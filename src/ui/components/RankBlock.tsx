@@ -1,5 +1,9 @@
 import { useState } from "react";
-import type { RankItem } from "@shared/heat";
+import {
+  formatSharePercent,
+  pressShare,
+  type RankItem,
+} from "@shared/heat";
 import { formatDuration } from "@shared/format";
 
 type RankBlockProps = {
@@ -10,6 +14,11 @@ type RankBlockProps = {
   totalRecordingMs: number;
   emptyMessage?: string;
 };
+
+function formatRankLine(item: RankItem, totalPresses: number): string {
+  const share = pressShare(item.count, totalPresses);
+  return `${item.label} — ${item.count} · ${formatSharePercent(share)}`;
+}
 
 export function RankBlock({
   title,
@@ -25,7 +34,9 @@ export function RankBlock({
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
-    const lines = top.map((item, index) => `${index + 1}. ${item.label} — ${item.count}`);
+    const lines = top.map(
+      (item, index) => `${index + 1}. ${formatRankLine(item, totalPresses)}`,
+    );
     const summary = [
       periodLabel,
       `Total presses: ${totalPresses}`,
@@ -76,9 +87,7 @@ export function RankBlock({
           <li>{emptyMessage}</li>
         ) : (
           top.map((item) => (
-            <li key={item.id}>
-              {item.label} — {item.count}
-            </li>
+            <li key={item.id}>{formatRankLine(item, totalPresses)}</li>
           ))
         )}
       </ol>

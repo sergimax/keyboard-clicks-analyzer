@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Export JSON `intensity.pressesPerMinute` (presses ÷ active recording minutes; computed at export)
+- Export JSON / UI top rows include `share` (fraction of period presses); UI shows e.g. `Space — 963 · 11.7%`
 
 ### Changed
 

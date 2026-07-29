@@ -13,6 +13,11 @@ export type HeatKey = {
 
 export type RankItem = { id: string; label: string; count: number };
 
+export type RankItemWithShare = RankItem & {
+  /** Fraction of period total presses (0–1), typically 4 decimal places. */
+  share: number;
+};
+
 export function intensityFor(count: number, max: number): number {
   if (max <= 0 || count <= 0) return 0;
   return Math.sqrt(count / max);
@@ -95,6 +100,27 @@ export function topKeysFromMap(
 
 export function topKeys(stats: StatsFile, limit = 30): RankItem[] {
   return topKeysFromMap(stats.keys ?? {}, limit);
+}
+
+/** Share of `count` within `totalPresses`, rounded to 4 decimal places. */
+export function pressShare(count: number, totalPresses: number): number {
+  if (totalPresses <= 0 || count <= 0) return 0;
+  return Math.round((count / totalPresses) * 10_000) / 10_000;
+}
+
+export function withPressShare(
+  items: RankItem[],
+  totalPresses: number,
+): RankItemWithShare[] {
+  return items.map((item) => ({
+    ...item,
+    share: pressShare(item.count, totalPresses),
+  }));
+}
+
+/** e.g. 0.1172 → "11.7%" */
+export function formatSharePercent(share: number): string {
+  return `${(share * 100).toFixed(1)}%`;
 }
 
 export function hottestCount(stats: StatsFile): number {

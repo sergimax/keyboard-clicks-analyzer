@@ -1,8 +1,9 @@
-import type { RankItem } from "@shared/heat";
+import type { RankItem, RankItemWithShare } from "@shared/heat";
 import {
   hottestCount,
   topKeys,
   topKeysFromMap,
+  withPressShare,
 } from "@shared/heat";
 import { dayRangeMs, localDateKey, weekRangeMs } from "@shared/dates";
 import {
@@ -30,6 +31,14 @@ export type ExportIntensity = {
   pressesPerMinute: number | null;
 };
 
+export type ExportTopItem = {
+  id: string;
+  label: string;
+  count: number;
+  /** Fraction of this period's totalPresses (0–1). */
+  share: number;
+};
+
 export type ExportRanking = {
   label: string;
   dateKey?: string;
@@ -38,7 +47,7 @@ export type ExportRanking = {
   totalPresses: number;
   timing: ExportTiming;
   intensity: ExportIntensity;
-  top: RankItem[];
+  top: ExportTopItem[];
 };
 
 export type ExportPayload = {
@@ -91,6 +100,10 @@ function intensityFor(
   return { pressesPerMinute: pressesPerMinute(totalPresses, activeRecordingMs) };
 }
 
+function toExportTop(items: RankItemWithShare[]): ExportTopItem[] {
+  return items.map(({ id, label, count, share }) => ({ id, label, count, share }));
+}
+
 function rankingBlock(options: {
   label: string;
   dateKey?: string;
@@ -110,7 +123,7 @@ function rankingBlock(options: {
     totalPresses: options.totalPresses,
     timing,
     intensity: intensityFor(options.totalPresses, timing.activeRecordingMs),
-    top: options.top,
+    top: toExportTop(withPressShare(options.top, options.totalPresses)),
   };
 }
 
