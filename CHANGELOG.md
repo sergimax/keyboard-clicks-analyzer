@@ -9,8 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Copy top list** — copies summary (total presses, total recorded time) plus the top presses ranking
+- **Day / last 7 days** rankings in the side panel (local calendar days), each with presses, recorded time, and its own **Copy** button
+- Per-day key buckets in `data/stats.json` (`daily`) so period rankings work going forward (retained ~60 days)
 - **Show numpad** checkbox to hide/show the numpad on the heatmap (saved in `localStorage`)
+
+### Changed
+
+- **Copy** buttons are per ranking block (all time / today / last 7 days); each payload includes period label, totals, and top list
+- Top ranking lists show up to **30** keys
 
 ### Fixed
 

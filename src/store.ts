@@ -29,6 +29,12 @@ export type RecordingSession = {
   durationMs: number;
 };
 
+/** Per local calendar day key counts (YYYY-MM-DD). */
+export type DailyBucket = {
+  presses: number;
+  keys: Record<string, KeyCount>;
+};
+
 export type StatsFile = {
   version: 1;
   updatedAt: string;
@@ -37,7 +43,12 @@ export type StatsFile = {
   recordingMs: number;
   sessions: RecordingSession[];
   keys: Record<string, KeyCount>;
+  /** Local-day buckets for day/week rankings. Older days may be pruned. */
+  daily: Record<string, DailyBucket>;
 };
+
+/** How many local calendar days of `daily` to retain. */
+export const DAILY_RETENTION_DAYS = 60;
 
 export function keyId(sc: number, ext: number): string {
   return canonicalKey(sc, ext).id;
@@ -51,11 +62,43 @@ export function emptyStats(): StatsFile {
     recordingMs: 0,
     sessions: [],
     keys: {},
+    daily: {},
   };
 }
 
 export function ensureDataDir(): void {
   fs.mkdirSync(dataDir, { recursive: true });
+}
+
+/** Local calendar date key YYYY-MM-DD. */
+export function localDateKey(atMs: number = Date.now()): string {
+  const date = new Date(atMs);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/** Start of local calendar day (ms) for a YYYY-MM-DD key. */
+export function localDayStartMs(dateKey: string): number {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Date(year!, month! - 1, day!, 0, 0, 0, 0).getTime();
+}
+
+/** Inclusive rolling window of local date keys ending at `endKey` (default today). */
+export function rollingDateKeys(
+  dayCount: number,
+  endKey: string = localDateKey(),
+): string[] {
+  const [year, month, day] = endKey.split("-").map(Number);
+  const cursor = new Date(year!, month! - 1, day!, 12, 0, 0, 0);
+  const keys: string[] = [];
+  for (let offset = dayCount - 1; offset >= 0; offset -= 1) {
+    const date = new Date(cursor);
+    date.setDate(cursor.getDate() - offset);
+    keys.push(localDateKey(date.getTime()));
+  }
+  return keys;
 }
 
 export function ensureTimingFields(stats: StatsFile): void {
@@ -67,11 +110,16 @@ export function ensureTimingFields(stats: StatsFile): void {
   }
 }
 
-/** Merge alias variants (e.g. 54:0 into 54:1) so old sessions display correctly. */
-export function normalizeStats(stats: StatsFile): StatsFile {
-  ensureTimingFields(stats);
+export function ensureDailyField(stats: StatsFile): void {
+  if (!stats.daily || typeof stats.daily !== "object") {
+    stats.daily = {};
+  }
+}
+
+function normalizeKeyMap(raw: Record<string, KeyCount>): Record<string, KeyCount> {
   const keys: Record<string, KeyCount> = {};
-  for (const entry of Object.values(stats.keys)) {
+  for (const entry of Object.values(raw)) {
+    if (!entry || typeof entry.count !== "number") continue;
     const canon = canonicalKey(entry.sc, entry.ext);
     const existing = keys[canon.id];
     if (existing) {
@@ -80,8 +128,35 @@ export function normalizeStats(stats: StatsFile): StatsFile {
       keys[canon.id] = { sc: canon.sc, ext: canon.ext, count: entry.count };
     }
   }
-  stats.keys = keys;
-  stats.totalPresses = Object.values(keys).reduce((sum, k) => sum + k.count, 0);
+  return keys;
+}
+
+function pruneDaily(stats: StatsFile, retainDays: number = DAILY_RETENTION_DAYS): void {
+  ensureDailyField(stats);
+  const keep = new Set(rollingDateKeys(retainDays));
+  for (const dateKey of Object.keys(stats.daily)) {
+    if (!keep.has(dateKey)) {
+      delete stats.daily[dateKey];
+    }
+  }
+}
+
+/** Merge alias variants (e.g. 54:0 into 54:1) so old sessions display correctly. */
+export function normalizeStats(stats: StatsFile): StatsFile {
+  ensureTimingFields(stats);
+  ensureDailyField(stats);
+  stats.keys = normalizeKeyMap(stats.keys);
+  stats.totalPresses = Object.values(stats.keys).reduce((sum, k) => sum + k.count, 0);
+
+  for (const [dateKey, bucket] of Object.entries(stats.daily)) {
+    if (!bucket || typeof bucket !== "object") {
+      delete stats.daily[dateKey];
+      continue;
+    }
+    bucket.keys = normalizeKeyMap(bucket.keys ?? {});
+    bucket.presses = Object.values(bucket.keys).reduce((sum, k) => sum + k.count, 0);
+  }
+  pruneDaily(stats);
   return stats;
 }
 
@@ -115,14 +190,108 @@ export function resetStats(): void {
   }
 }
 
-export function bumpKey(stats: StatsFile, sc: number, ext: number): void {
+function bumpInKeyMap(
+  map: Record<string, KeyCount>,
+  sc: number,
+  ext: number,
+): void {
   const canon = canonicalKey(sc, ext);
-  const existing = stats.keys[canon.id];
+  const existing = map[canon.id];
   if (existing) {
     existing.count += 1;
   } else {
-    stats.keys[canon.id] = { sc: canon.sc, ext: canon.ext, count: 1 };
+    map[canon.id] = { sc: canon.sc, ext: canon.ext, count: 1 };
   }
+}
+
+export function bumpKey(
+  stats: StatsFile,
+  sc: number,
+  ext: number,
+  atMs: number = Date.now(),
+): void {
+  ensureDailyField(stats);
+  bumpInKeyMap(stats.keys, sc, ext);
+  const dateKey = localDateKey(atMs);
+  const bucket = stats.daily[dateKey] ?? { presses: 0, keys: {} };
+  bumpInKeyMap(bucket.keys, sc, ext);
+  bucket.presses = Object.values(bucket.keys).reduce((sum, k) => sum + k.count, 0);
+  stats.daily[dateKey] = bucket;
+}
+
+/** Merge key maps from the given local date keys. */
+export function keysForDateKeys(
+  stats: StatsFile,
+  dateKeys: string[],
+): Record<string, KeyCount> {
+  ensureDailyField(stats);
+  const merged: Record<string, KeyCount> = {};
+  for (const dateKey of dateKeys) {
+    const bucket = stats.daily[dateKey];
+    if (!bucket) continue;
+    for (const entry of Object.values(bucket.keys)) {
+      const canon = canonicalKey(entry.sc, entry.ext);
+      const prev = merged[canon.id];
+      if (prev) {
+        prev.count += entry.count;
+      } else {
+        merged[canon.id] = { sc: canon.sc, ext: canon.ext, count: entry.count };
+      }
+    }
+  }
+  return merged;
+}
+
+export function pressesForDateKeys(stats: StatsFile, dateKeys: string[]): number {
+  ensureDailyField(stats);
+  let total = 0;
+  for (const dateKey of dateKeys) {
+    total += stats.daily[dateKey]?.presses ?? 0;
+  }
+  return total;
+}
+
+/**
+ * Completed-session recording time overlapping [rangeStartMs, rangeEndMs).
+ * Current live session is not included until finalize.
+ */
+export function recordingMsInRange(
+  stats: StatsFile,
+  rangeStartMs: number,
+  rangeEndMs: number,
+): number {
+  ensureTimingFields(stats);
+  let total = 0;
+  for (const session of stats.sessions) {
+    const start = Date.parse(session.startedAt);
+    const end = Date.parse(session.endedAt);
+    if (!Number.isFinite(start) || !Number.isFinite(end)) continue;
+    const overlapStart = Math.max(start, rangeStartMs);
+    const overlapEnd = Math.min(end, rangeEndMs);
+    if (overlapEnd > overlapStart) {
+      total += overlapEnd - overlapStart;
+    }
+  }
+  return total;
+}
+
+export function dayRangeMs(dateKey: string = localDateKey()): {
+  startMs: number;
+  endMs: number;
+} {
+  const startMs = localDayStartMs(dateKey);
+  return { startMs, endMs: startMs + 86_400_000 };
+}
+
+export function weekRangeMs(endKey: string = localDateKey()): {
+  startMs: number;
+  endMs: number;
+  dateKeys: string[];
+} {
+  const dateKeys = rollingDateKeys(7, endKey);
+  const startMs = localDayStartMs(dateKeys[0]!);
+  const { endMs } = dayRangeMs(endKey);
+  return { startMs, endMs, dateKeys };
 }
 
 /** Append a completed recording interval and update total recordingMs. */
@@ -147,6 +316,7 @@ export function clearStatsInPlace(stats: StatsFile): void {
   stats.totalPresses = 0;
   stats.recordingMs = 0;
   stats.sessions = [];
+  stats.daily = {};
   stats.updatedAt = new Date().toISOString();
   saveStats(stats);
 }

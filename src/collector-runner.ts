@@ -96,7 +96,7 @@ export async function runCollectSession(options?: {
   rl.on("line", (line) => {
     const event = parseEvent(line);
     if (!event) return;
-    bumpKey(stats, event.sc, event.ext);
+    bumpKey(stats, event.sc, event.ext, event.t);
     dirty = true;
     sessionPresses += 1;
     writeStatusLine();

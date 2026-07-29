@@ -40,8 +40,8 @@ npm run reset
   - **LIVE** badge, heatmap, top keys
   - **Total recorded** — sum of *completed* start→stop intervals (current session is not included until you stop)
   - **Saved intervals** — count of completed intervals; list under **Recording intervals**
-  - **Reset stats** — clears key counts, timers, and intervals (confirm dialog); requires collect still running
-  - **Copy top list** — copies total presses, total recorded time, and the top ranking
+  - **All time / Today / Last 7 days** — top-30 rankings with presses + recorded time; each has its own **Copy** button
+  - **Reset stats** — clears key counts, day buckets, timers, and intervals (confirm dialog); requires collect still running
   - **Show numpad** — toggle numpad visibility (saved in the browser)
 
 After stop (or `npm run report`), open `data/heatmap.html` for a static snapshot. That file has no Reset button — use `npm run reset` in the CLI.
@@ -52,7 +52,8 @@ Restart `collect` after pulling code changes so the live UI loads the new build.
 
 `data/stats.json` (gitignored) stores:
 
-- `keys` — per physical key counts (`sc` + `ext`)
+- `keys` — per physical key counts (`sc` + `ext`), all time
+- `daily` — per local calendar day key counts (for today / last 7 days; older days pruned)
 - `recordingMs` / `sessions` — completed recording intervals
 - `totalPresses`, `updatedAt`
 

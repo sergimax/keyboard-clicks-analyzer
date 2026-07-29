@@ -1,11 +1,18 @@
 import fs from "node:fs";
 import { allMappedKeys, canonicalKey, lookupKey } from "./keymap.ts";
 import {
+  dayRangeMs,
   formatDuration,
   heatmapPath,
+  keysForDateKeys,
   loadStats,
+  localDateKey,
+  pressesForDateKeys,
+  recordingMsInRange,
   saveStats,
   templatePath,
+  weekRangeMs,
+  type KeyCount,
   type StatsFile,
 } from "./store.ts";
 
@@ -24,6 +31,8 @@ export type RenderOptions = {
   /** Body fragment only (for live polling). */
   partial?: boolean;
 };
+
+type RankItem = { id: string; label: string; count: number };
 
 function intensityFor(count: number, max: number): number {
   if (max <= 0 || count <= 0) return 0;
@@ -93,22 +102,29 @@ export function buildHeatKeys(stats: StatsFile): HeatKey[] {
   return keys;
 }
 
-export function topKeys(
-  stats: StatsFile,
+export function topKeysFromMap(
+  keyMap: Record<string, KeyCount>,
   limit = 30,
-): Array<{ id: string; label: string; count: number }> {
-  const merged = new Map<string, { id: string; label: string; count: number }>();
-  for (const k of Object.values(stats.keys)) {
-    const canon = canonicalKey(k.sc, k.ext);
+): RankItem[] {
+  const merged = new Map<string, RankItem>();
+  for (const entry of Object.values(keyMap)) {
+    const canon = canonicalKey(entry.sc, entry.ext);
     const meta = lookupKey(canon.sc, canon.ext);
     const prev = merged.get(canon.id);
     if (prev) {
-      prev.count += k.count;
+      prev.count += entry.count;
     } else {
-      merged.set(canon.id, { id: canon.id, label: meta.label, count: k.count });
+      merged.set(canon.id, { id: canon.id, label: meta.label, count: entry.count });
     }
   }
-  return [...merged.values()].sort((a, b) => b.count - a.count).slice(0, limit);
+  return [...merged.values()]
+    .filter((item) => item.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
+}
+
+export function topKeys(stats: StatsFile, limit = 30): RankItem[] {
+  return topKeysFromMap(stats.keys, limit);
 }
 
 function renderMeta(options: {
@@ -186,9 +202,9 @@ function renderBoard(keys: HeatKey[]): string {
     .join("");
 }
 
-function renderTop(top: Array<{ label: string; count: number }>): string {
+function renderTop(top: RankItem[], emptyMessage = "No data yet."): string {
   if (top.length === 0) {
-    return `<li>No data yet. Run npm run collect.</li>`;
+    return `<li>${escapeHtml(emptyMessage)}</li>`;
   }
   return top
     .map((item) => `<li>${escapeHtml(item.label)} — ${item.count}</li>`)
@@ -204,18 +220,73 @@ function renderUnmapped(unmapped: HeatKey[]): string {
   return `<div><h2 style="margin-top:18px">Unmapped codes</h2><ol>${items}</ol></div>`;
 }
 
+function renderRankBlock(options: {
+  title: string;
+  listId: string;
+  periodLabel: string;
+  top: RankItem[];
+  totalPresses: number;
+  totalRecordingMs: number;
+  emptyMessage?: string;
+}): string {
+  const {
+    title,
+    listId,
+    periodLabel,
+    top,
+    totalPresses,
+    totalRecordingMs,
+    emptyMessage,
+  } = options;
+  const recorded = formatDuration(totalRecordingMs);
+  const empty =
+    top.length === 0 && totalPresses === 0 && totalRecordingMs === 0;
+  return [
+    `<section class="rank-block">`,
+    `<div class="side-heading">`,
+    `<h2>${escapeHtml(title)}</h2>`,
+    `<p class="rank-summary">`,
+    `<span>Presses: <strong>${totalPresses}</strong></span>`,
+    `<span>Recorded: <strong>${escapeHtml(recorded)}</strong></span>`,
+    `</p>`,
+    `<button type="button" class="btn-copy"`,
+    ` data-copy-list="${escapeHtml(listId)}"`,
+    ` data-period-label="${escapeHtml(periodLabel)}"`,
+    ` data-total-presses="${totalPresses}"`,
+    ` data-total-recorded="${escapeHtml(recorded)}"`,
+    empty ? ` disabled` : ``,
+    `>Copy</button>`,
+    `</div>`,
+    `<ol id="${escapeHtml(listId)}">${renderTop(top, emptyMessage)}</ol>`,
+    `</section>`,
+  ].join("");
+}
+
 function renderBodyInner(stats: StatsFile, live: boolean): string {
   const heatKeys = buildHeatKeys(stats);
-  const top = topKeys(stats);
+  const topAll = topKeys(stats);
+  const todayKey = localDateKey();
+  const day = dayRangeMs(todayKey);
+  const week = weekRangeMs(todayKey);
+  const topDay = topKeysFromMap(keysForDateKeys(stats, [todayKey]));
+  const topWeek = topKeysFromMap(keysForDateKeys(stats, week.dateKeys));
+  const pressesDay = pressesForDateKeys(stats, [todayKey]);
+  const pressesWeek = pressesForDateKeys(stats, week.dateKeys);
+  const recordedDay = recordingMsInRange(stats, day.startMs, day.endMs);
+  const recordedWeek = recordingMsInRange(stats, week.startMs, week.endMs);
   const max = Math.max(0, ...Object.values(stats.keys).map((k) => k.count), 0);
   const mapped = heatKeys.filter((k) => k.row > 0);
   const unmapped = heatKeys.filter((k) => k.row === 0 && k.count > 0);
   // Browser shows completed recording only; live session clock is console-only.
   const totalPresses = stats.totalPresses;
   const totalRecordingMs = stats.recordingMs ?? 0;
+  const hasDaily = Object.keys(stats.daily ?? {}).length > 0;
+  const periodEmptyHint = hasDaily
+    ? "No presses in this period yet."
+    : "No day buckets yet — restart collect to start tracking today/week.";
   const note = live
-    ? "Live view updates about once per second from the local collector (127.0.0.1 only). Current session time is shown in the collect terminal."
-    : "Intensity uses a square-root scale so secondary keys remain readable. Auto-repeat while holding a key is ignored (one count per press).";
+    ? "Live view updates about once per second from the local collector (127.0.0.1 only). Current session time is shown in the collect terminal. Day/week key counts update live; recorded time for periods uses completed intervals only."
+    : "Intensity uses a square-root scale so secondary keys remain readable. Auto-repeat while holding a key is ignored (one count per press). Day/week rankings use local calendar days (week = last 7 days).";
 
   return [
     `<div class="meta">${renderMeta({
@@ -233,15 +304,33 @@ function renderBodyInner(stats: StatsFile, live: boolean): string {
     `<p class="note">${note}</p>`,
     `</div>`,
     `<aside class="side">`,
-    `<div class="side-heading">`,
-    `<h2>Replace first (top presses)</h2>`,
-    `<button type="button" id="copy-top-btn" class="btn-copy"`,
-    ` data-total-presses="${totalPresses}"`,
-    ` data-total-recorded="${escapeHtml(formatDuration(totalRecordingMs))}"`,
-    top.length === 0 && totalPresses === 0 ? ` disabled` : ``,
-    `>Copy top list</button>`,
-    `</div>`,
-    `<ol id="top-list">${renderTop(top)}</ol>`,
+    renderRankBlock({
+      title: "All time",
+      listId: "top-list-all",
+      periodLabel: "All time",
+      top: topAll,
+      totalPresses,
+      totalRecordingMs,
+      emptyMessage: "No data yet. Run npm run collect.",
+    }),
+    renderRankBlock({
+      title: "Today",
+      listId: "top-list-day",
+      periodLabel: `Today (${todayKey})`,
+      top: topDay,
+      totalPresses: pressesDay,
+      totalRecordingMs: recordedDay,
+      emptyMessage: periodEmptyHint,
+    }),
+    renderRankBlock({
+      title: "Last 7 days",
+      listId: "top-list-week",
+      periodLabel: `Last 7 days (${week.dateKeys[0]} – ${todayKey})`,
+      top: topWeek,
+      totalPresses: pressesWeek,
+      totalRecordingMs: recordedWeek,
+      emptyMessage: periodEmptyHint,
+    }),
     renderUnmapped(unmapped),
     renderSessions(stats),
     `</aside>`,
@@ -299,23 +388,30 @@ function pageScriptSnippet(): string {
         }
 
         document.addEventListener("click", async function (event) {
-          const btn = event.target && event.target.closest && event.target.closest("#copy-top-btn");
+          const btn = event.target && event.target.closest && event.target.closest(".btn-copy");
           if (!btn) return;
-          const lines = Array.prototype.map
-            .call(document.querySelectorAll("#top-list li"), function (li, index) {
-              var text = (li.textContent || "").trim();
-              if (!text || text.indexOf("No data yet") === 0) return null;
-              return index + 1 + ". " + text;
-            })
-            .filter(Boolean);
+          var listId = btn.getAttribute("data-copy-list");
+          if (!listId) return;
+          const list = document.getElementById(listId);
+          const lines = list
+            ? Array.prototype.map
+                .call(list.querySelectorAll("li"), function (li, index) {
+                  var text = (li.textContent || "").trim();
+                  if (!text || text.indexOf("No data yet") === 0 || text.indexOf("No presses in this period") === 0 || text.indexOf("No day buckets yet") === 0) return null;
+                  return index + 1 + ". " + text;
+                })
+                .filter(Boolean)
+            : [];
+          var periodLabel = btn.getAttribute("data-period-label") || "Stats";
           var totalPresses = btn.getAttribute("data-total-presses") || "0";
           var totalRecorded = btn.getAttribute("data-total-recorded") || "00:00";
           var summary = [
+            periodLabel,
             "Total presses: " + totalPresses,
             "Total recorded: " + totalRecorded,
           ];
           var payload = summary.concat(lines.length ? [""].concat(lines) : []);
-          if (!lines.length && totalPresses === "0") {
+          if (!lines.length && totalPresses === "0" && (totalRecorded === "00:00" || totalRecorded === "0:00:00")) {
             alert("Nothing to copy yet.");
             return;
           }

@@ -82,11 +82,11 @@ Example: `feat(live-server): add reset stats endpoint`
 
 - **`npm run build:collector`** — `cargo build --release` into `collector/target/release/collector.exe` (explicit `--target-dir`)
 - **`npm run collect`** — loads/creates `data/stats.json`, spawns Rust collector, parses NDJSON key-down events, flushes stats periodically; Ctrl+C stops, finalizes recording interval, writes static heatmap
-- **Live view** — during collect, `http://127.0.0.1:17823/` (~1s partial refresh); **LIVE** badge; **Reset stats** (`POST /reset`); **Copy top list**; **Total recorded** / **Saved intervals** / **Recording intervals** (completed start→stop only)
+- **Live view** — during collect, `http://127.0.0.1:17823/` (~1s partial refresh); **LIVE** badge; **Reset stats** (`POST /reset`); side rankings **All time / Today / Last 7 days** with per-block **Copy**; **Total recorded** / **Saved intervals** / **Recording intervals** (completed start→stop only)
 - **Console session timer** — terminal line `session mm:ss · presses N` for the current run only (not shown in the browser); resets with Reset stats
-- **`npm run report`** — regenerates static `data/heatmap.html` from saved stats (no Reset button; Copy top list still works)
+- **`npm run report`** — regenerates static `data/heatmap.html` from saved stats (no Reset button; Copy still works)
 - **`npm run reset`** — deletes `data/stats.json` and `data/heatmap.html`
-- **Key aggregation** — `canonicalKey` / aliases in `keymap.ts` (e.g. RShift `54:0`→`54:1`); collector may normalize RShift/Win/Menu via VK
+- **Key aggregation** — `canonicalKey` / aliases in `keymap.ts` (e.g. RShift `54:0`→`54:1`); collector may normalize RShift/Win/Menu via VK; presses also go into `daily` local-day buckets
 - **Ignore** key-up and OS auto-repeat (one count per physical press)
 - **Heatmap labels** — US QWERTY **positions** for display; not the user’s active layout
 - Restart `collect` after pulling code changes so the live UI picks up changes (old process keeps old in-memory renderers)
