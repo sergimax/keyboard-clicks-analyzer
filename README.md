@@ -31,7 +31,7 @@ npm run report
 npm run reset
 ```
 
-During `collect`, open **http://127.0.0.1:17823/** (bound to localhost only; no external network). The page shows a **LIVE** badge and refreshes as you type.
+During `collect`, open **http://127.0.0.1:17823/** (bound to localhost only; no external network). The page shows a **LIVE** badge, refreshes as you type, and includes **Reset stats**.
 
 After the session (or `report`), you can also open `data/heatmap.html` as a static snapshot.
 

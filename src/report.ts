@@ -201,6 +201,12 @@ export function renderHeatmapHtml(stats: StatsFile, options: RenderOptions = {})
   const template = fs.readFileSync(templatePath, "utf8");
   return template
     .replace("__LIVE_HEAD__", live ? liveHeadSnippet() : "")
+    .replace(
+      "__LIVE_CONTROLS__",
+      live
+        ? `<button type="button" id="reset-btn" class="btn-reset">Reset stats</button>`
+        : "",
+    )
     .replace("__BODY__", inner);
 }
 
@@ -218,6 +224,22 @@ function liveHeadSnippet(): string {
           } catch (_) {}
         }
         setInterval(tick, 1000);
+
+        document.addEventListener("click", async function (event) {
+          const btn = event.target && event.target.closest && event.target.closest("#reset-btn");
+          if (!btn) return;
+          if (!confirm("Reset all accumulated key stats? This cannot be undone.")) return;
+          btn.disabled = true;
+          try {
+            const res = await fetch("/reset", { method: "POST", cache: "no-store" });
+            if (!res.ok) throw new Error("reset failed");
+            await tick();
+          } catch (_) {
+            alert("Could not reset stats. Is collect still running?");
+          } finally {
+            btn.disabled = false;
+          }
+        });
       })();
     </script>
   `;

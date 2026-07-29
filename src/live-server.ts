@@ -14,6 +14,7 @@ const DEFAULT_PORT = 17823;
 
 export async function startLiveServer(options: {
   getStats: () => StatsFile;
+  onReset?: () => void;
   port?: number;
 }): Promise<LiveServer> {
   const port = options.port ?? DEFAULT_PORT;
@@ -21,6 +22,27 @@ export async function startLiveServer(options: {
   const server = http.createServer((req, res) => {
     const url = new URL(req.url ?? "/", `http://${HOST}`);
     const path = url.pathname;
+    const method = (req.method ?? "GET").toUpperCase();
+
+    if (path === "/reset" && method === "POST") {
+      try {
+        options.onReset?.();
+        res.writeHead(200, {
+          "Content-Type": "application/json; charset=utf-8",
+          "Cache-Control": "no-store",
+        });
+        res.end(JSON.stringify({ ok: true }));
+      } catch (err) {
+        res.writeHead(500, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(
+          JSON.stringify({
+            ok: false,
+            error: err instanceof Error ? err.message : String(err),
+          }),
+        );
+      }
+      return;
+    }
 
     if (path !== "/" && path !== "/partial" && path !== "/heatmap.html") {
       res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
@@ -29,7 +51,6 @@ export async function startLiveServer(options: {
     }
 
     const stats = options.getStats();
-    // Keep totals coherent for the live view even before disk flush.
     stats.totalPresses = Object.values(stats.keys).reduce((sum, k) => sum + k.count, 0);
     stats.updatedAt = new Date().toISOString();
 

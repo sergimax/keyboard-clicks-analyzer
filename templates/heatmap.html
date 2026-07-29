@@ -146,12 +146,47 @@
       font-size: 0.82rem;
       max-width: 70ch;
     }
+    .header-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px 20px;
+      margin-bottom: 22px;
+    }
+    .header-row .sub {
+      margin-bottom: 0;
+    }
+    .btn-reset {
+      appearance: none;
+      border: 1px solid #5a4030;
+      background: #2a1f18;
+      color: #f4a261;
+      font: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn-reset:hover {
+      background: #3a2a20;
+      border-color: #e85d04;
+      color: #ffd4a8;
+    }
+    .btn-reset:disabled {
+      opacity: 0.55;
+      cursor: wait;
+    }
   </style>
   __LIVE_HEAD__
 </head>
 <body>
   <h1>Keyboard Heatmap</h1>
-  <p class="sub">Local physical-key presses · no network · labels use US QWERTY positions</p>
+  <div class="header-row">
+    <p class="sub">Local physical-key presses · no network · labels use US QWERTY positions</p>
+    __LIVE_CONTROLS__
+  </div>
   <div id="live-root">__BODY__</div>
 </body>
 </html>

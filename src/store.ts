@@ -102,3 +102,11 @@ export function bumpKey(stats: StatsFile, sc: number, ext: number): void {
     stats.keys[canon.id] = { sc: canon.sc, ext: canon.ext, count: 1 };
   }
 }
+
+/** Clear counters in place (keeps the same object reference for the live session). */
+export function clearStatsInPlace(stats: StatsFile): void {
+  stats.keys = {};
+  stats.totalPresses = 0;
+  stats.updatedAt = new Date().toISOString();
+  saveStats(stats);
+}

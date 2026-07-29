@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Reset stats button in the live heatmap UI (`POST /reset` on localhost while `collect` is running)
+
 ### Fixed
 
 - Map Right Shift as scan code `54:1` (Windows often sets the extended bit); alias `54:0` → `54:1` so older stats merge correctly

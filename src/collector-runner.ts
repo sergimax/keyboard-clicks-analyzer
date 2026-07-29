@@ -2,7 +2,14 @@ import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { existsSync } from "node:fs";
 import readline from "node:readline";
 import { openInBrowser, startLiveServer } from "./live-server.ts";
-import { collectorBin, bumpKey, loadStats, saveStats, type StatsFile } from "./store.ts";
+import {
+  bumpKey,
+  clearStatsInPlace,
+  collectorBin,
+  loadStats,
+  saveStats,
+  type StatsFile,
+} from "./store.ts";
 import { dim, ok } from "./style.ts";
 
 type RawEvent = {
@@ -51,7 +58,15 @@ export async function runCollectSession(options?: {
   let sessionPresses = 0;
   let finished = false;
 
-  const live = await startLiveServer({ getStats: () => stats });
+  const live = await startLiveServer({
+    getStats: () => stats,
+    onReset: () => {
+      clearStatsInPlace(stats);
+      sessionPresses = 0;
+      dirty = false;
+      process.stderr.write(`\n${ok("Stats reset from live UI")}\n`);
+    },
+  });
   process.stderr.write(`\n${ok(`Live heatmap: ${live.url}`)}\n`);
   if (openBrowser) {
     openInBrowser(live.url);
