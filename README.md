@@ -4,32 +4,36 @@
 
 No outbound network calls. No character/text logging — only scan codes, counts, and recording timers under `data/`.
 
+UI is a **Vite + React** app served on `127.0.0.1` during `collect` / `report`.
+
 See [CHANGELOG.md](CHANGELOG.md) for history.
 
 ## Requirements
 
 - Windows
 - [Node.js](https://nodejs.org/) 20+
-- [Rust](https://www.rust-lang.org/) (stable) with `cargo` — builds the small collector binary
+- [Rust](https://rust-lang.org/) (stable) with `cargo` — builds the small collector binary
 
 ## Setup
 
 ```bash
 npm install
-npm run build:collector
+npm run build
 ```
+
+`npm run build` builds the Rust collector and the React UI (`dist/ui`). After pulling UI changes, run `npm run build:ui` (or full `build`) and restart `collect`.
 
 ## Usage
 
 ```bash
 # Capture a session (Ctrl+C to stop). Stats accumulate across sessions.
-# Opens a live localhost heatmap (~1s refresh).
+# Opens a live localhost React heatmap (~1s JSON refresh).
 npm run collect
 
-# Rebuild static HTML from saved stats
+# Open a localhost viewer from saved stats (Ctrl+C to stop)
 npm run report
 
-# Delete data/stats.json and data/heatmap.html
+# Delete data/stats.json
 npm run reset
 ```
 
@@ -37,16 +41,14 @@ npm run reset
 
 - Terminal status line: `session mm:ss · presses N` (current run only; resets with **Reset stats**)
 - Browser: **http://127.0.0.1:17823/** (loopback only; usually opens automatically)
-  - **LIVE** badge, heatmap, top keys
+  - **LIVE** badge, heatmap, rankings
   - **Total recorded** — sum of *completed* start→stop intervals (current session is not included until you stop)
   - **Saved intervals** — count of completed intervals; list under **Recording intervals**
   - **All time / Today / Last 7 days** — top-30 rankings with presses + recorded time; each has its own **Copy** button
   - **Reset stats** — clears key counts, day buckets, timers, and intervals (confirm dialog); requires collect still running
   - **Show numpad** — toggle numpad visibility (saved in the browser)
 
-After stop (or `npm run report`), open `data/heatmap.html` for a static snapshot. That file has no Reset button — use `npm run reset` in the CLI.
-
-Restart `collect` after pulling code changes so the live UI loads the new build.
+`npm run report` serves the same UI from disk stats (no Reset button). There is no standalone `data/heatmap.html` anymore — use the report viewer.
 
 ### Data file
 
@@ -56,6 +58,8 @@ Restart `collect` after pulling code changes so the live UI loads the new build.
 - `daily` — per local calendar day key counts (for today / last 7 days; older days pruned)
 - `recordingMs` / `sessions` — completed recording intervals
 - `totalPresses`, `updatedAt`
+
+Built UI assets live in `dist/ui/` (gitignored; produced by `npm run build:ui`).
 
 ## What is counted
 
@@ -68,7 +72,7 @@ Restart `collect` after pulling code changes so the live UI loads the new build.
 
 - Runs only locally
 - Live HTTP server binds to `127.0.0.1` only (not reachable from the LAN/internet)
-- Writes `data/stats.json` and `data/heatmap.html` (gitignored)
+- Writes `data/stats.json` (gitignored)
 - Does not log typed text, window titles, or keyboard layout
 
 ## Notes

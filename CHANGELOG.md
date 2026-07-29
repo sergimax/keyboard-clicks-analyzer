@@ -9,18 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Day / last 7 days** rankings (local calendar days), each with presses, recorded time, and its own **Copy** button — three separate blocks under the keyboard
+- **React + Vite** heatmap UI (`src/ui`) with JSON API (`GET /api/stats`, `POST /api/reset`)
+- Shared browser-safe helpers under `src/shared/` (heat, dates, period rankings)
+- **Day / last 7 days** rankings under the keyboard, each with presses, recorded time, and its own **Copy** button
 - Per-day key buckets in `data/stats.json` (`daily`) so period rankings work going forward (retained ~60 days)
 - **Show numpad** checkbox to hide/show the numpad on the heatmap (saved in `localStorage`)
+- `npm run build:ui` / `npm run build` to produce `dist/ui`
 
 ### Changed
 
-- Ranking **Copy** blocks sit under the heatmap (not in the side column); each period is its own panel
+- `npm run report` opens a localhost React viewer (Ctrl+C to stop) instead of writing `data/heatmap.html`
+- Live updates poll JSON (~1s) instead of HTML `/partial` replacement
+- Ranking **Copy** blocks sit under the heatmap as three separate panels
 - Top ranking lists show up to **30** keys
 
-### Fixed
+### Removed
 
-- Show numpad toggle: bind on `DOMContentLoaded` so the checkbox exists before the handler attaches
+- String-templated `templates/heatmap.html` / `src/report.ts` static HTML generator
+- Writing or deleting `data/heatmap.html`
 
 ## [1.1.0] - 2026-07-29
 ### Added
