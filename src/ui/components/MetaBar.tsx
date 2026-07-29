@@ -35,7 +35,7 @@ export function MetaBar({
           Hottest key: <strong>{maxCount}</strong>
         </span>
         <span>
-          Total recorded: <strong>{formatDuration(totalRecordingMs)}</strong>
+          Total active recording: <strong>{formatDuration(totalRecordingMs)}</strong>
         </span>
         <span>
           Saved intervals: <strong>{sessionCount}</strong>

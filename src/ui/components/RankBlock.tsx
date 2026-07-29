@@ -29,7 +29,7 @@ export function RankBlock({
     const summary = [
       periodLabel,
       `Total presses: ${totalPresses}`,
-      `Total recorded: ${recorded}`,
+      `Active recording: ${recorded}`,
     ];
     const payload = summary.concat(lines.length ? ["", ...lines] : []);
     if (!lines.length && totalPresses === 0 && (recorded === "00:00" || recorded === "0:00:00")) {
@@ -59,7 +59,7 @@ export function RankBlock({
             Presses: <strong>{totalPresses}</strong>
           </span>
           <span>
-            Recorded: <strong>{recorded}</strong>
+            Active recording: <strong>{recorded}</strong>
           </span>
         </p>
         <button
