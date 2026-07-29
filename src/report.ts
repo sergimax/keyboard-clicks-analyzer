@@ -231,8 +231,11 @@ function renderBodyInner(stats: StatsFile, live: boolean): string {
     `<p class="note">${note}</p>`,
     `</div>`,
     `<aside class="side">`,
+    `<div class="side-heading">`,
     `<h2>Replace first (top presses)</h2>`,
-    `<ol>${renderTop(top)}</ol>`,
+    `<button type="button" id="copy-top-btn" class="btn-copy"${top.length === 0 ? " disabled" : ""}>Copy top list</button>`,
+    `</div>`,
+    `<ol id="top-list">${renderTop(top)}</ol>`,
     renderUnmapped(unmapped),
     renderSessions(stats),
     `</aside>`,
@@ -252,7 +255,45 @@ export function renderHeatmapHtml(stats: StatsFile, options: RenderOptions = {})
   const template = fs.readFileSync(templatePath, "utf8");
   return template
     .replace(/__LIVE_HEAD__/g, () => (live ? liveHeadSnippet() : ""))
+    .replace(/__PAGE_SCRIPT__/g, () => pageScriptSnippet())
     .replace(/__BODY__/g, () => inner);
+}
+
+function pageScriptSnippet(): string {
+  return `
+    <script>
+      (function () {
+        document.addEventListener("click", async function (event) {
+          const btn = event.target && event.target.closest && event.target.closest("#copy-top-btn");
+          if (!btn) return;
+          const lines = Array.prototype.map
+            .call(document.querySelectorAll("#top-list li"), function (li, index) {
+              var text = (li.textContent || "").trim();
+              if (!text || text.indexOf("No data yet") === 0) return null;
+              return index + 1 + ". " + text;
+            })
+            .filter(Boolean);
+          if (!lines.length) {
+            alert("Nothing to copy yet.");
+            return;
+          }
+          var previous = btn.textContent;
+          btn.disabled = true;
+          try {
+            await navigator.clipboard.writeText(lines.join("\\n"));
+            btn.textContent = "Copied";
+            setTimeout(function () {
+              btn.textContent = previous;
+              btn.disabled = false;
+            }, 1200);
+          } catch (_) {
+            btn.disabled = false;
+            alert("Could not copy to clipboard.");
+          }
+        });
+      })();
+    </script>
+  `;
 }
 
 function liveHeadSnippet(): string {
