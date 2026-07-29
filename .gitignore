@@ -1,5 +1,6 @@
 node_modules/
 data/
+dist/
 collector/target/
 *.log
 .DS_Store

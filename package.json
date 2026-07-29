@@ -6,14 +6,25 @@
   "type": "module",
   "scripts": {
     "build:collector": "cargo build --release --manifest-path collector/Cargo.toml --target-dir collector/target",
+    "build:ui": "vite build",
+    "build": "npm run build:collector && npm run build:ui",
     "collect": "tsx src/cli.ts collect",
     "report": "tsx src/cli.ts report",
-    "reset": "tsx src/cli.ts reset"
+    "reset": "tsx src/cli.ts reset",
+    "dev:ui": "vite"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.5.0",
     "tsx": "^4.20.0",
-    "typescript": "^5.8.0"
+    "typescript": "^5.8.0",
+    "vite": "^6.3.0"
   },
   "engines": {
     "node": ">=20"
