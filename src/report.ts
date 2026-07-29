@@ -167,7 +167,7 @@ function renderMeta(options: {
 function renderSessions(stats: StatsFile): string {
   const sessions = stats.sessions ?? [];
   if (sessions.length === 0) {
-    return `<div><h2 style="margin-top:18px">Recording intervals</h2><p class="side-empty">No completed intervals yet.</p></div>`;
+    return `<div><h2>Recording intervals</h2><p class="side-empty">No completed intervals yet.</p></div>`;
   }
   const items = [...sessions]
     .reverse()
@@ -181,7 +181,7 @@ function renderSessions(stats: StatsFile): string {
     sessions.length > 20
       ? `<p class="side-empty">Showing latest 20 of ${sessions.length}.</p>`
       : "";
-  return `<div><h2 style="margin-top:18px">Recording intervals</h2><ol>${items}</ol>${more}</div>`;
+  return `<div><h2>Recording intervals</h2><ol>${items}</ol>${more}</div>`;
 }
 
 function renderBoard(keys: HeatKey[]): string {
@@ -217,7 +217,7 @@ function renderUnmapped(unmapped: HeatKey[]): string {
     .sort((a, b) => b.count - a.count)
     .map((item) => `<li>${escapeHtml(item.label)} — ${item.count}</li>`)
     .join("");
-  return `<div><h2 style="margin-top:18px">Unmapped codes</h2><ol>${items}</ol></div>`;
+  return `<div><h2>Unmapped codes</h2><ol>${items}</ol></div>`;
 }
 
 function renderRankBlock(options: {
@@ -298,12 +298,11 @@ function renderBodyInner(stats: StatsFile, live: boolean): string {
       sessionCount: stats.sessions?.length ?? 0,
     })}</div>`,
     `<div class="layout">`,
-    `<div>`,
+    `<div class="main-col">`,
     `<div class="board-wrap"><div class="board">${renderBoard(mapped)}</div></div>`,
     `<div class="legend"><span>cold</span><div class="swatch"></div><span>hot</span></div>`,
     `<p class="note">${note}</p>`,
-    `</div>`,
-    `<aside class="side">`,
+    `<div class="rank-row">`,
     renderRankBlock({
       title: "All time",
       listId: "top-list-all",
@@ -331,6 +330,9 @@ function renderBodyInner(stats: StatsFile, live: boolean): string {
       totalRecordingMs: recordedWeek,
       emptyMessage: periodEmptyHint,
     }),
+    `</div>`,
+    `</div>`,
+    `<aside class="side">`,
     renderUnmapped(unmapped),
     renderSessions(stats),
     `</aside>`,
