@@ -21,6 +21,7 @@ async function main(): Promise<void> {
     case "collect": {
       console.error(info("Starting local capture session. Press Ctrl+C to stop."));
       console.error(info(`Stats file: ${statsPath}`));
+      console.error(info("A live heatmap will open at http://127.0.0.1:17823/ (localhost only)."));
       const stats = await runCollectSession();
       const out = generateHeatmap(stats);
       console.error(ok(`Session complete — ${stats.totalPresses} total presses saved`));

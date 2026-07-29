@@ -1,6 +1,7 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { existsSync } from "node:fs";
 import readline from "node:readline";
+import { openInBrowser, startLiveServer } from "./live-server.ts";
 import { collectorBin, bumpKey, loadStats, saveStats, type StatsFile } from "./store.ts";
 import { dim, ok } from "./style.ts";
 
@@ -30,8 +31,10 @@ function parseEvent(line: string): RawEvent | null {
 
 export async function runCollectSession(options?: {
   flushEveryMs?: number;
+  openBrowser?: boolean;
 }): Promise<StatsFile> {
   const flushEveryMs = options?.flushEveryMs ?? 5_000;
+  const openBrowser = options?.openBrowser !== false;
 
   if (process.platform !== "win32") {
     throw new Error("Collector supports Windows only (WH_KEYBOARD_LL).");
@@ -47,6 +50,12 @@ export async function runCollectSession(options?: {
   let dirty = false;
   let sessionPresses = 0;
   let finished = false;
+
+  const live = await startLiveServer({ getStats: () => stats });
+  process.stderr.write(`\n${ok(`Live heatmap: ${live.url}`)}\n`);
+  if (openBrowser) {
+    openInBrowser(live.url);
+  }
 
   const child: ChildProcessWithoutNullStreams = spawn(collectorBin, [], {
     stdio: ["ignore", "pipe", "pipe"],
@@ -77,7 +86,7 @@ export async function runCollectSession(options?: {
     dirty = false;
   }, flushEveryMs);
 
-  const finalize = () => {
+  const finalize = async () => {
     if (finished) return;
     finished = true;
     clearInterval(flushTimer);
@@ -85,6 +94,11 @@ export async function runCollectSession(options?: {
     if (dirty) {
       saveStats(stats);
       dirty = false;
+    }
+    try {
+      await live.close();
+    } catch {
+      // ignore close races on shutdown
     }
     process.stderr.write(
       `\n${ok(`Saved ${sessionPresses} presses this session (total ${stats.totalPresses})`)}\n`,
@@ -97,8 +111,7 @@ export async function runCollectSession(options?: {
       if (!child.killed) {
         child.kill();
       }
-      finalize();
-      resolve();
+      void finalize().then(resolve);
     };
 
     process.once("SIGINT", onSignal);
@@ -107,19 +120,19 @@ export async function runCollectSession(options?: {
     child.on("error", (err) => {
       process.off("SIGINT", onSignal);
       process.off("SIGTERM", onSignal);
-      finalize();
-      reject(err);
+      void finalize().then(() => reject(err));
     });
 
     child.on("exit", (code, signal) => {
       process.off("SIGINT", onSignal);
       process.off("SIGTERM", onSignal);
-      finalize();
-      if (signal || code === 0 || code === null) {
-        resolve();
-        return;
-      }
-      reject(new Error(`Collector exited with code ${code}`));
+      void finalize().then(() => {
+        if (signal || code === 0 || code === null) {
+          resolve();
+          return;
+        }
+        reject(new Error(`Collector exited with code ${code}`));
+      });
     });
   });
 

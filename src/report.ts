@@ -18,6 +18,12 @@ export type HeatKey = {
   intensity: number;
 };
 
+export type RenderOptions = {
+  live?: boolean;
+  /** Body fragment only (for live polling). */
+  partial?: boolean;
+};
+
 function intensityFor(count: number, max: number): number {
   if (max <= 0 || count <= 0) return 0;
   return Math.sqrt(count / max);
@@ -97,8 +103,17 @@ export function topKeys(
     .slice(0, limit);
 }
 
-function renderMeta(updatedAt: string, totalPresses: number, maxCount: number): string {
+function renderMeta(
+  updatedAt: string,
+  totalPresses: number,
+  maxCount: number,
+  live: boolean,
+): string {
+  const liveBadge = live
+    ? `<span class="live-badge">LIVE</span>`
+    : "";
   return [
+    liveBadge,
     `<span>Updated: <strong>${escapeHtml(updatedAt || "—")}</strong></span>`,
     `<span>Total presses: <strong>${totalPresses}</strong></span>`,
     `<span>Hottest key: <strong>${maxCount}</strong></span>`,
@@ -140,23 +155,71 @@ function renderUnmapped(unmapped: HeatKey[]): string {
   return `<div><h2 style="margin-top:18px">Unmapped codes</h2><ol>${items}</ol></div>`;
 }
 
+function renderBodyInner(stats: StatsFile, live: boolean): string {
+  const heatKeys = buildHeatKeys(stats);
+  const top = topKeys(stats);
+  const max = Math.max(0, ...Object.values(stats.keys).map((k) => k.count), 0);
+  const mapped = heatKeys.filter((k) => k.row > 0);
+  const unmapped = heatKeys.filter((k) => k.row === 0 && k.count > 0);
+  const note = live
+    ? "Live view updates about once per second from the local collector (127.0.0.1 only)."
+    : "Intensity uses a square-root scale so secondary keys remain readable. Auto-repeat while holding a key is ignored (one count per press).";
+
+  return [
+    `<div class="meta">${renderMeta(stats.updatedAt, stats.totalPresses, max, live)}</div>`,
+    `<div class="layout">`,
+    `<div>`,
+    `<div class="board-wrap"><div class="board">${renderBoard(mapped)}</div></div>`,
+    `<div class="legend"><span>cold</span><div class="swatch"></div><span>hot</span></div>`,
+    `<p class="note">${note}</p>`,
+    `</div>`,
+    `<aside class="side">`,
+    `<h2>Replace first (top presses)</h2>`,
+    `<ol>${renderTop(top)}</ol>`,
+    renderUnmapped(unmapped),
+    `</aside>`,
+    `</div>`,
+  ].join("");
+}
+
+export function renderHeatmapHtml(stats: StatsFile, options: RenderOptions = {}): string {
+  const live = options.live === true;
+  const partial = options.partial === true;
+  const inner = renderBodyInner(stats, live);
+
+  if (partial) {
+    return inner;
+  }
+
+  const template = fs.readFileSync(templatePath, "utf8");
+  return template
+    .replace("__LIVE_HEAD__", live ? liveHeadSnippet() : "")
+    .replace("__BODY__", inner);
+}
+
+function liveHeadSnippet(): string {
+  return `
+    <script>
+      (function () {
+        async function tick() {
+          try {
+            const res = await fetch("/partial?t=" + Date.now(), { cache: "no-store" });
+            if (!res.ok) return;
+            const html = await res.text();
+            const root = document.getElementById("live-root");
+            if (root) root.innerHTML = html;
+          } catch (_) {}
+        }
+        setInterval(tick, 1000);
+      })();
+    </script>
+  `;
+}
+
 export function generateHeatmap(stats?: StatsFile): string {
   const data = stats ?? loadStats();
   saveStats(data);
-
-  const template = fs.readFileSync(templatePath, "utf8");
-  const heatKeys = buildHeatKeys(data);
-  const top = topKeys(data);
-  const max = Math.max(0, ...Object.values(data.keys).map((k) => k.count), 0);
-  const mapped = heatKeys.filter((k) => k.row > 0);
-  const unmapped = heatKeys.filter((k) => k.row === 0 && k.count > 0);
-
-  const html = template
-    .replace("__META__", renderMeta(data.updatedAt, data.totalPresses, max))
-    .replace("__BOARD__", renderBoard(mapped))
-    .replace("__TOP__", renderTop(top))
-    .replace("__UNMAPPED__", renderUnmapped(unmapped));
-
+  const html = renderHeatmapHtml(data, { live: false });
   fs.writeFileSync(heatmapPath, html, "utf8");
   return heatmapPath;
 }

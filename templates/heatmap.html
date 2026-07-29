@@ -46,8 +46,19 @@
       margin-bottom: 22px;
       color: var(--muted);
       font-size: 0.9rem;
+      align-items: center;
     }
     .meta strong { color: var(--text); font-weight: 600; }
+    .live-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #1f6f5b;
+      color: #e8edf5;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
     .board-wrap {
       overflow-x: auto;
       padding-bottom: 8px;
@@ -136,24 +147,11 @@
       max-width: 70ch;
     }
   </style>
+  __LIVE_HEAD__
 </head>
 <body>
   <h1>Keyboard Heatmap</h1>
   <p class="sub">Local physical-key presses · no network · labels use US QWERTY positions</p>
-  <div class="meta">__META__</div>
-  <div class="layout">
-    <div>
-      <div class="board-wrap">
-        <div class="board">__BOARD__</div>
-      </div>
-      <div class="legend"><span>cold</span><div class="swatch"></div><span>hot</span></div>
-      <p class="note">Intensity uses a square-root scale so secondary keys remain readable. Auto-repeat while holding a key is ignored (one count per press). This page is fully static (no JavaScript required).</p>
-    </div>
-    <aside class="side">
-      <h2>Replace first (top presses)</h2>
-      <ol>__TOP__</ol>
-      __UNMAPPED__
-    </aside>
-  </div>
+  <div id="live-root">__BODY__</div>
 </body>
 </html>
