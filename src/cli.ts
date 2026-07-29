@@ -1,6 +1,7 @@
 import { runCollectSession } from "./collector-runner.ts";
 import { generateHeatmap } from "./report.ts";
 import { loadStats, resetStats, statsPath } from "./store.ts";
+import { info, ok, red } from "./style.ts";
 
 function usage(): never {
   console.error(`Usage:
@@ -18,25 +19,28 @@ async function main(): Promise<void> {
 
   switch (cmd) {
     case "collect": {
-      console.error("Starting local capture session. Press Ctrl+C to stop.");
-      console.error(`Stats file: ${statsPath}`);
-      await runCollectSession();
-      const out = generateHeatmap();
-      console.error(`Heatmap written: ${out}`);
+      console.error(info("Starting local capture session. Press Ctrl+C to stop."));
+      console.error(info(`Stats file: ${statsPath}`));
+      const stats = await runCollectSession();
+      const out = generateHeatmap(stats);
+      console.error(ok(`Session complete — ${stats.totalPresses} total presses saved`));
+      console.error(ok(`Heatmap ready: ${out}`));
       break;
     }
     case "report": {
       const stats = loadStats();
       const out = generateHeatmap(stats);
-      console.log(out);
       console.error(
-        `total presses: ${stats.totalPresses}; keys tracked: ${Object.keys(stats.keys).length}`,
+        ok(
+          `Report ready — ${stats.totalPresses} presses, ${Object.keys(stats.keys).length} keys`,
+        ),
       );
+      console.error(ok(`Heatmap ready: ${out}`));
       break;
     }
     case "reset": {
       resetStats();
-      console.error("Local stats and heatmap removed.");
+      console.error(ok("Local stats and heatmap removed"));
       break;
     }
     default:
@@ -45,6 +49,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((err: unknown) => {
-  console.error(err instanceof Error ? err.message : err);
+  console.error(red(`✖ ${err instanceof Error ? err.message : String(err)}`));
   process.exit(1);
 });

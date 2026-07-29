@@ -2,6 +2,7 @@ import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { existsSync } from "node:fs";
 import readline from "node:readline";
 import { collectorBin, bumpKey, loadStats, saveStats, type StatsFile } from "./store.ts";
+import { dim, ok } from "./style.ts";
 
 type RawEvent = {
   sc: number;
@@ -60,7 +61,9 @@ export async function runCollectSession(options?: {
     dirty = true;
     sessionPresses += 1;
     if (sessionPresses === 1 || sessionPresses % 50 === 0) {
-      process.stderr.write(`\rpresses this session: ${sessionPresses}   `);
+      process.stderr.write(
+        `\r${dim(`presses this session: ${sessionPresses}`)}   `,
+      );
     }
   });
 
@@ -84,13 +87,13 @@ export async function runCollectSession(options?: {
       dirty = false;
     }
     process.stderr.write(
-      `\nsaved ${sessionPresses} presses this session; total ${stats.totalPresses}\n`,
+      `\n${ok(`Saved ${sessionPresses} presses this session (total ${stats.totalPresses})`)}\n`,
     );
   };
 
   await new Promise<void>((resolve, reject) => {
     const onSignal = () => {
-      process.stderr.write("\nstopping (SIGINT)...\n");
+      process.stderr.write(`\n${dim("stopping (SIGINT)...")}\n`);
       if (!child.killed) {
         child.kill();
       }
