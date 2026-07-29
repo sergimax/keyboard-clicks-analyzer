@@ -16,8 +16,13 @@ use windows::Win32::UI::WindowsAndMessaging::{
 
 static HELD: Mutex<Option<HashSet<u32>>> = Mutex::new(None);
 
+// Virtual-key codes used to normalize a few physical keys that Windows reports inconsistently.
+const VK_LWIN: u32 = 0x5B;
+const VK_RWIN: u32 = 0x5C;
+const VK_APPS: u32 = 0x5D; // Menu
+const VK_RSHIFT: u32 = 0xA1;
+
 fn key_id(sc: u32, extended: bool) -> u32 {
-    // Pack scan code + extended bit so left/right variants stay distinct.
     sc | if extended { 0xE000 } else { 0 }
 }
 
@@ -28,13 +33,24 @@ fn unix_ms() -> u64 {
         .unwrap_or(0)
 }
 
+/// Prefer stable physical ids for keys Windows tags inconsistently (RShift extended bit, Win/Menu).
+fn physical_sc_ext(vk: u32, scan_code: u32, extended: bool) -> (u32, bool) {
+    match vk {
+        VK_RSHIFT => (0x36, true),
+        VK_LWIN => (0x5B, true),
+        VK_RWIN => (0x5C, true),
+        VK_APPS => (0x5D, true),
+        _ => (scan_code, extended),
+    }
+}
+
 unsafe extern "system" fn keyboard_proc(code: i32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
     if code >= 0 {
         let info = &*(lparam.0 as *const KBDLLHOOKSTRUCT);
         let flags = info.flags;
         let is_up = flags.contains(LLKHF_UP);
-        let extended = flags.contains(LLKHF_EXTENDED);
-        let sc = info.scanCode;
+        let (sc, extended) =
+            physical_sc_ext(info.vkCode, info.scanCode, flags.contains(LLKHF_EXTENDED));
         let id = key_id(sc, extended);
 
         if is_up {

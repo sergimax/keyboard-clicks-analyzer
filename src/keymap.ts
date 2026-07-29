@@ -86,7 +86,8 @@ const MAP: Record<string, KeyMeta> = {
   "51:0": { label: ",", row: 5, col: 10 },
   "52:0": { label: ".", row: 5, col: 11 },
   "53:0": { label: "/", row: 5, col: 12 },
-  "54:0": { label: "RShift", row: 5, col: 13, span: 3 },
+  // Windows often reports Right Shift as extended (54:1); 54:0 is aliased below.
+  "54:1": { label: "RShift", row: 5, col: 13, span: 3 },
 
   // Row 6 — modifiers / space / arrows cluster starts at col 17 in template
   "29:0": { label: "LCtrl", row: 6, col: 1, span: 2 },
@@ -134,9 +135,24 @@ const MAP: Record<string, KeyMeta> = {
   "83:0": { label: "N.", row: 6, col: 23 },
 };
 
+/** Variants that should count as the same physical key on the heatmap. */
+const ALIASES: Record<string, string> = {
+  "54:0": "54:1", // RShift without extended bit
+  "91:0": "91:1", // LWin
+  "92:0": "92:1", // RWin
+  "93:0": "93:1", // Menu / Apps
+};
+
+export function canonicalKey(sc: number, ext: number): { id: string; sc: number; ext: number } {
+  const raw = `${sc}:${ext}`;
+  const mapped = ALIASES[raw] ?? raw;
+  const [csc, cext] = mapped.split(":").map((part) => Number(part));
+  return { id: mapped, sc: csc!, ext: cext! };
+}
+
 export function lookupKey(sc: number, ext: number): KeyMeta {
-  const id = `${sc}:${ext}`;
-  return MAP[id] ?? { label: `sc${sc}${ext ? "e" : ""}`, row: 0, col: 0 };
+  const { id, sc: csc, ext: cext } = canonicalKey(sc, ext);
+  return MAP[id] ?? { label: `sc${csc}${cext ? "e" : ""}`, row: 0, col: 0 };
 }
 
 export function allMappedKeys(): Array<{ id: string; meta: KeyMeta }> {

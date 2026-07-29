@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { allMappedKeys, lookupKey } from "./keymap.ts";
+import { allMappedKeys, canonicalKey, lookupKey } from "./keymap.ts";
 import {
   heatmapPath,
   loadStats,
@@ -53,8 +53,9 @@ function escapeHtml(value: string): string {
 
 export function buildHeatKeys(stats: StatsFile): HeatKey[] {
   const counts = new Map<string, number>();
-  for (const [id, entry] of Object.entries(stats.keys)) {
-    counts.set(id, entry.count);
+  for (const entry of Object.values(stats.keys)) {
+    const { id } = canonicalKey(entry.sc, entry.ext);
+    counts.set(id, (counts.get(id) ?? 0) + entry.count);
   }
 
   const max = Math.max(0, ...counts.values(), 0);
@@ -73,17 +74,18 @@ export function buildHeatKeys(stats: StatsFile): HeatKey[] {
     };
   });
 
-  for (const [id, entry] of Object.entries(stats.keys)) {
+  for (const [id, count] of counts) {
     if (known.has(id)) continue;
-    const meta = lookupKey(entry.sc, entry.ext);
+    const [sc, ext] = id.split(":").map(Number);
+    const meta = lookupKey(sc!, ext!);
     keys.push({
       id,
       label: meta.label,
       row: 0,
       col: 0,
       span: 1,
-      count: entry.count,
-      intensity: intensityFor(entry.count, max),
+      count,
+      intensity: intensityFor(count, max),
     });
   }
 
@@ -94,13 +96,18 @@ export function topKeys(
   stats: StatsFile,
   limit = 20,
 ): Array<{ id: string; label: string; count: number }> {
-  return Object.values(stats.keys)
-    .map((k) => {
-      const meta = lookupKey(k.sc, k.ext);
-      return { id: `${k.sc}:${k.ext}`, label: meta.label, count: k.count };
-    })
-    .sort((a, b) => b.count - a.count)
-    .slice(0, limit);
+  const merged = new Map<string, { id: string; label: string; count: number }>();
+  for (const k of Object.values(stats.keys)) {
+    const canon = canonicalKey(k.sc, k.ext);
+    const meta = lookupKey(canon.sc, canon.ext);
+    const prev = merged.get(canon.id);
+    if (prev) {
+      prev.count += k.count;
+    } else {
+      merged.set(canon.id, { id: canon.id, label: meta.label, count: k.count });
+    }
+  }
+  return [...merged.values()].sort((a, b) => b.count - a.count).slice(0, limit);
 }
 
 function renderMeta(
