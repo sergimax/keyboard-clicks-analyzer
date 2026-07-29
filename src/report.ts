@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { allMappedKeys, canonicalKey, lookupKey } from "./keymap.ts";
 import {
+  formatDuration,
   heatmapPath,
   loadStats,
   saveStats,
@@ -110,25 +111,61 @@ export function topKeys(
   return [...merged.values()].sort((a, b) => b.count - a.count).slice(0, limit);
 }
 
-function renderMeta(
-  updatedAt: string,
-  totalPresses: number,
-  maxCount: number,
-  live: boolean,
-): string {
+function renderMeta(options: {
+  updatedAt: string;
+  totalPresses: number;
+  maxCount: number;
+  live: boolean;
+  totalRecordingMs: number;
+  sessionCount: number;
+}): string {
+  const {
+    updatedAt,
+    totalPresses,
+    maxCount,
+    live,
+    totalRecordingMs,
+    sessionCount,
+  } = options;
   const liveBadge = live ? `<span class="live-badge">LIVE</span>` : "";
   const resetBtn = live
     ? `<button type="button" id="reset-btn" class="btn-reset">Reset stats</button>`
     : "";
+  const timing = [
+    `<span>Total recorded: <strong>${escapeHtml(formatDuration(totalRecordingMs))}</strong></span>`,
+    `<span>Saved intervals: <strong>${sessionCount}</strong></span>`,
+  ].join("");
+
   return [
     `<div class="meta-main">`,
     liveBadge,
     `<span>Updated: <strong>${escapeHtml(updatedAt || "—")}</strong></span>`,
     `<span>Total presses: <strong>${totalPresses}</strong></span>`,
     `<span>Hottest key: <strong>${maxCount}</strong></span>`,
+    timing,
     `</div>`,
     resetBtn,
   ].join("");
+}
+
+function renderSessions(stats: StatsFile): string {
+  const sessions = stats.sessions ?? [];
+  if (sessions.length === 0) {
+    return `<div><h2 style="margin-top:18px">Recording intervals</h2><p class="side-empty">No completed intervals yet.</p></div>`;
+  }
+  const items = [...sessions]
+    .reverse()
+    .slice(0, 20)
+    .map((s, indexFromEnd) => {
+      const n = sessions.length - indexFromEnd;
+      return `<li>#${n} — ${escapeHtml(formatDuration(s.durationMs))}</li>`;
+    })
+    .join("");
+  const more =
+    sessions.length > 20
+      ? `<p class="side-empty">Showing latest 20 of ${sessions.length}.</p>`
+      : "";
+  return `<div><h2 style="margin-top:18px">Recording intervals</h2><ol>${items}</ol>${more}</div>`;
 }
 
 function renderBoard(keys: HeatKey[]): string {
@@ -172,12 +209,21 @@ function renderBodyInner(stats: StatsFile, live: boolean): string {
   const max = Math.max(0, ...Object.values(stats.keys).map((k) => k.count), 0);
   const mapped = heatKeys.filter((k) => k.row > 0);
   const unmapped = heatKeys.filter((k) => k.row === 0 && k.count > 0);
+  // Browser shows completed recording only; live session clock is console-only.
+  const totalRecordingMs = stats.recordingMs ?? 0;
   const note = live
-    ? "Live view updates about once per second from the local collector (127.0.0.1 only)."
+    ? "Live view updates about once per second from the local collector (127.0.0.1 only). Current session time is shown in the collect terminal."
     : "Intensity uses a square-root scale so secondary keys remain readable. Auto-repeat while holding a key is ignored (one count per press).";
 
   return [
-    `<div class="meta">${renderMeta(stats.updatedAt, stats.totalPresses, max, live)}</div>`,
+    `<div class="meta">${renderMeta({
+      updatedAt: stats.updatedAt,
+      totalPresses: stats.totalPresses,
+      maxCount: max,
+      live,
+      totalRecordingMs,
+      sessionCount: stats.sessions?.length ?? 0,
+    })}</div>`,
     `<div class="layout">`,
     `<div>`,
     `<div class="board-wrap"><div class="board">${renderBoard(mapped)}</div></div>`,
@@ -188,6 +234,7 @@ function renderBodyInner(stats: StatsFile, live: boolean): string {
     `<h2>Replace first (top presses)</h2>`,
     `<ol>${renderTop(top)}</ol>`,
     renderUnmapped(unmapped),
+    renderSessions(stats),
     `</aside>`,
     `</div>`,
   ].join("");
@@ -226,7 +273,7 @@ function liveHeadSnippet(): string {
         document.addEventListener("click", async function (event) {
           const btn = event.target && event.target.closest && event.target.closest("#reset-btn");
           if (!btn) return;
-          if (!confirm("Reset all accumulated key stats? This cannot be undone.")) return;
+          if (!confirm("Reset all accumulated key stats and recording timers? This cannot be undone.")) return;
           btn.disabled = true;
           try {
             const res = await fetch("/reset", { method: "POST", cache: "no-store" });

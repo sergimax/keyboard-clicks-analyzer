@@ -6,6 +6,8 @@ import {
   bumpKey,
   clearStatsInPlace,
   collectorBin,
+  finalizeRecordingSession,
+  formatDuration,
   loadStats,
   saveStats,
   type StatsFile,
@@ -57,6 +59,14 @@ export async function runCollectSession(options?: {
   let dirty = false;
   let sessionPresses = 0;
   let finished = false;
+  let sessionStartedAt = Date.now();
+
+  const writeStatusLine = () => {
+    const elapsed = formatDuration(Date.now() - sessionStartedAt);
+    process.stderr.write(
+      `\r${dim(`session ${elapsed} · presses ${sessionPresses}`)}   `,
+    );
+  };
 
   const live = await startLiveServer({
     getStats: () => stats,
@@ -64,7 +74,9 @@ export async function runCollectSession(options?: {
       clearStatsInPlace(stats);
       sessionPresses = 0;
       dirty = false;
-      process.stderr.write(`\n${ok("Stats reset from live UI")}\n`);
+      sessionStartedAt = Date.now();
+      process.stderr.write(`\n${ok("Stats and recording timers reset from live UI")}\n`);
+      writeStatusLine();
     },
   });
   process.stderr.write(`\n${ok(`Live heatmap: ${live.url}`)}\n`);
@@ -77,6 +89,9 @@ export async function runCollectSession(options?: {
     windowsHide: true,
   });
 
+  const statusTimer = setInterval(writeStatusLine, 1000);
+  writeStatusLine();
+
   const rl = readline.createInterface({ input: child.stdout });
   rl.on("line", (line) => {
     const event = parseEvent(line);
@@ -84,11 +99,7 @@ export async function runCollectSession(options?: {
     bumpKey(stats, event.sc, event.ext);
     dirty = true;
     sessionPresses += 1;
-    if (sessionPresses === 1 || sessionPresses % 50 === 0) {
-      process.stderr.write(
-        `\r${dim(`presses this session: ${sessionPresses}`)}   `,
-      );
-    }
+    writeStatusLine();
   });
 
   child.stderr.on("data", (chunk: Buffer) => {
@@ -105,18 +116,21 @@ export async function runCollectSession(options?: {
     if (finished) return;
     finished = true;
     clearInterval(flushTimer);
+    clearInterval(statusTimer);
     rl.close();
-    if (dirty) {
-      saveStats(stats);
-      dirty = false;
-    }
+    finalizeRecordingSession(stats, sessionStartedAt);
+    saveStats(stats);
+    dirty = false;
     try {
       await live.close();
     } catch {
       // ignore close races on shutdown
     }
+    const last = stats.sessions[stats.sessions.length - 1];
     process.stderr.write(
-      `\n${ok(`Saved ${sessionPresses} presses this session (total ${stats.totalPresses})`)}\n`,
+      `\n${ok(
+        `Saved ${sessionPresses} presses this session (${formatDuration(last?.durationMs ?? 0)}); total ${stats.totalPresses}; recorded ${formatDuration(stats.recordingMs)}`,
+      )}\n`,
     );
   };
 

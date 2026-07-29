@@ -22,10 +22,20 @@ export type KeyCount = {
   count: number;
 };
 
+/** One completed collect start→stop interval. */
+export type RecordingSession = {
+  startedAt: string;
+  endedAt: string;
+  durationMs: number;
+};
+
 export type StatsFile = {
   version: 1;
   updatedAt: string;
   totalPresses: number;
+  /** Sum of completed session durations (ms). Current running session is not included until stop. */
+  recordingMs: number;
+  sessions: RecordingSession[];
   keys: Record<string, KeyCount>;
 };
 
@@ -38,6 +48,8 @@ export function emptyStats(): StatsFile {
     version: 1,
     updatedAt: new Date().toISOString(),
     totalPresses: 0,
+    recordingMs: 0,
+    sessions: [],
     keys: {},
   };
 }
@@ -46,8 +58,18 @@ export function ensureDataDir(): void {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
+export function ensureTimingFields(stats: StatsFile): void {
+  if (typeof stats.recordingMs !== "number" || !Number.isFinite(stats.recordingMs)) {
+    stats.recordingMs = 0;
+  }
+  if (!Array.isArray(stats.sessions)) {
+    stats.sessions = [];
+  }
+}
+
 /** Merge alias variants (e.g. 54:0 into 54:1) so old sessions display correctly. */
 export function normalizeStats(stats: StatsFile): StatsFile {
+  ensureTimingFields(stats);
   const keys: Record<string, KeyCount> = {};
   for (const entry of Object.values(stats.keys)) {
     const canon = canonicalKey(entry.sc, entry.ext);
@@ -103,10 +125,38 @@ export function bumpKey(stats: StatsFile, sc: number, ext: number): void {
   }
 }
 
-/** Clear counters in place (keeps the same object reference for the live session). */
+/** Append a completed recording interval and update total recordingMs. */
+export function finalizeRecordingSession(
+  stats: StatsFile,
+  startedAtMs: number,
+  endedAtMs: number = Date.now(),
+): void {
+  ensureTimingFields(stats);
+  const durationMs = Math.max(0, endedAtMs - startedAtMs);
+  stats.sessions.push({
+    startedAt: new Date(startedAtMs).toISOString(),
+    endedAt: new Date(endedAtMs).toISOString(),
+    durationMs,
+  });
+  stats.recordingMs += durationMs;
+}
+
+/** Clear counters and timers in place (keeps the same object reference for the live session). */
 export function clearStatsInPlace(stats: StatsFile): void {
   stats.keys = {};
   stats.totalPresses = 0;
+  stats.recordingMs = 0;
+  stats.sessions = [];
   stats.updatedAt = new Date().toISOString();
   saveStats(stats);
+}
+
+export function formatDuration(ms: number): string {
+  const totalSec = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  if (h > 0) return `${h}:${pad(m)}:${pad(s)}`;
+  return `${pad(m)}:${pad(s)}`;
 }
