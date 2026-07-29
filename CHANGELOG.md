@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Shared browser-safe helpers under `src/shared/` (heat, dates, period rankings)
 - **Day / last 7 days** rankings under the keyboard, each with presses, recorded time, and its own **Copy** button
 - Per-day key buckets in `data/stats.json` (`daily`) so period rankings work going forward (retained ~60 days)
-- **Show numpad** checkbox to hide/show the numpad on the heatmap (saved in `localStorage`)
+- **Export JSON** button — downloads summary, period rankings (top 30), and full `stats` snapshot
+- **Show numpad** switch (default Off / hidden; preference in `localStorage`)
 - `npm run build:ui` / `npm run build` to produce `dist/ui`
 
 ### Changed

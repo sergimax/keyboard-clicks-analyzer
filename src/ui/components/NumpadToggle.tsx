@@ -24,20 +24,18 @@ export function writeShowNumpad(show: boolean): void {
 
 export function NumpadToggle({ showNumpad, onChange }: NumpadToggleProps) {
   return (
-    <div className="view-controls">
-      <button
-        type="button"
-        className={`numpad-toggle${showNumpad ? " is-on" : ""}`}
-        role="switch"
-        aria-checked={showNumpad}
-        aria-label="Show numpad"
-        onClick={() => onChange(!showNumpad)}
-      >
-        <span className="numpad-toggle-track" aria-hidden="true">
-          <span className="numpad-toggle-thumb" />
-        </span>
-        <span className="numpad-toggle-label">Show numpad</span>
-      </button>
-    </div>
+    <button
+      type="button"
+      className={`numpad-toggle${showNumpad ? " is-on" : ""}`}
+      role="switch"
+      aria-checked={showNumpad}
+      aria-label="Show numpad"
+      onClick={() => onChange(!showNumpad)}
+    >
+      <span className="numpad-toggle-track" aria-hidden="true">
+        <span className="numpad-toggle-thumb" />
+      </span>
+      <span className="numpad-toggle-label">Show numpad</span>
+    </button>
   );
 }

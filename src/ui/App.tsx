@@ -12,8 +12,10 @@ import { fetchStats, resetStats } from "./api";
 import { KeyboardBoard } from "./components/KeyboardBoard";
 import { MetaBar } from "./components/MetaBar";
 import { NumpadToggle, readShowNumpad, writeShowNumpad } from "./components/NumpadToggle";
+import { ExportJsonButton } from "./components/ExportJsonButton";
 import { RankRow } from "./components/RankRow";
 import { SessionsList } from "./components/SessionsList";
+import { downloadExportJson } from "./export-json";
 
 const emptyStats: StatsFile = {
   version: 1,
@@ -129,7 +131,13 @@ export function App() {
       <p className="sub">
         Local physical-key presses · no network · labels use US QWERTY positions
       </p>
-      <NumpadToggle showNumpad={showNumpad} onChange={setShowNumpad} />
+      <div className="view-controls">
+        <NumpadToggle showNumpad={showNumpad} onChange={setShowNumpad} />
+        <ExportJsonButton
+          disabled={stats.totalPresses === 0 && (stats.recordingMs ?? 0) === 0}
+          onExport={() => downloadExportJson(stats, live)}
+        />
+      </div>
       {error ? <p className="status-error">{error}</p> : null}
       <MetaBar
         live={live}

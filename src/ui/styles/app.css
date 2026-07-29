@@ -386,6 +386,30 @@ li {
   border-radius: 4px;
 }
 
+.btn-export {
+  appearance: none;
+  border: 1px solid #3a4456;
+  background: #1a1f27;
+  color: #c5cddb;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-export:hover {
+  border-color: #2f9e82;
+  color: #e8edf5;
+  background: #1a2e28;
+}
+
+.btn-export:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 
 body.hide-numpad .key-numpad {
   display: none;

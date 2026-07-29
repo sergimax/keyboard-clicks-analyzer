@@ -46,7 +46,8 @@ npm run reset
   - **Saved intervals** — count of completed intervals; list under **Recording intervals**
   - **All time / Today / Last 7 days** — top-30 rankings with presses + recorded time; each has its own **Copy** button
   - **Reset stats** — clears key counts, day buckets, timers, and intervals (confirm dialog); requires collect still running
-  - **Show numpad** — toggle numpad visibility (saved in the browser)
+  - **Show numpad** — toggle numpad visibility (default Off; saved in the browser)
+  - **Export JSON** — download summary + period rankings + full stats snapshot
 
 `npm run report` serves the same UI from disk stats (no Reset button). There is no standalone `data/heatmap.html` anymore — use the report viewer.
 
