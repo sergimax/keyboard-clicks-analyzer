@@ -47,6 +47,13 @@
       color: var(--muted);
       font-size: 0.9rem;
       align-items: center;
+      justify-content: space-between;
+    }
+    .meta-main {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px 24px;
+      align-items: center;
     }
     .meta strong { color: var(--text); font-weight: 600; }
     .live-badge {
@@ -146,17 +153,6 @@
       font-size: 0.82rem;
       max-width: 70ch;
     }
-    .header-row {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px 20px;
-      margin-bottom: 22px;
-    }
-    .header-row .sub {
-      margin-bottom: 0;
-    }
     .btn-reset {
       appearance: none;
       border: 1px solid #5a4030;
@@ -183,10 +179,7 @@
 </head>
 <body>
   <h1>Keyboard Heatmap</h1>
-  <div class="header-row">
-    <p class="sub">Local physical-key presses · no network · labels use US QWERTY positions</p>
-    __LIVE_CONTROLS__
-  </div>
+  <p class="sub">Local physical-key presses · no network · labels use US QWERTY positions</p>
   <div id="live-root">__BODY__</div>
 </body>
 </html>

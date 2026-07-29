@@ -116,14 +116,18 @@ function renderMeta(
   maxCount: number,
   live: boolean,
 ): string {
-  const liveBadge = live
-    ? `<span class="live-badge">LIVE</span>`
+  const liveBadge = live ? `<span class="live-badge">LIVE</span>` : "";
+  const resetBtn = live
+    ? `<button type="button" id="reset-btn" class="btn-reset">Reset stats</button>`
     : "";
   return [
+    `<div class="meta-main">`,
     liveBadge,
     `<span>Updated: <strong>${escapeHtml(updatedAt || "—")}</strong></span>`,
     `<span>Total presses: <strong>${totalPresses}</strong></span>`,
     `<span>Hottest key: <strong>${maxCount}</strong></span>`,
+    `</div>`,
+    resetBtn,
   ].join("");
 }
 
@@ -200,14 +204,8 @@ export function renderHeatmapHtml(stats: StatsFile, options: RenderOptions = {})
 
   const template = fs.readFileSync(templatePath, "utf8");
   return template
-    .replace("__LIVE_HEAD__", live ? liveHeadSnippet() : "")
-    .replace(
-      "__LIVE_CONTROLS__",
-      live
-        ? `<button type="button" id="reset-btn" class="btn-reset">Reset stats</button>`
-        : "",
-    )
-    .replace("__BODY__", inner);
+    .replace(/__LIVE_HEAD__/g, () => (live ? liveHeadSnippet() : ""))
+    .replace(/__BODY__/g, () => inner);
 }
 
 function liveHeadSnippet(): string {
