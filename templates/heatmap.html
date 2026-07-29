@@ -212,6 +212,34 @@
       color: var(--muted);
       font-size: 0.85rem;
     }
+    .view-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      align-items: center;
+      margin: 0 0 18px;
+    }
+    .toggle-numpad {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .toggle-numpad input {
+      width: 1rem;
+      height: 1rem;
+      accent-color: #1f6f5b;
+      cursor: pointer;
+    }
+    body.hide-numpad .key-numpad {
+      display: none;
+    }
+    body.hide-numpad .board {
+      grid-template-columns: repeat(19, minmax(36px, 42px));
+    }
   </style>
   __LIVE_HEAD__
   __PAGE_SCRIPT__
@@ -219,6 +247,12 @@
 <body>
   <h1>Keyboard Heatmap</h1>
   <p class="sub">Local physical-key presses · no network · labels use US QWERTY positions</p>
+  <div class="view-controls">
+    <label class="toggle-numpad">
+      <input type="checkbox" id="toggle-numpad" checked />
+      Show numpad
+    </label>
+  </div>
   <div id="live-root">__BODY__</div>
 </body>
 </html>

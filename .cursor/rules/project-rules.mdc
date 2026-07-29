@@ -89,7 +89,8 @@ Example: `feat(live-server): add reset stats endpoint`
 - **Key aggregation** — `canonicalKey` / aliases in `keymap.ts` (e.g. RShift `54:0`→`54:1`); collector may normalize RShift/Win/Menu via VK
 - **Ignore** key-up and OS auto-repeat (one count per physical press)
 - **Heatmap labels** — US QWERTY **positions** for display; not the user’s active layout
-- After code pulls, **restart `collect`** so live UI picks up changes (old process keeps old in-memory renderers)
+- Restart `collect` after pulling code changes so the live UI picks up changes (old process keeps old in-memory renderers)
+- **Show numpad** — checkbox outside the live refresh root; preference in `localStorage` (`kca-show-numpad`)
 
 ## Component Structure
 

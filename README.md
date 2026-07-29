@@ -42,6 +42,7 @@ npm run reset
   - **Saved intervals** — count of completed intervals; list under **Recording intervals**
   - **Reset stats** — clears key counts, timers, and intervals (confirm dialog); requires collect still running
   - **Copy top list** — copies the top presses ranking to the clipboard
+  - **Show numpad** — toggle numpad visibility (saved in the browser)
 
 After stop (or `npm run report`), open `data/heatmap.html` for a static snapshot. That file has no Reset button — use `npm run reset` in the CLI.
 

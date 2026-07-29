@@ -175,8 +175,9 @@ function renderBoard(keys: HeatKey[]): string {
       const border = key.intensity > 0.55 ? "#5a4030" : "#343c4a";
       const count = key.count > 0 ? String(key.count) : "";
       const title = escapeHtml(`${key.label} (${key.id}): ${key.count}`);
+      const numpadClass = key.col >= 21 ? " key-numpad" : "";
       return [
-        `<div class="key" title="${title}" style="grid-row:${key.row};grid-column:${key.col} / span ${key.span};background:${bg};border-color:${border}">`,
+        `<div class="key${numpadClass}" title="${title}" style="grid-row:${key.row};grid-column:${key.col} / span ${key.span};background:${bg};border-color:${border}">`,
         `<span class="lbl">${escapeHtml(key.label)}</span>`,
         `<span class="cnt">${escapeHtml(count)}</span>`,
         `</div>`,
@@ -263,6 +264,35 @@ function pageScriptSnippet(): string {
   return `
     <script>
       (function () {
+        var NUMPAD_KEY = "kca-show-numpad";
+
+        function initNumpadToggle() {
+          var numpadToggle = document.getElementById("toggle-numpad");
+          if (!numpadToggle) return;
+
+          function applyNumpadVisibility() {
+            var show = numpadToggle.checked;
+            document.body.classList.toggle("hide-numpad", !show);
+            try {
+              localStorage.setItem(NUMPAD_KEY, show ? "1" : "0");
+            } catch (_) {}
+          }
+
+          try {
+            if (localStorage.getItem(NUMPAD_KEY) === "0") {
+              numpadToggle.checked = false;
+            }
+          } catch (_) {}
+          applyNumpadVisibility();
+          numpadToggle.addEventListener("change", applyNumpadVisibility);
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", initNumpadToggle);
+        } else {
+          initNumpadToggle();
+        }
+
         document.addEventListener("click", async function (event) {
           const btn = event.target && event.target.closest && event.target.closest("#copy-top-btn");
           if (!btn) return;
