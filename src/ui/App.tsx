@@ -13,9 +13,15 @@ import { KeyboardBoard } from "./components/KeyboardBoard";
 import { MetaBar } from "./components/MetaBar";
 import { NumpadToggle, readShowNumpad, writeShowNumpad } from "./components/NumpadToggle";
 import { ExportJsonButton } from "./components/ExportJsonButton";
+import { DeviceMetaFields } from "./components/DeviceMetaFields";
 import { RankRow } from "./components/RankRow";
 import { SessionsList } from "./components/SessionsList";
 import { downloadExportJson } from "./export-json";
+import {
+  readDeviceMeta,
+  writeDeviceMeta,
+  type DeviceMeta,
+} from "./device-meta";
 
 const emptyStats: StatsFile = {
   version: 1,
@@ -33,11 +39,16 @@ export function App() {
   const [error, setError] = useState<string | null>(null);
   const [resetting, setResetting] = useState(false);
   const [showNumpad, setShowNumpad] = useState(() => readShowNumpad());
+  const [deviceMeta, setDeviceMeta] = useState<DeviceMeta>(() => readDeviceMeta());
 
   useEffect(() => {
     document.body.classList.toggle("hide-numpad", !showNumpad);
     writeShowNumpad(showNumpad);
   }, [showNumpad]);
+
+  useEffect(() => {
+    writeDeviceMeta(deviceMeta);
+  }, [deviceMeta]);
 
   useEffect(() => {
     let cancelled = false;
@@ -133,9 +144,10 @@ export function App() {
       </p>
       <div className="view-controls">
         <NumpadToggle showNumpad={showNumpad} onChange={setShowNumpad} />
+        <DeviceMetaFields meta={deviceMeta} onChange={setDeviceMeta} />
         <ExportJsonButton
           disabled={stats.totalPresses === 0 && (stats.recordingMs ?? 0) === 0}
-          onExport={() => downloadExportJson(stats, live)}
+          onExport={() => downloadExportJson(stats, live, deviceMeta)}
         />
       </div>
       {error ? <p className="status-error">{error}</p> : null}

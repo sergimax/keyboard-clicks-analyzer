@@ -12,6 +12,7 @@ import {
   recordingMsInRange,
 } from "@shared/period";
 import type { StatsFile } from "@shared/types";
+import { toExportMeta, type DeviceMeta, type ExportMeta } from "./device-meta";
 
 /**
  * Timing for a ranking window.
@@ -53,6 +54,8 @@ export type ExportRanking = {
 export type ExportPayload = {
   exportedAt: string;
   live: boolean;
+  /** User-supplied context + platform; layouts/model are not OS-detected. */
+  meta: ExportMeta;
   summary: {
     totalPresses: number;
     /** Sum of all completed collect intervals (same as stats.recordingMs). */
@@ -146,7 +149,11 @@ function allTimePeriodMs(stats: StatsFile): number {
   return maxEnd - minStart;
 }
 
-export function buildExportPayload(stats: StatsFile, live: boolean): ExportPayload {
+export function buildExportPayload(
+  stats: StatsFile,
+  live: boolean,
+  deviceMeta: DeviceMeta,
+): ExportPayload {
   const todayKey = localDateKey();
   const day = dayRangeMs(todayKey);
   const week = weekRangeMs(todayKey);
@@ -159,6 +166,7 @@ export function buildExportPayload(stats: StatsFile, live: boolean): ExportPaylo
   return {
     exportedAt: new Date().toISOString(),
     live,
+    meta: toExportMeta(deviceMeta),
     summary: {
       totalPresses: stats.totalPresses,
       activeRecordingMs: activeAll,
@@ -197,8 +205,12 @@ export function buildExportPayload(stats: StatsFile, live: boolean): ExportPaylo
   };
 }
 
-export function downloadExportJson(stats: StatsFile, live: boolean): void {
-  const payload = buildExportPayload(stats, live);
+export function downloadExportJson(
+  stats: StatsFile,
+  live: boolean,
+  deviceMeta: DeviceMeta,
+): void {
+  const payload = buildExportPayload(stats, live, deviceMeta);
   const stamp = payload.exportedAt.replace(/[:.]/g, "-");
   const blob = new Blob([`${JSON.stringify(payload, null, 2)}\n`], {
     type: "application/json;charset=utf-8",

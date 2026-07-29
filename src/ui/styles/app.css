@@ -410,6 +410,50 @@ li {
   cursor: not-allowed;
 }
 
+.device-meta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: center;
+}
+
+.device-meta-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.device-meta-label {
+  flex-shrink: 0;
+}
+
+.device-meta-input {
+  width: 7.5rem;
+  appearance: none;
+  border: 1px solid #3a4456;
+  background: #141820;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 5px 8px;
+  border-radius: 8px;
+}
+
+.device-meta-input-wide {
+  width: 11rem;
+}
+
+.device-meta-input::placeholder {
+  color: #5a6578;
+}
+
+.device-meta-input:focus {
+  outline: none;
+  border-color: #2f9e82;
+}
+
 
 body.hide-numpad .key-numpad {
   display: none;
