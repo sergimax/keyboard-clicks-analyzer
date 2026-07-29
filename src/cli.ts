@@ -9,7 +9,8 @@ function usage(): never {
   npm run report    Build data/heatmap.html from accumulated stats
   npm run reset     Delete local stats and heatmap
 
-Offline only. Counts physical keys (scan codes), not characters.`);
+Offline only. Counts physical keys (scan codes), not characters.
+Live view: http://127.0.0.1:17823/ (during collect). Session time is in the terminal.`);
   process.exit(1);
 }
 

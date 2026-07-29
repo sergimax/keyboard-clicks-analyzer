@@ -11,18 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Reset stats button in the live heatmap UI (`POST /reset` on localhost while `collect` is running)
 - Canonical key aliases so alternate Windows scan/extended variants merge onto one heatmap cell
-- Recording timers: accumulated **Total recorded** across start/stop intervals and a list of saved intervals (cleared by Reset stats / `npm run reset`)
-- Current session duration in the collect terminal (`session mm:ss · presses N`)
-
-### Changed
-
-- Current session clock is console-only (not shown in the live browser UI)
+- Recording timers stored in `data/stats.json` (`recordingMs`, `sessions`)
+- Live/static UI: **Total recorded** and **Recording intervals** (completed start→stop runs only)
+- Current session duration in the collect terminal only (`session mm:ss · presses N`)
 
 ### Fixed
 
 - Map Right Shift as scan code `54:1` (Windows often sets the extended bit); alias `54:0` → `54:1`
 - Prefer stable VK-based ids in the collector for RShift / LWin / RWin / Menu when Windows reports them inconsistently
-- Render live controls inside the heatmap body so placeholders cannot leak into the browser
+- Render live controls inside the heatmap body so template placeholders cannot appear in the browser
 
 ## [1.0.0] - 2026-07-29
 

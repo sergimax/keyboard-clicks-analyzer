@@ -1,16 +1,16 @@
 # Keyboard Clicks Analyzer
 
-**v1.1.0 (unreleased)** — local, offline heatmap of **physical** keyboard key presses on Windows. Use it to decide which switches to replace first.
+**v1.1.0** — local, offline heatmap of **physical** keyboard key presses on Windows. Use it to decide which switches to replace first.
 
-No outbound network. No character/text logging — only scan codes and counts under `data/`.
+No outbound network calls. No character/text logging — only scan codes, counts, and recording timers under `data/`.
 
-See [CHANGELOG.md](CHANGELOG.md) for release history.
+See [CHANGELOG.md](CHANGELOG.md) for history.
 
 ## Requirements
 
 - Windows
 - [Node.js](https://nodejs.org/) 20+
-- [Rust](https://www.rust-lang.org/) (stable) with `cargo` — for the small collector binary
+- [Rust](https://www.rust-lang.org/) (stable) with `cargo` — builds the small collector binary
 
 ## Setup
 
@@ -23,29 +23,36 @@ npm run build:collector
 
 ```bash
 # Capture a session (Ctrl+C to stop). Stats accumulate across sessions.
-# Opens a live localhost heatmap that updates about once per second.
+# Opens a live localhost heatmap (~1s refresh).
 npm run collect
 
-# Rebuild static HTML report from saved stats
+# Rebuild static HTML from saved stats
 npm run report
 
-# Wipe local stats and heatmap (CLI)
+# Delete data/stats.json and data/heatmap.html
 npm run reset
 ```
 
-### Live view
+### During `collect`
 
-During `collect`, the app serves **http://127.0.0.1:17823/** (loopback only):
+- Terminal status line: `session mm:ss · presses N` (current run only; resets with **Reset stats**)
+- Browser: **http://127.0.0.1:17823/** (loopback only; usually opens automatically)
+  - **LIVE** badge, heatmap, top keys
+  - **Total recorded** — sum of *completed* start→stop intervals (current session is not included until you stop)
+  - **Saved intervals** — count of completed intervals; list under **Recording intervals**
+  - **Reset stats** — clears key counts, timers, and intervals (confirm dialog); requires collect still running
 
-- **LIVE** badge and ~1s refresh while you type
-- **Total recorded** across all start/stop intervals; saved intervals listed in the side panel
-- Current **session** time is shown in the collect terminal (`session mm:ss · presses N`), not in the browser
-- **Reset stats** — clears key counts, session clock, and all saved intervals (with confirm)
-- Top keys list for “replace first”
+After stop (or `npm run report`), open `data/heatmap.html` for a static snapshot. That file has no Reset button — use `npm run reset` in the CLI.
 
-After the session (or `npm run report`), open `data/heatmap.html` as a static snapshot (no Reset button — use `npm run reset`).
+Restart `collect` after pulling code changes so the live UI loads the new build.
 
-Restart `collect` after pulling code changes so the live page picks up UI updates.
+### Data file
+
+`data/stats.json` (gitignored) stores:
+
+- `keys` — per physical key counts (`sc` + `ext`)
+- `recordingMs` / `sessions` — completed recording intervals
+- `totalPresses`, `updatedAt`
 
 ## What is counted
 
@@ -57,9 +64,9 @@ Restart `collect` after pulling code changes so the live page picks up UI update
 ## Privacy
 
 - Runs only locally
-- Live view listens on `127.0.0.1` only (not reachable from the LAN/internet)
+- Live HTTP server binds to `127.0.0.1` only (not reachable from the LAN/internet)
 - Writes `data/stats.json` and `data/heatmap.html` (gitignored)
-- Does not log typed text, window titles, or layout
+- Does not log typed text, window titles, or keyboard layout
 
 ## Notes
 
