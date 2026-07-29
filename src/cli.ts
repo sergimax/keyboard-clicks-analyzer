@@ -1,16 +1,17 @@
 import { runCollectSession } from "./collector-runner.ts";
-import { generateHeatmap } from "./report.ts";
+import { startReportServer } from "./server/report-server.ts";
+import { ensureUiBuilt } from "./server/http-app.ts";
 import { loadStats, resetStats, statsPath } from "./store.ts";
-import { info, ok, red } from "./style.ts";
+import { dim, info, ok, red } from "./style.ts";
 
 function usage(): never {
   console.error(`Usage:
   npm run collect   Start a capture session (Ctrl+C to stop)
-  npm run report    Build data/heatmap.html from accumulated stats
-  npm run reset     Delete local stats and heatmap
+  npm run report    Open local React heatmap viewer from saved stats
+  npm run reset     Delete local stats
 
 Offline only. Counts physical keys (scan codes), not characters.
-Live view: http://127.0.0.1:17823/ (during collect). Session time is in the terminal.`);
+UI: http://127.0.0.1:17823/ (during collect or report). Session time is in the terminal.`);
   process.exit(1);
 }
 
@@ -20,29 +21,39 @@ async function main(): Promise<void> {
 
   switch (cmd) {
     case "collect": {
+      ensureUiBuilt();
       console.error(info("Starting local capture session. Press Ctrl+C to stop."));
       console.error(info(`Stats file: ${statsPath}`));
       console.error(info("A live heatmap will open at http://127.0.0.1:17823/ (localhost only)."));
       const stats = await runCollectSession();
-      const out = generateHeatmap(stats);
       console.error(ok(`Session complete — ${stats.totalPresses} total presses saved`));
-      console.error(ok(`Heatmap ready: ${out}`));
       break;
     }
     case "report": {
+      ensureUiBuilt();
       const stats = loadStats();
-      const out = generateHeatmap(stats);
       console.error(
         ok(
           `Report ready — ${stats.totalPresses} presses, ${Object.keys(stats.keys).length} keys`,
         ),
       );
-      console.error(ok(`Heatmap ready: ${out}`));
+      const server = await startReportServer({ openBrowser: true });
+      console.error(ok(`Heatmap viewer: ${server.url}`));
+      console.error(dim("Press Ctrl+C to stop the viewer."));
+      await new Promise<void>((resolve) => {
+        const onSignal = () => {
+          process.off("SIGINT", onSignal);
+          process.off("SIGTERM", onSignal);
+          void server.close().finally(resolve);
+        };
+        process.on("SIGINT", onSignal);
+        process.on("SIGTERM", onSignal);
+      });
       break;
     }
     case "reset": {
       resetStats();
-      console.error(ok("Local stats and heatmap removed"));
+      console.error(ok("Local stats removed"));
       break;
     }
     default:

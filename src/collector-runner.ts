@@ -1,7 +1,7 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { existsSync } from "node:fs";
 import readline from "node:readline";
-import { openInBrowser, startLiveServer } from "./live-server.ts";
+import { openInBrowser, startLiveServer } from "./server/live-server.ts";
 import {
   bumpKey,
   clearStatsInPlace,
