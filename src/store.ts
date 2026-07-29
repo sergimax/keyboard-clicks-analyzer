@@ -16,14 +16,19 @@ import {
   recordingMsInRange,
 } from "./shared/period.ts";
 import {
+  bumpTransitionInMap,
+  normalizeTransitionMap,
+} from "./shared/transitions.ts";
+import {
   DAILY_RETENTION_DAYS,
   type DailyBucket,
   type KeyCount,
   type RecordingSession,
   type StatsFile,
+  type TransitionCount,
 } from "./shared/types.ts";
 
-export type { DailyBucket, KeyCount, RecordingSession, StatsFile };
+export type { DailyBucket, KeyCount, RecordingSession, StatsFile, TransitionCount };
 export { DAILY_RETENTION_DAYS };
 export {
   dayRangeMs,
@@ -60,6 +65,7 @@ export function emptyStats(): StatsFile {
     recordingMs: 0,
     sessions: [],
     keys: {},
+    transitions: {},
     daily: {},
   };
 }
@@ -80,6 +86,12 @@ export function ensureTimingFields(stats: StatsFile): void {
 export function ensureDailyField(stats: StatsFile): void {
   if (!stats.daily || typeof stats.daily !== "object") {
     stats.daily = {};
+  }
+}
+
+export function ensureTransitionsField(stats: StatsFile): void {
+  if (!stats.transitions || typeof stats.transitions !== "object") {
+    stats.transitions = {};
   }
 }
 
@@ -112,8 +124,10 @@ function pruneDaily(stats: StatsFile, retainDays: number = DAILY_RETENTION_DAYS)
 export function normalizeStats(stats: StatsFile): StatsFile {
   ensureTimingFields(stats);
   ensureDailyField(stats);
+  ensureTransitionsField(stats);
   stats.keys = normalizeKeyMap(stats.keys);
   stats.totalPresses = Object.values(stats.keys).reduce((sum, k) => sum + k.count, 0);
+  stats.transitions = normalizeTransitionMap(stats.transitions);
 
   for (const [dateKey, bucket] of Object.entries(stats.daily)) {
     if (!bucket || typeof bucket !== "object") {
@@ -122,6 +136,7 @@ export function normalizeStats(stats: StatsFile): StatsFile {
     }
     bucket.keys = normalizeKeyMap(bucket.keys ?? {});
     bucket.presses = Object.values(bucket.keys).reduce((sum, k) => sum + k.count, 0);
+    bucket.transitions = normalizeTransitionMap(bucket.transitions);
   }
   pruneDaily(stats);
   return stats;
@@ -173,13 +188,44 @@ export function bumpKey(
   sc: number,
   ext: number,
   atMs: number = Date.now(),
-): void {
+): string {
   ensureDailyField(stats);
+  ensureTransitionsField(stats);
   bumpInKeyMap(stats.keys, sc, ext);
   const dateKey = localDateKey(atMs);
-  const bucket = stats.daily[dateKey] ?? { presses: 0, keys: {} };
+  const bucket = stats.daily[dateKey] ?? {
+    presses: 0,
+    keys: {},
+    transitions: {},
+  };
+  if (!bucket.transitions) bucket.transitions = {};
   bumpInKeyMap(bucket.keys, sc, ext);
   bucket.presses = Object.values(bucket.keys).reduce((sum, k) => sum + k.count, 0);
+  stats.daily[dateKey] = bucket;
+  return canonicalKey(sc, ext).id;
+}
+
+/** Record consecutive first-down pair previousKeyId → current (sc,ext). */
+export function bumpTransition(
+  stats: StatsFile,
+  previousKeyId: string,
+  sc: number,
+  ext: number,
+  atMs: number = Date.now(),
+): void {
+  ensureDailyField(stats);
+  ensureTransitionsField(stats);
+  const [fromScRaw, fromExtRaw] = previousKeyId.split(":").map(Number);
+  if (!Number.isFinite(fromScRaw) || !Number.isFinite(fromExtRaw)) return;
+  bumpTransitionInMap(stats.transitions, fromScRaw!, fromExtRaw!, sc, ext);
+  const dateKey = localDateKey(atMs);
+  const bucket = stats.daily[dateKey] ?? {
+    presses: 0,
+    keys: {},
+    transitions: {},
+  };
+  if (!bucket.transitions) bucket.transitions = {};
+  bumpTransitionInMap(bucket.transitions, fromScRaw!, fromExtRaw!, sc, ext);
   stats.daily[dateKey] = bucket;
 }
 
@@ -205,6 +251,7 @@ export function clearStatsInPlace(stats: StatsFile): void {
   stats.totalPresses = 0;
   stats.recordingMs = 0;
   stats.sessions = [];
+  stats.transitions = {};
   stats.daily = {};
   stats.updatedAt = new Date().toISOString();
   saveStats(stats);

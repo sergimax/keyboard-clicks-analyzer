@@ -190,6 +190,17 @@ h1 {
   font-weight: 600;
 }
 
+.rank-subheading {
+  margin: 14px 0 8px;
+  font-size: 0.85rem;
+  font-weight: 650;
+  color: var(--muted);
+}
+
+.transition-list {
+  max-height: 220px;
+}
+
 .rank-block ol {
   margin: 0;
   padding-left: 1.2rem;

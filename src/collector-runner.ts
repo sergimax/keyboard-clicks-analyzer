@@ -4,6 +4,7 @@ import readline from "node:readline";
 import { openInBrowser, startLiveServer } from "./server/live-server.ts";
 import {
   bumpKey,
+  bumpTransition,
   clearStatsInPlace,
   collectorBin,
   finalizeRecordingSession,
@@ -60,6 +61,7 @@ export async function runCollectSession(options?: {
   let sessionPresses = 0;
   let finished = false;
   let sessionStartedAt = Date.now();
+  let lastKeyId: string | null = null;
 
   const writeStatusLine = () => {
     const elapsed = formatDuration(Date.now() - sessionStartedAt);
@@ -73,6 +75,7 @@ export async function runCollectSession(options?: {
     onReset: () => {
       clearStatsInPlace(stats);
       sessionPresses = 0;
+      lastKeyId = null;
       dirty = false;
       sessionStartedAt = Date.now();
       process.stderr.write(`\n${ok("Stats and recording timers reset from live UI")}\n`);
@@ -96,7 +99,11 @@ export async function runCollectSession(options?: {
   rl.on("line", (line) => {
     const event = parseEvent(line);
     if (!event) return;
-    bumpKey(stats, event.sc, event.ext, event.t);
+    const keyId = bumpKey(stats, event.sc, event.ext, event.t);
+    if (lastKeyId) {
+      bumpTransition(stats, lastKeyId, event.sc, event.ext, event.t);
+    }
+    lastKeyId = keyId;
     dirty = true;
     sessionPresses += 1;
     writeStatusLine();

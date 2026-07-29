@@ -48,7 +48,8 @@ npm run reset
   - **All time / Today / Last 7 days** — top-30 rankings with presses + recorded time; each has its own **Copy** button
   - **Reset stats** — clears key counts, day buckets, timers, and intervals (confirm dialog); requires collect still running
   - **Show numpad** — toggle numpad visibility (default Off; saved in the browser)
-  - **Export JSON** — download summary + rankings + stats; includes `meta` (platform + optional layouts/keyboard model), `timing`, `intensity`, top `share`
+  - **Export JSON** — download summary + rankings + stats; includes `meta`, `timing`, `intensity`, top `share`, top-20 `transitions`
+  - **Top transitions** — consecutive physical key pairs (e.g. LCtrl→C) per period
 
 `npm run report` serves the same UI from disk stats (no Reset button). There is no standalone `data/heatmap.html` anymore — use the report viewer.
 
@@ -57,7 +58,8 @@ npm run reset
 `data/stats.json` (gitignored) stores:
 
 - `keys` — per physical key counts (`sc` + `ext`), all time
-- `daily` — per local calendar day key counts (for today / last 7 days; older days pruned)
+- `transitions` — consecutive first-down pairs (`from→to` aggregates)
+- `daily` — per local calendar day key counts + transitions (for today / last 7 days; older days pruned)
 - `recordingMs` / `sessions` — completed recording intervals
 - `totalPresses`, `updatedAt`
 

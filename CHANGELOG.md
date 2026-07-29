@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Export JSON `intensity.pressesPerMinute` (presses ÷ active recording minutes; computed at export)
 - Export JSON / UI top rows include `share` (fraction of period presses); UI shows e.g. `Space — 963 · 11.7%`
 - Export JSON `meta` (`platform`, user-supplied `keyboardLayout` / `keyboardModel`; not OS-detected; saved in `localStorage`)
+- **Key transitions** — consecutive first-down pairs aggregated in `stats.transitions` / daily buckets; top-20 in UI + Export JSON (hotkeys / nav patterns; O(1) per press)
 
 ### Changed
 

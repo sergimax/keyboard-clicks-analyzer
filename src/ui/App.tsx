@@ -7,6 +7,7 @@ import {
 } from "@shared/heat";
 import { dayRangeMs, localDateKey, weekRangeMs } from "@shared/dates";
 import { keysForDateKeys, pressesForDateKeys, recordingMsInRange } from "@shared/period";
+import { topTransitions, transitionsForDateKeys } from "@shared/transitions";
 import type { StatsFile } from "@shared/types";
 import { fetchStats, resetStats } from "./api";
 import { KeyboardBoard } from "./components/KeyboardBoard";
@@ -30,6 +31,7 @@ const emptyStats: StatsFile = {
   recordingMs: 0,
   sessions: [],
   keys: {},
+  transitions: {},
   daily: {},
 };
 
@@ -114,6 +116,7 @@ export function App() {
       title: "All time",
       periodLabel: "All time",
       top: topKeys(stats),
+      transitions: topTransitions(stats.transitions),
       totalPresses: stats.totalPresses,
       totalRecordingMs: stats.recordingMs ?? 0,
       emptyMessage: "No data yet. Run npm run collect.",
@@ -122,6 +125,7 @@ export function App() {
       title: "Today",
       periodLabel: `Today (${todayKey})`,
       top: topKeysFromMap(keysForDateKeys(stats, [todayKey])),
+      transitions: topTransitions(transitionsForDateKeys(stats, [todayKey])),
       totalPresses: pressesForDateKeys(stats, [todayKey]),
       totalRecordingMs: recordingMsInRange(stats, day.startMs, day.endMs),
       emptyMessage: periodEmptyHint,
@@ -130,6 +134,7 @@ export function App() {
       title: "Last 7 days",
       periodLabel: `Last 7 days (${week.dateKeys[0]} – ${todayKey})`,
       top: topKeysFromMap(keysForDateKeys(stats, week.dateKeys)),
+      transitions: topTransitions(transitionsForDateKeys(stats, week.dateKeys)),
       totalPresses: pressesForDateKeys(stats, week.dateKeys),
       totalRecordingMs: recordingMsInRange(stats, week.startMs, week.endMs),
       emptyMessage: periodEmptyHint,

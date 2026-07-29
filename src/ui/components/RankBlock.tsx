@@ -5,11 +5,13 @@ import {
   type RankItem,
 } from "@shared/heat";
 import { formatDuration } from "@shared/format";
+import type { TransitionItem } from "@shared/transitions";
 
 type RankBlockProps = {
   title: string;
   periodLabel: string;
   top: RankItem[];
+  transitions: TransitionItem[];
   totalPresses: number;
   totalRecordingMs: number;
   emptyMessage?: string;
@@ -20,36 +22,59 @@ function formatRankLine(item: RankItem, totalPresses: number): string {
   return `${item.label} — ${item.count} · ${formatSharePercent(share)}`;
 }
 
+function formatTransitionLine(item: TransitionItem): string {
+  return `${item.from} → ${item.to} — ${item.count}`;
+}
+
 export function RankBlock({
   title,
   periodLabel,
   top,
+  transitions,
   totalPresses,
   totalRecordingMs,
   emptyMessage = "No data yet.",
 }: RankBlockProps) {
   const recorded = formatDuration(totalRecordingMs);
-  const empty = top.length === 0 && totalPresses === 0 && totalRecordingMs === 0;
+  const empty =
+    top.length === 0 &&
+    transitions.length === 0 &&
+    totalPresses === 0 &&
+    totalRecordingMs === 0;
   const [copying, setCopying] = useState(false);
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
-    const lines = top.map(
+    const keyLines = top.map(
       (item, index) => `${index + 1}. ${formatRankLine(item, totalPresses)}`,
+    );
+    const transitionLines = transitions.map(
+      (item, index) => `${index + 1}. ${formatTransitionLine(item)}`,
     );
     const summary = [
       periodLabel,
       `Total presses: ${totalPresses}`,
       `Active recording: ${recorded}`,
     ];
-    const payload = summary.concat(lines.length ? ["", ...lines] : []);
-    if (!lines.length && totalPresses === 0 && (recorded === "00:00" || recorded === "0:00:00")) {
+    const parts = [...summary];
+    if (keyLines.length) {
+      parts.push("", "Top keys:", ...keyLines);
+    }
+    if (transitionLines.length) {
+      parts.push("", "Top transitions:", ...transitionLines);
+    }
+    if (
+      !keyLines.length &&
+      !transitionLines.length &&
+      totalPresses === 0 &&
+      (recorded === "00:00" || recorded === "0:00:00")
+    ) {
       window.alert("Nothing to copy yet.");
       return;
     }
     setCopying(true);
     try {
-      await navigator.clipboard.writeText(payload.join("\n"));
+      await navigator.clipboard.writeText(parts.join("\n"));
       setCopied(true);
       window.setTimeout(() => {
         setCopied(false);
@@ -91,6 +116,18 @@ export function RankBlock({
           ))
         )}
       </ol>
+      {transitions.length > 0 ? (
+        <>
+          <h3 className="rank-subheading">Top transitions</h3>
+          <ol className="transition-list">
+            {transitions.map((item) => (
+              <li key={`${item.fromId}>${item.toId}`}>
+                {formatTransitionLine(item)}
+              </li>
+            ))}
+          </ol>
+        </>
+      ) : null}
     </section>
   );
 }

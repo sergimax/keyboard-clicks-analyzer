@@ -13,10 +13,21 @@ export type RecordingSession = {
   durationMs: number;
 };
 
+/** Aggregated A→B key-down pairs (first-down only; no auto-repeat). */
+export type TransitionCount = {
+  fromSc: number;
+  fromExt: number;
+  toSc: number;
+  toExt: number;
+  count: number;
+};
+
 /** Per local calendar day key counts (YYYY-MM-DD). */
 export type DailyBucket = {
   presses: number;
   keys: Record<string, KeyCount>;
+  /** Consecutive physical-key transitions for this local day. */
+  transitions: Record<string, TransitionCount>;
 };
 
 export type StatsFile = {
@@ -27,6 +38,8 @@ export type StatsFile = {
   recordingMs: number;
   sessions: RecordingSession[];
   keys: Record<string, KeyCount>;
+  /** All-time consecutive key-down transitions (`fromId>toId`). */
+  transitions: Record<string, TransitionCount>;
   /** Local-day buckets for day/week rankings. Older days may be pruned. */
   daily: Record<string, DailyBucket>;
 };
