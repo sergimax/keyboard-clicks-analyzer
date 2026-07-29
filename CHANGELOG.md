@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Export JSON `intensity.pressesPerMinute` (presses ÷ active recording minutes; computed at export)
+
 ### Changed
 
 - Export JSON period timing: `recordingMs` → `timing.activeRecordingMs` plus `periodMs` / `idleMs` (calendar window vs completed collect overlap)

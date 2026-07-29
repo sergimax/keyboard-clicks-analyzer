@@ -48,7 +48,7 @@ npm run reset
   - **All time / Today / Last 7 days** — top-30 rankings with presses + recorded time; each has its own **Copy** button
   - **Reset stats** — clears key counts, day buckets, timers, and intervals (confirm dialog); requires collect still running
   - **Show numpad** — toggle numpad visibility (default Off; saved in the browser)
-  - **Export JSON** — download summary + period rankings + full stats; timing fields: `activeRecordingMs`, `periodMs`, `idleMs`
+  - **Export JSON** — download summary + period rankings + full stats; `timing` (`activeRecordingMs` / `periodMs` / `idleMs`) and `intensity.pressesPerMinute`
 
 `npm run report` serves the same UI from disk stats (no Reset button). There is no standalone `data/heatmap.html` anymore — use the report viewer.
 

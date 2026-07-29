@@ -24,6 +24,12 @@ export type ExportTiming = {
   idleMs: number;
 };
 
+/** Load metrics derived at export time from presses ÷ active recording. */
+export type ExportIntensity = {
+  /** null when activeRecordingMs is 0 (rate undefined). */
+  pressesPerMinute: number | null;
+};
+
 export type ExportRanking = {
   label: string;
   dateKey?: string;
@@ -31,6 +37,7 @@ export type ExportRanking = {
   dateTo?: string;
   totalPresses: number;
   timing: ExportTiming;
+  intensity: ExportIntensity;
   top: RankItem[];
 };
 
@@ -41,6 +48,7 @@ export type ExportPayload = {
     totalPresses: number;
     /** Sum of all completed collect intervals (same as stats.recordingMs). */
     activeRecordingMs: number;
+    intensity: ExportIntensity;
     hottestKeyCount: number;
     sessionCount: number;
     updatedAt: string;
@@ -60,6 +68,49 @@ function timingFor(activeRecordingMs: number, periodMs: number): ExportTiming {
     activeRecordingMs: active,
     periodMs: period,
     idleMs: Math.max(0, period - active),
+  };
+}
+
+/**
+ * Presses per minute of active recording (completed collect time only).
+ * Rounded to 1 decimal; null if there is no active recording time.
+ */
+export function pressesPerMinute(
+  totalPresses: number,
+  activeRecordingMs: number,
+): number | null {
+  if (activeRecordingMs <= 0) return null;
+  const rate = (Math.max(0, totalPresses) * 60_000) / activeRecordingMs;
+  return Math.round(rate * 10) / 10;
+}
+
+function intensityFor(
+  totalPresses: number,
+  activeRecordingMs: number,
+): ExportIntensity {
+  return { pressesPerMinute: pressesPerMinute(totalPresses, activeRecordingMs) };
+}
+
+function rankingBlock(options: {
+  label: string;
+  dateKey?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  totalPresses: number;
+  activeRecordingMs: number;
+  periodMs: number;
+  top: RankItem[];
+}): ExportRanking {
+  const timing = timingFor(options.activeRecordingMs, options.periodMs);
+  return {
+    label: options.label,
+    dateKey: options.dateKey,
+    dateFrom: options.dateFrom,
+    dateTo: options.dateTo,
+    totalPresses: options.totalPresses,
+    timing,
+    intensity: intensityFor(options.totalPresses, timing.activeRecordingMs),
+    top: options.top,
   };
 }
 
@@ -89,6 +140,8 @@ export function buildExportPayload(stats: StatsFile, live: boolean): ExportPaylo
   const activeAll = stats.recordingMs ?? 0;
   const activeToday = recordingMsInRange(stats, day.startMs, day.endMs);
   const activeWeek = recordingMsInRange(stats, week.startMs, week.endMs);
+  const pressesToday = pressesForDateKeys(stats, [todayKey]);
+  const pressesWeek = pressesForDateKeys(stats, week.dateKeys);
 
   return {
     exportedAt: new Date().toISOString(),
@@ -96,32 +149,36 @@ export function buildExportPayload(stats: StatsFile, live: boolean): ExportPaylo
     summary: {
       totalPresses: stats.totalPresses,
       activeRecordingMs: activeAll,
+      intensity: intensityFor(stats.totalPresses, activeAll),
       hottestKeyCount: hottestCount(stats),
       sessionCount: stats.sessions?.length ?? 0,
       updatedAt: stats.updatedAt,
     },
     rankings: {
-      allTime: {
+      allTime: rankingBlock({
         label: "All time",
         totalPresses: stats.totalPresses,
-        timing: timingFor(activeAll, allTimePeriodMs(stats)),
+        activeRecordingMs: activeAll,
+        periodMs: allTimePeriodMs(stats),
         top: topKeys(stats),
-      },
-      today: {
+      }),
+      today: rankingBlock({
         label: "Today",
         dateKey: todayKey,
-        totalPresses: pressesForDateKeys(stats, [todayKey]),
-        timing: timingFor(activeToday, day.endMs - day.startMs),
+        totalPresses: pressesToday,
+        activeRecordingMs: activeToday,
+        periodMs: day.endMs - day.startMs,
         top: topKeysFromMap(keysForDateKeys(stats, [todayKey])),
-      },
-      last7Days: {
+      }),
+      last7Days: rankingBlock({
         label: "Last 7 days",
         dateFrom: week.dateKeys[0],
         dateTo: todayKey,
-        totalPresses: pressesForDateKeys(stats, week.dateKeys),
-        timing: timingFor(activeWeek, week.endMs - week.startMs),
+        totalPresses: pressesWeek,
+        activeRecordingMs: activeWeek,
+        periodMs: week.endMs - week.startMs,
         top: topKeysFromMap(keysForDateKeys(stats, week.dateKeys)),
-      },
+      }),
     },
     stats,
   };
