@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-07-29
+
 ### Added
 
 - **React + Vite** heatmap UI (`src/ui`) with JSON API (`GET /api/stats`, `POST /api/reset`)
@@ -27,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - String-templated `templates/heatmap.html` / `src/report.ts` static HTML generator
-- Writing or deleting `data/heatmap.html`
+- Writing or deleting `data/heatmap.html` — open the report viewer instead of a standalone HTML file
 
 ## [1.1.0] - 2026-07-29
 ### Added
