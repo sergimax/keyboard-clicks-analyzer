@@ -5,22 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Unreleased] — 1.1.0
 
 ### Added
 
+- Reset stats button in the live heatmap UI (`POST /reset` on localhost while `collect` is running)
+- Canonical key aliases so alternate Windows scan/extended variants merge onto one heatmap cell
 - Recording timers: accumulated **Total recorded** across start/stop intervals and a list of saved intervals (cleared by Reset stats / `npm run reset`)
 - Current session duration in the collect terminal (`session mm:ss · presses N`)
 
 ### Changed
 
 - Current session clock is console-only (not shown in the live browser UI)
-## [1.1.0] - 2026-07-29
-
-### Added
-
-- Reset stats button in the live heatmap UI (`POST /reset` on localhost while `collect` is running)
-- Canonical key aliases so alternate Windows scan/extended variants merge onto one heatmap cell
 
 ### Fixed
 

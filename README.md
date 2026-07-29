@@ -1,6 +1,6 @@
 # Keyboard Clicks Analyzer
 
-**v1.1.0** — local, offline heatmap of **physical** keyboard key presses on Windows. Use it to decide which switches to replace first.
+**v1.1.0 (unreleased)** — local, offline heatmap of **physical** keyboard key presses on Windows. Use it to decide which switches to replace first.
 
 No outbound network. No character/text logging — only scan codes and counts under `data/`.
 
