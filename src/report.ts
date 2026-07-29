@@ -211,6 +211,7 @@ function renderBodyInner(stats: StatsFile, live: boolean): string {
   const mapped = heatKeys.filter((k) => k.row > 0);
   const unmapped = heatKeys.filter((k) => k.row === 0 && k.count > 0);
   // Browser shows completed recording only; live session clock is console-only.
+  const totalPresses = stats.totalPresses;
   const totalRecordingMs = stats.recordingMs ?? 0;
   const note = live
     ? "Live view updates about once per second from the local collector (127.0.0.1 only). Current session time is shown in the collect terminal."
@@ -219,7 +220,7 @@ function renderBodyInner(stats: StatsFile, live: boolean): string {
   return [
     `<div class="meta">${renderMeta({
       updatedAt: stats.updatedAt,
-      totalPresses: stats.totalPresses,
+      totalPresses,
       maxCount: max,
       live,
       totalRecordingMs,
@@ -234,7 +235,11 @@ function renderBodyInner(stats: StatsFile, live: boolean): string {
     `<aside class="side">`,
     `<div class="side-heading">`,
     `<h2>Replace first (top presses)</h2>`,
-    `<button type="button" id="copy-top-btn" class="btn-copy"${top.length === 0 ? " disabled" : ""}>Copy top list</button>`,
+    `<button type="button" id="copy-top-btn" class="btn-copy"`,
+    ` data-total-presses="${totalPresses}"`,
+    ` data-total-recorded="${escapeHtml(formatDuration(totalRecordingMs))}"`,
+    top.length === 0 && totalPresses === 0 ? ` disabled` : ``,
+    `>Copy top list</button>`,
     `</div>`,
     `<ol id="top-list">${renderTop(top)}</ol>`,
     renderUnmapped(unmapped),
@@ -303,14 +308,21 @@ function pageScriptSnippet(): string {
               return index + 1 + ". " + text;
             })
             .filter(Boolean);
-          if (!lines.length) {
+          var totalPresses = btn.getAttribute("data-total-presses") || "0";
+          var totalRecorded = btn.getAttribute("data-total-recorded") || "00:00";
+          var summary = [
+            "Total presses: " + totalPresses,
+            "Total recorded: " + totalRecorded,
+          ];
+          var payload = summary.concat(lines.length ? [""].concat(lines) : []);
+          if (!lines.length && totalPresses === "0") {
             alert("Nothing to copy yet.");
             return;
           }
           var previous = btn.textContent;
           btn.disabled = true;
           try {
-            await navigator.clipboard.writeText(lines.join("\\n"));
+            await navigator.clipboard.writeText(payload.join("\\n"));
             btn.textContent = "Copied";
             setTimeout(function () {
               btn.textContent = previous;

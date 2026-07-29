@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Copy top list** button for the top presses ranking (live and static heatmap)
+- **Copy top list** — copies summary (total presses, total recorded time) plus the top presses ranking
 - **Show numpad** checkbox to hide/show the numpad on the heatmap (saved in `localStorage`)
 
 ### Fixed
