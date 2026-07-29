@@ -20,8 +20,29 @@ export type HeatKey = {
 
 function intensityFor(count: number, max: number): number {
   if (max <= 0 || count <= 0) return 0;
-  // sqrt scale so rare keys stay visible while hot keys dominate.
   return Math.sqrt(count / max);
+}
+
+function colorFor(intensity: number): string {
+  if (intensity <= 0) return "#252b36";
+  const cold = [31, 111, 91];
+  const mid = [244, 162, 97];
+  const hot = [232, 93, 4];
+  const t = Math.min(1, Math.max(0, intensity));
+  const from = t < 0.5 ? cold : mid;
+  const to = t < 0.5 ? mid : hot;
+  const u = t < 0.5 ? t * 2 : (t - 0.5) * 2;
+  const rgb = from.map((c, i) => Math.round(c + (to[i]! - c) * u));
+  return `rgb(${rgb.join(",")})`;
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 export function buildHeatKeys(stats: StatsFile): HeatKey[] {
@@ -30,7 +51,7 @@ export function buildHeatKeys(stats: StatsFile): HeatKey[] {
     counts.set(id, entry.count);
   }
 
-  const max = Math.max(0, ...counts.values());
+  const max = Math.max(0, ...counts.values(), 0);
   const known = new Set(allMappedKeys().map((k) => k.id));
 
   const keys: HeatKey[] = allMappedKeys().map(({ id, meta }) => {
@@ -46,7 +67,6 @@ export function buildHeatKeys(stats: StatsFile): HeatKey[] {
     };
   });
 
-  // Unknown physical keys (not on the drawn layout) still appear in the side list via stats.
   for (const [id, entry] of Object.entries(stats.keys)) {
     if (known.has(id)) continue;
     const meta = lookupKey(entry.sc, entry.ext);
@@ -64,7 +84,10 @@ export function buildHeatKeys(stats: StatsFile): HeatKey[] {
   return keys;
 }
 
-export function topKeys(stats: StatsFile, limit = 20): Array<{ id: string; label: string; count: number }> {
+export function topKeys(
+  stats: StatsFile,
+  limit = 20,
+): Array<{ id: string; label: string; count: number }> {
   return Object.values(stats.keys)
     .map((k) => {
       const meta = lookupKey(k.sc, k.ext);
@@ -74,26 +97,66 @@ export function topKeys(stats: StatsFile, limit = 20): Array<{ id: string; label
     .slice(0, limit);
 }
 
+function renderMeta(updatedAt: string, totalPresses: number, maxCount: number): string {
+  return [
+    `<span>Updated: <strong>${escapeHtml(updatedAt || "—")}</strong></span>`,
+    `<span>Total presses: <strong>${totalPresses}</strong></span>`,
+    `<span>Hottest key: <strong>${maxCount}</strong></span>`,
+  ].join("");
+}
+
+function renderBoard(keys: HeatKey[]): string {
+  return keys
+    .map((key) => {
+      const bg = colorFor(key.intensity);
+      const border = key.intensity > 0.55 ? "#5a4030" : "#343c4a";
+      const count = key.count > 0 ? String(key.count) : "";
+      const title = escapeHtml(`${key.label} (${key.id}): ${key.count}`);
+      return [
+        `<div class="key" title="${title}" style="grid-row:${key.row};grid-column:${key.col} / span ${key.span};background:${bg};border-color:${border}">`,
+        `<span class="lbl">${escapeHtml(key.label)}</span>`,
+        `<span class="cnt">${escapeHtml(count)}</span>`,
+        `</div>`,
+      ].join("");
+    })
+    .join("");
+}
+
+function renderTop(top: Array<{ label: string; count: number }>): string {
+  if (top.length === 0) {
+    return `<li>No data yet. Run npm run collect.</li>`;
+  }
+  return top
+    .map((item) => `<li>${escapeHtml(item.label)} — ${item.count}</li>`)
+    .join("");
+}
+
+function renderUnmapped(unmapped: HeatKey[]): string {
+  if (unmapped.length === 0) return "";
+  const items = [...unmapped]
+    .sort((a, b) => b.count - a.count)
+    .map((item) => `<li>${escapeHtml(item.label)} — ${item.count}</li>`)
+    .join("");
+  return `<div><h2 style="margin-top:18px">Unmapped codes</h2><ol>${items}</ol></div>`;
+}
+
 export function generateHeatmap(stats?: StatsFile): string {
   const data = stats ?? loadStats();
-  // Refresh total before report
   saveStats(data);
 
   const template = fs.readFileSync(templatePath, "utf8");
   const heatKeys = buildHeatKeys(data);
   const top = topKeys(data);
-  const max = Math.max(0, ...Object.values(data.keys).map((k) => k.count));
+  const max = Math.max(0, ...Object.values(data.keys).map((k) => k.count), 0);
+  const mapped = heatKeys.filter((k) => k.row > 0);
+  const unmapped = heatKeys.filter((k) => k.row === 0 && k.count > 0);
 
-  const payload = {
-    updatedAt: data.updatedAt,
-    totalPresses: data.totalPresses,
-    maxCount: max,
-    keys: heatKeys.filter((k) => k.row > 0),
-    unmapped: heatKeys.filter((k) => k.row === 0 && k.count > 0),
-    top,
-  };
+  const html = template
+    .replace("__META__", renderMeta(data.updatedAt, data.totalPresses, max))
+    .replace("__BOARD__", renderBoard(mapped))
+    .replace("__TOP__", renderTop(top))
+    .replace("__UNMAPPED__", renderUnmapped(unmapped));
 
-  const html = template.replace("__DATA__", JSON.stringify(payload));
   fs.writeFileSync(heatmapPath, html, "utf8");
   return heatmapPath;
 }
