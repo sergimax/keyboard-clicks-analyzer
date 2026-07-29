@@ -324,6 +324,69 @@ li {
   cursor: pointer;
 }
 
+.numpad-toggle {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.numpad-toggle-track {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  background: #2a3140;
+  border: 1px solid #3a4456;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.numpad-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #8b95a8;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.numpad-toggle.is-on .numpad-toggle-track {
+  background: #1f6f5b;
+  border-color: #2f9e82;
+}
+
+.numpad-toggle.is-on .numpad-toggle-thumb {
+  transform: translateX(16px);
+  background: #e8edf5;
+}
+
+.numpad-toggle:hover .numpad-toggle-track {
+  border-color: #5a6a82;
+}
+
+.numpad-toggle.is-on:hover .numpad-toggle-track {
+  border-color: #3db894;
+}
+
+.numpad-toggle:focus-visible {
+  outline: 2px solid #2f9e82;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+
 body.hide-numpad .key-numpad {
   display: none;
 }
