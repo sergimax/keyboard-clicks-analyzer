@@ -95,7 +95,7 @@ export function buildHeatKeys(stats: StatsFile): HeatKey[] {
 
 export function topKeys(
   stats: StatsFile,
-  limit = 20,
+  limit = 30,
 ): Array<{ id: string; label: string; count: number }> {
   const merged = new Map<string, { id: string; label: string; count: number }>();
   for (const k of Object.values(stats.keys)) {
