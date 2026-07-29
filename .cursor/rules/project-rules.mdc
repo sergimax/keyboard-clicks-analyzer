@@ -1,0 +1,140 @@
+---
+description: Basic rules for AI agents working on this project
+alwaysApply: true
+---
+
+# Project Rules for AI Agents
+
+## Code Style
+
+- Use TypeScript strictly; avoid `any` unless necessary
+- Prefer small, focused modules over large “god” files
+- Use meaningful names; keep functions small and focused
+- Rust collector: keep the hook path minimal, no network, no text logging
+
+## Naming
+
+- Prefer **kebab-case** for file names (e.g. `collector-runner.ts`, `live-server.ts`)
+- Keep exported symbols idiomatic (e.g. `runCollectSession` is fine), but keep **file paths** kebab-case
+- Avoid oversimplified names for locals and callback params (e.g. `v`, `d`, `c`, `e`); prefer descriptive names like `event`, `stats`, `scanCode`, `sessionStartedAt`
+
+## Commit Messages
+
+Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/):
+
+```
+<type>[optional scope]: <description>
+```
+
+- **feat:** new feature (MINOR)
+- **fix:** bug fix (PATCH)
+- **docs:** documentation only
+- **style:** formatting, no code change
+- **refactor:** code change that neither fixes nor adds a feature
+- **perf:** performance improvement
+- **test:** adding or updating tests
+- **chore:** build, CI, tooling
+- **BREAKING CHANGE:** use `!` after type/scope or footer (MAJOR)
+
+Example: `feat(live-server): add reset stats endpoint`
+
+## Versioning & Changelog
+
+- Use [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH
+- Version lives in `package.json` and `collector/Cargo.toml` (keep them in sync)
+- When releasing: bump both versions, update `CHANGELOG.md` (move `[Unreleased]` into a dated `## [X.Y.Z] - YYYY-MM-DD`), update `README.md` version line
+- Changelog entries must describe **actual user-facing changes** included in the release (derived from commits/diff since the previous release), not just “bump version”
+
+### Changelog format
+
+- Follow [Keep a Changelog](https://keepachangelog.com/)
+- File: `CHANGELOG.md` at project root
+- Sections: `### Added`, `### Changed`, `### Deprecated`, `### Removed`, `### Fixed`, `### Security`
+- Unreleased work: `## [Unreleased] — X.Y.Z` (no release date until cut)
+- Released entry format: `## [X.Y.Z] - YYYY-MM-DD`
+- Add new entries at the top (above previous releases)
+- Do **not** add filler entries like “version bump for release”; if a release contains no notable changes, do not cut a release (or explicitly document why)
+
+### Version bump rules
+
+- **PATCH** — bug fixes, minor tweaks
+- **MINOR** — new features, non-breaking changes
+- **MAJOR** — breaking changes (use `BREAKING CHANGE` in commit)
+
+## Editing
+
+- Prefer editing existing files over creating new ones
+- Preserve existing formatting and indentation
+- After substantive edits, sanity-check with `npm run report` (and rebuild collector when Rust changes: `npm run build:collector`)
+
+## Project Context
+
+- Local **Windows** tool: physical keyboard press heatmap for deciding which switches to replace first
+- Stack: **Node.js + TypeScript** CLI/orchestrator (`tsx`) + thin **Rust** collector (`WH_KEYBOARD_LL`)
+- Privacy-first: offline; no typed text / window titles / layout logging; live HTTP binds **`127.0.0.1` only**
+- Counts **physical keys** (scan code + extended flag), not characters — EN/RU layouts share the same key
+- Runtime data under `data/` (gitignored): `stats.json`, `heatmap.html`
+- Docs: `README.md`, `CHANGELOG.md`
+- No React/Vite/UI framework — heatmap is server-rendered / static HTML from `templates/heatmap.html`
+- Follow existing patterns; check README before adding dependencies
+
+## Key Behaviors
+
+- **`npm run build:collector`** — `cargo build --release` into `collector/target/release/collector.exe` (explicit `--target-dir`)
+- **`npm run collect`** — loads/creates `data/stats.json`, spawns Rust collector, parses NDJSON key-down events, flushes stats periodically; Ctrl+C stops, finalizes recording interval, writes static heatmap
+- **Live view** — during collect, `http://127.0.0.1:17823/` (~1s partial refresh); **LIVE** badge; **Reset stats** (`POST /reset`); **Copy top list**; **Total recorded** / **Saved intervals** / **Recording intervals** (completed start→stop only)
+- **Console session timer** — terminal line `session mm:ss · presses N` for the current run only (not shown in the browser); resets with Reset stats
+- **`npm run report`** — regenerates static `data/heatmap.html` from saved stats (no Reset button; Copy top list still works)
+- **`npm run reset`** — deletes `data/stats.json` and `data/heatmap.html`
+- **Key aggregation** — `canonicalKey` / aliases in `keymap.ts` (e.g. RShift `54:0`→`54:1`); collector may normalize RShift/Win/Menu via VK
+- **Ignore** key-up and OS auto-repeat (one count per physical press)
+- **Heatmap labels** — US QWERTY **positions** for display; not the user’s active layout
+- After code pulls, **restart `collect`** so live UI picks up changes (old process keeps old in-memory renderers)
+
+## Component Structure
+
+This is not a React app. Organize as small TypeScript modules + one HTML template + one Rust binary:
+
+- **CLI** — `cli.ts` dispatches `collect` | `report` | `reset`
+- **Session runner** — `collector-runner.ts` owns spawn, flush, timers, live server wiring, finalize session
+- **Persistence** — `store.ts` (`StatsFile`, load/save/normalize, recording intervals, `formatDuration`)
+- **Key map** — `keymap.ts` (scan/ext → label + grid cell; aliases)
+- **Report/UI HTML** — `report.ts` renders into `templates/heatmap.html` placeholders (`__BODY__`, `__LIVE_HEAD__`, `__PAGE_SCRIPT__`)
+- **Live HTTP** — `live-server.ts` (loopback only; `/`, `/partial`, `/reset`)
+- **CLI colors** — `style.ts` (respect `NO_COLOR` / TTY)
+- **Rust** — `collector/src/main.rs` emits NDJSON `{ sc, ext, t }` on first key-down only
+
+## Project Structure
+
+```
+.
+├── package.json          # scripts: build:collector, collect, report, reset
+├── tsconfig.json
+├── README.md
+├── CHANGELOG.md
+├── src/
+│   ├── cli.ts                 # CLI entry
+│   ├── collector-runner.ts    # collect session orchestration
+│   ├── live-server.ts         # localhost live heatmap + reset
+│   ├── store.ts               # stats.json IO + recording timers
+│   ├── keymap.ts              # physical key map + aliases
+│   ├── report.ts              # HTML heatmap generation
+│   └── style.ts               # terminal colors
+├── templates/
+│   └── heatmap.html           # static/live HTML shell + CSS
+├── collector/
+│   ├── Cargo.toml
+│   ├── Cargo.lock
+│   └── src/main.rs            # WH_KEYBOARD_LL → NDJSON stdout
+└── data/                      # gitignored runtime output
+    ├── stats.json
+    └── heatmap.html
+```
+
+Prefer extending these modules over adding new top-level packages or frameworks.
+
+## Communication
+
+- Be direct and concise
+- Prefer answering questions before making edits when unclear
+- Explain non-obvious changes briefly
