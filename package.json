@@ -1,0 +1,21 @@
+{
+  "name": "keyboard-clicks-analyzer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local physical-key press heatmap for Windows (offline)",
+  "type": "module",
+  "scripts": {
+    "build:collector": "cargo build --release --manifest-path collector/Cargo.toml --target-dir collector/target",
+    "collect": "tsx src/cli.ts collect",
+    "report": "tsx src/cli.ts report",
+    "reset": "tsx src/cli.ts reset"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
