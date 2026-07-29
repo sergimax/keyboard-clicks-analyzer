@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Keyboard Heatmap (local)</title>
+  <style>
+    :root {
+      --bg: #12151a;
+      --panel: #1a1f27;
+      --text: #e8edf5;
+      --muted: #8b95a8;
+      --key-bg: #252b36;
+      --key-border: #343c4a;
+      --cold: #1f6f5b;
+      --hot: #e85d04;
+      --gap: 6px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", "IBM Plex Sans", system-ui, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #1e3a34 0%, transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, #3a2418 0%, transparent 50%),
+        var(--bg);
+      color: var(--text);
+      padding: 28px 20px 48px;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 1.45rem;
+      font-weight: 650;
+      letter-spacing: 0.02em;
+    }
+    .sub {
+      color: var(--muted);
+      margin-bottom: 22px;
+      font-size: 0.95rem;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px 24px;
+      margin-bottom: 22px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .meta strong { color: var(--text); font-weight: 600; }
+    .board-wrap {
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(24, 42px);
+      grid-template-rows: repeat(6, 42px);
+      gap: var(--gap);
+      width: max-content;
+      background: color-mix(in srgb, var(--panel) 88%, black);
+      border: 1px solid #2a3140;
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .key {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      border: 1px solid var(--key-border);
+      background: var(--key-bg);
+      font-size: 0.72rem;
+      line-height: 1.1;
+      text-align: center;
+      padding: 2px;
+      user-select: none;
+      position: relative;
+    }
+    .key .lbl { font-weight: 600; }
+    .key .cnt {
+      font-size: 0.62rem;
+      color: color-mix(in srgb, var(--text) 70%, transparent);
+      margin-top: 2px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr minmax(220px, 280px);
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+    .side {
+      background: var(--panel);
+      border: 1px solid #2a3140;
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+    .side h2 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+    }
+    ol {
+      margin: 0;
+      padding-left: 1.2rem;
+    }
+    li {
+      margin: 0.35rem 0;
+      font-size: 0.9rem;
+    }
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    .swatch {
+      width: 140px;
+      height: 12px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--cold), #f4a261, var(--hot));
+      border: 1px solid #2a3140;
+    }
+    .note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      max-width: 70ch;
+    }
+  </style>
+</head>
+<body>
+  <h1>Keyboard Heatmap</h1>
+  <p class="sub">Local physical-key presses · no network · labels use US QWERTY positions</p>
+  <div class="meta" id="meta"></div>
+  <div class="layout">
+    <div>
+      <div class="board-wrap">
+        <div class="board" id="board"></div>
+      </div>
+      <div class="legend"><span>cold</span><div class="swatch"></div><span>hot</span></div>
+      <p class="note">Intensity uses a square-root scale so secondary keys remain readable. Auto-repeat while holding a key is ignored (one count per press).</p>
+    </div>
+    <aside class="side">
+      <h2>Replace first (top presses)</h2>
+      <ol id="top"></ol>
+      <div id="unmapped-wrap" hidden>
+        <h2 style="margin-top:18px">Unmapped codes</h2>
+        <ol id="unmapped"></ol>
+      </div>
+    </aside>
+  </div>
+  <script type="application/json" id="data">__DATA__</script>
+  <script>
+    const data = JSON.parse(document.getElementById("data").textContent);
+
+    function colorFor(intensity) {
+      if (intensity <= 0) return getComputedStyle(document.documentElement).getPropertyValue("--key-bg").trim() || "#252b36";
+      const cold = [31, 111, 91];
+      const mid = [244, 162, 97];
+      const hot = [232, 93, 4];
+      const t = Math.min(1, Math.max(0, intensity));
+      const from = t < 0.5 ? cold : mid;
+      const to = t < 0.5 ? mid : hot;
+      const u = t < 0.5 ? t * 2 : (t - 0.5) * 2;
+      const rgb = from.map((c, i) => Math.round(c + (to[i] - c) * u));
+      return `rgb(${rgb.join(",")})`;
+    }
+
+    const meta = document.getElementById("meta");
+    meta.innerHTML = [
+      `<span>Updated: <strong>${data.updatedAt || "—"}</strong></span>`,
+      `<span>Total presses: <strong>${data.totalPresses ?? 0}</strong></span>`,
+      `<span>Hottest key: <strong>${data.maxCount ?? 0}</strong></span>`,
+    ].join("");
+
+    const board = document.getElementById("board");
+    for (const key of data.keys || []) {
+      const el = document.createElement("div");
+      el.className = "key";
+      el.style.gridRow = String(key.row);
+      el.style.gridColumn = `${key.col} / span ${key.span || 1}`;
+      el.style.background = colorFor(key.intensity || 0);
+      if ((key.intensity || 0) > 0.55) el.style.borderColor = "#5a4030";
+      el.title = `${key.label} (${key.id}): ${key.count}`;
+      el.innerHTML = `<span class="lbl">${key.label}</span><span class="cnt">${key.count || ""}</span>`;
+      board.appendChild(el);
+    }
+
+    const top = document.getElementById("top");
+    for (const item of data.top || []) {
+      const li = document.createElement("li");
+      li.textContent = `${item.label} — ${item.count}`;
+      top.appendChild(li);
+    }
+    if (!data.top || data.top.length === 0) {
+      const li = document.createElement("li");
+      li.textContent = "No data yet. Run npm run collect.";
+      top.appendChild(li);
+    }
+
+    if (data.unmapped && data.unmapped.length) {
+      document.getElementById("unmapped-wrap").hidden = false;
+      const list = document.getElementById("unmapped");
+      for (const item of data.unmapped.sort((a, b) => b.count - a.count)) {
+        const li = document.createElement("li");
+        li.textContent = `${item.label} — ${item.count}`;
+        list.appendChild(li);
+      }
+    }
+  </script>
+</body>
+</html>
