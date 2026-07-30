@@ -23,17 +23,78 @@ export function intensityFor(count: number, max: number): number {
   return Math.sqrt(count / max);
 }
 
-export function colorFor(intensity: number): string {
-  if (intensity <= 0) return "#252b36";
-  const cold = [31, 111, 91];
-  const mid = [244, 162, 97];
-  const hot = [232, 93, 4];
+function heatRgb(intensity: number): [number, number, number] {
+  if (intensity <= 0) return [37, 43, 54];
+  // Deeper mid/hot so labels stay readable; cold stays teal.
+  const cold = [28, 96, 82];
+  const mid = [214, 132, 64];
+  const hot = [176, 58, 8];
   const t = Math.min(1, Math.max(0, intensity));
   const from = t < 0.5 ? cold : mid;
   const to = t < 0.5 ? mid : hot;
   const u = t < 0.5 ? t * 2 : (t - 0.5) * 2;
-  const rgb = from.map((c, i) => Math.round(c + (to[i]! - c) * u));
-  return `rgb(${rgb.join(",")})`;
+  return [
+    Math.round(from[0]! + (to[0]! - from[0]!) * u),
+    Math.round(from[1]! + (to[1]! - from[1]!) * u),
+    Math.round(from[2]! + (to[2]! - from[2]!) * u),
+  ];
+}
+
+/** Relative luminance 0–1 (sRGB). */
+function relativeLuminance(rgb: [number, number, number]): number {
+  const channel = (value: number) => {
+    const s = value / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * channel(rgb[0]) + 0.7152 * channel(rgb[1]) + 0.0722 * channel(rgb[2]);
+}
+
+function contrastRatio(lumA: number, lumB: number): number {
+  const lighter = Math.max(lumA, lumB);
+  const darker = Math.min(lumA, lumB);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+export function colorFor(intensity: number): string {
+  const [r, g, b] = heatRgb(intensity);
+  return `rgb(${r},${g},${b})`;
+}
+
+export type HeatKeyStyle = {
+  background: string;
+  borderColor: string;
+  labelColor: string;
+  countColor: string;
+  textShadow: string;
+};
+
+const LIGHT_LABEL: [number, number, number] = [248, 250, 252];
+const DARK_LABEL: [number, number, number] = [18, 14, 10];
+const LIGHT_COUNT: [number, number, number] = [220, 226, 235];
+const DARK_COUNT: [number, number, number] = [48, 36, 28];
+
+function rgbCss(rgb: [number, number, number]): string {
+  return `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+}
+
+/** Background + readable label/count colors (picks higher-contrast ink). */
+export function heatKeyStyle(intensity: number): HeatKeyStyle {
+  const rgb = heatRgb(intensity);
+  const bgLum = relativeLuminance(rgb);
+  const lightContrast = contrastRatio(bgLum, relativeLuminance(LIGHT_LABEL));
+  const darkContrast = contrastRatio(bgLum, relativeLuminance(DARK_LABEL));
+  // Prefer dark ink unless light ink is clearly more readable (cold/dark keys).
+  const useDarkInk = darkContrast >= lightContrast || intensity >= 0.28;
+
+  return {
+    background: rgbCss(rgb),
+    borderColor: useDarkInk ? "#4a3424" : intensity > 0 ? "#2a4038" : "#343c4a",
+    labelColor: rgbCss(useDarkInk ? DARK_LABEL : LIGHT_LABEL),
+    countColor: rgbCss(useDarkInk ? DARK_COUNT : LIGHT_COUNT),
+    textShadow: useDarkInk
+      ? "0 0 0 transparent"
+      : "0 0 2px rgba(0,0,0,0.85), 0 1px 1px rgba(0,0,0,0.7)",
+  };
 }
 
 export function buildHeatKeys(stats: StatsFile): HeatKey[] {

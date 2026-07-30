@@ -5,8 +5,8 @@
   --muted: #8b95a8;
   --key-bg: #252b36;
   --key-border: #343c4a;
-  --cold: #1f6f5b;
-  --hot: #e85d04;
+  --cold: #1c6052;
+  --hot: #b03a08;
   --gap: 6px;
 }
 
@@ -101,23 +101,29 @@ h1 {
   border: 1px solid var(--key-border);
   background: var(--key-bg);
   color: var(--text);
-  font-size: 0.72rem;
-  line-height: 1.1;
+  font-family: "Cascadia Mono", "Cascadia Code", Consolas, "SF Mono", "Segoe UI Mono", ui-monospace, monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
   text-align: center;
   padding: 2px 3px;
   user-select: none;
   min-width: 0;
+  -webkit-font-smoothing: antialiased;
 }
 
 .key .lbl {
-  font-weight: 600;
+  font-weight: 700;
   word-break: break-all;
+  color: inherit;
 }
 
 .key .cnt {
-  font-size: 0.62rem;
-  color: #c5cddb;
+  font-size: 0.6rem;
+  font-weight: 650;
   margin-top: 2px;
+  font-variant-numeric: tabular-nums;
 }
 
 .layout {
@@ -233,7 +239,7 @@ li {
   width: 140px;
   height: 12px;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--cold), #f4a261, var(--hot));
+  background: linear-gradient(90deg, var(--cold), #d68440, var(--hot));
   border: 1px solid #2a3140;
 }
 
