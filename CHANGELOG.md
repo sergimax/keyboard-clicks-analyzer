@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-07-31
+
 ### Added
 
 - Export JSON `intensity.pressesPerMinute` (presses ÷ active recording minutes; computed at export)
@@ -18,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Export JSON period timing: `recordingMs` → `timing.activeRecordingMs` plus `periodMs` / `idleMs` (calendar window vs completed collect overlap)
 - UI labels: **Active recording** instead of **Recorded**
+- Heatmap key text picks high-contrast ink (dark on warm mid/hot keys); key labels use a monospace stack for readability
+- Ranking list number padding so two-digit indexes are not clipped
 
 ## [2.0.0] - 2026-07-29
 

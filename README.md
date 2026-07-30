@@ -1,5 +1,5 @@
 # Keyboard Clicks Analyzer
-![App version](https://img.shields.io/badge/App_version-2.0.0-purple)
+![App version](https://img.shields.io/badge/App_version-2.1.0-purple)
 
 Local, offline heatmap of **physical** keyboard key presses on Windows. Use it to decide which switches to replace first.
 
@@ -43,7 +43,7 @@ npm run reset
 - Terminal status line: `session mm:ss · presses N` (current run only; resets with **Reset stats**)
 - Browser: **http://127.0.0.1:17823/** (loopback only; usually opens automatically)
   - **LIVE** badge, heatmap, rankings
-  - **Total recorded** — sum of *completed* start→stop intervals (current session is not included until you stop)
+  - **Active recording** — sum of *completed* start→stop intervals (current session is not included until you stop)
   - **Saved intervals** — count of completed intervals; list under **Recording intervals**
   - **All time / Today / Last 7 days** — top-30 rankings with presses + recorded time; each has its own **Copy** button
   - **Reset stats** — clears key counts, day buckets, timers, and intervals (confirm dialog); requires collect still running
