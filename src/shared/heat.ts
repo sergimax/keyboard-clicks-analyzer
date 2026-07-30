@@ -77,14 +77,18 @@ function rgbCss(rgb: [number, number, number]): string {
   return `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
 }
 
-/** Background + readable label/count colors (picks higher-contrast ink). */
+/** Background + readable label/count colors. */
 export function heatKeyStyle(intensity: number): HeatKeyStyle {
   const rgb = heatRgb(intensity);
   const bgLum = relativeLuminance(rgb);
+  // Warm oranges/peaches (high R) always need dark ink — luminance alone
+  // mis-classifies some mid oranges as "dark enough" for white text.
+  const isWarm = rgb[0] >= 100 && rgb[0] >= rgb[2] + 24;
   const lightContrast = contrastRatio(bgLum, relativeLuminance(LIGHT_LABEL));
   const darkContrast = contrastRatio(bgLum, relativeLuminance(DARK_LABEL));
-  // Prefer dark ink unless light ink is clearly more readable (cold/dark keys).
-  const useDarkInk = darkContrast >= lightContrast || intensity >= 0.28;
+  const useDarkInk =
+    intensity > 0 &&
+    (isWarm || bgLum >= 0.18 || darkContrast > lightContrast || intensity >= 0.22);
 
   return {
     background: rgbCss(rgb),
