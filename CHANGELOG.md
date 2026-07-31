@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Suspicious repeats** — sparse per-key counters for same-key gaps under 30ms / 50ms (`stats.suspiciousRepeats`); side panel list for bounce / double-register / dying switches (no full interval storage)
 - **Modifier chords** (`stats.modifierPairs`) — true held-modifier + key combos via collector `mods` bitmask; UI/export separate from sequential bigrams
 - Rankings split transitions into **Top pairs** (A≠B), **Self-repeats** (A→A), and **Modifier chords** (top 30 each)
+- Export JSON metadata: `appVersion` (from package.json) and `schemaVersion` (export shape; currently `2`), alongside existing `exportedAt`
 
 ### Changed
 

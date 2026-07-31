@@ -7,6 +7,7 @@ import {
 } from "@shared/heat";
 import { avgBurstLength, burstsPerHour } from "@shared/bursts";
 import { dayRangeMs, localDateKey, weekRangeMs } from "@shared/dates";
+import { EXPORT_SCHEMA_VERSION } from "@shared/export-schema";
 import {
   keysForDateKeys,
   pressesForDateKeys,
@@ -94,7 +95,12 @@ export type ExportRanking = {
 };
 
 export type ExportPayload = {
+  /** ISO timestamp when this JSON file was produced. */
   exportedAt: string;
+  /** App semver from package.json (build-time). */
+  appVersion: string;
+  /** Export document shape version (not `stats.json` version). */
+  schemaVersion: number;
   live: boolean;
   /** User-supplied context + platform; layouts/model are not OS-detected. */
   meta: ExportMeta;
@@ -235,6 +241,8 @@ export function buildExportPayload(
 
   return {
     exportedAt: new Date().toISOString(),
+    appVersion: __APP_VERSION__,
+    schemaVersion: EXPORT_SCHEMA_VERSION,
     live,
     meta: toExportMeta(deviceMeta),
     summary: {

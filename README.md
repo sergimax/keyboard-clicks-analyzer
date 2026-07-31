@@ -49,7 +49,7 @@ npm run reset
   - **Reset stats** — clears key counts, day buckets, timers, and intervals (confirm dialog); requires collect still running
   - **Show numpad** — toggle numpad visibility (default Off; saved in the browser)
   - **Heatmap Absolute / Relative (%)** — absolute uses sqrt scale vs hottest key; relative shows % captions and rank-based colors (Space won’t wash out mid keys; preference saved in the browser)
-  - **Export JSON** — download summary + rankings + stats; includes `meta`, `timing`, `intensity`, top `share`, and `transitions.{topPairs,selfRepeats,modifierPairs}`
+  - **Export JSON** — download summary + rankings + stats; includes `exportedAt` / `appVersion` / `schemaVersion`, `meta`, `timing`, `intensity`, top `share`, and `transitions.{topPairs,selfRepeats,modifierPairs}`
   - **Top pairs / self-repeats / modifier chords** — bigrams (A≠B), same-key runs (A→A), and true held-modifier+key combos per period
 
 `npm run report` serves the same UI from disk stats (no Reset button). There is no standalone `data/heatmap.html` anymore — use the report viewer.
