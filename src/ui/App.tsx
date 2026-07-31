@@ -41,6 +41,7 @@ const emptyStats: StatsFile = {
   keys: {},
   transitions: {},
   bursts: { count: 0, longest: 0 },
+  suspiciousRepeats: {},
   daily: {},
 };
 

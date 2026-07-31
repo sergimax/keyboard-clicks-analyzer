@@ -1,4 +1,5 @@
 import type { HeatKey } from "@shared/heat";
+import { topSuspiciousRepeats } from "@shared/suspicious-repeats";
 import type { StatsFile } from "@shared/types";
 import { formatDuration } from "@shared/format";
 
@@ -9,6 +10,7 @@ type SessionsListProps = {
 
 export function SessionsList({ stats, unmapped }: SessionsListProps) {
   const sessions = stats.sessions ?? [];
+  const suspicious = topSuspiciousRepeats(stats.suspiciousRepeats);
 
   return (
     <aside className="side">
@@ -26,6 +28,28 @@ export function SessionsList({ stats, unmapped }: SessionsListProps) {
           </ol>
         </div>
       ) : null}
+      <div>
+        <h2 title="Same physical key pressed again within 30ms / 50ms (not OS auto-repeat). Sparse counters only — useful for bounce, double register, dying switches.">
+          Suspicious repeats
+        </h2>
+        {suspicious.length === 0 ? (
+          <p className="side-empty">
+            No same-key gaps under 50ms yet.
+          </p>
+        ) : (
+          <ol>
+            {suspicious.map((item) => (
+              <li
+                key={item.id}
+                title={`${item.label} (${item.id}): same-key gaps under 30ms / under 50ms`}
+              >
+                {item.label} — {"<30ms"} {item.under30ms} · {"<50ms"}{" "}
+                {item.under50ms}
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
       <div>
         <h2>Recording intervals</h2>
         {sessions.length === 0 ? (

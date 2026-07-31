@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Per-key `repeatCount` in `stats.json` — OS auto-repeat while a key is held (separate from physical `count`); shown in heatmap key tooltips
 - **Bursts** — press runs separated by >1s idle (`stats.bursts.count` / `longest`); MetaBar + Export JSON show avg burst length and bursts/hour
 - Heatmap scale toggle **Absolute** / **Relative (%)** (`localStorage` `kca-heat-scale`): relative shows share captions and rank-based colors so dominant keys (e.g. Space) do not wash out the board
+- **Suspicious repeats** — sparse per-key counters for same-key gaps under 30ms / 50ms (`stats.suspiciousRepeats`); side panel list for bounce / double-register / dying switches (no full interval storage)
 
 ### Changed
 

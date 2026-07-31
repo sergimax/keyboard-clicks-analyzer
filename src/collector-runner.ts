@@ -6,10 +6,12 @@ import {
   bumpBurst,
   bumpKey,
   bumpKeyRepeat,
+  bumpSuspiciousRepeat,
   bumpTransition,
   clearStatsInPlace,
   collectorBin,
   emptyBurstTracker,
+  emptySuspiciousRepeatTracker,
   finalizeRecordingSession,
   formatDuration,
   loadStats,
@@ -69,6 +71,7 @@ export async function runCollectSession(options?: {
   let sessionStartedAt = Date.now();
   let lastKeyId: string | null = null;
   const burstTracker = emptyBurstTracker();
+  const suspiciousTracker = emptySuspiciousRepeatTracker();
 
   const writeStatusLine = () => {
     const elapsed = formatDuration(Date.now() - sessionStartedAt);
@@ -85,6 +88,7 @@ export async function runCollectSession(options?: {
       lastKeyId = null;
       burstTracker.lastPressAt = 0;
       burstTracker.currentLength = 0;
+      suspiciousTracker.clear();
       dirty = false;
       sessionStartedAt = Date.now();
       process.stderr.write(`\n${ok("Stats and recording timers reset from live UI")}\n`);
@@ -115,6 +119,7 @@ export async function runCollectSession(options?: {
     }
     const keyId = bumpKey(stats, event.sc, event.ext, event.t);
     bumpBurst(stats, burstTracker, event.t);
+    bumpSuspiciousRepeat(stats, suspiciousTracker, event.sc, event.ext, event.t);
     if (lastKeyId) {
       bumpTransition(stats, lastKeyId, event.sc, event.ext, event.t);
     }
