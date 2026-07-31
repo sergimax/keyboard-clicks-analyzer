@@ -9,13 +9,17 @@ export function KeyCell({ heatKey }: KeyCellProps) {
   const style = heatKeyStyle(heatKey.intensity);
   const isNumpad = heatKey.col >= 21;
   const count = heatKey.count > 0 ? String(heatKey.count) : "";
-  const titleRepeats =
-    heatKey.repeatCount > 0 ? ` · repeats ${heatKey.repeatCount}` : "";
+  const title =
+    heatKey.repeatCount > 0
+      ? `${heatKey.label} (${heatKey.id}): ${heatKey.count} physical presses` +
+        ` · ${heatKey.repeatCount} hold-repeats (OS auto-repeat while held;` +
+        ` not wear — useful for games/navigation hold patterns)`
+      : `${heatKey.label} (${heatKey.id}): ${heatKey.count}`;
 
   return (
     <div
       className={`key${isNumpad ? " key-numpad" : ""}`}
-      title={`${heatKey.label} (${heatKey.id}): ${heatKey.count}${titleRepeats}`}
+      title={title}
       style={{
         gridRow: heatKey.row,
         gridColumn: `${heatKey.col} / span ${heatKey.span}`,
