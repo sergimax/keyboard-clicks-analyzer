@@ -5,7 +5,15 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Unreleased] — 2.2.0
+
+### Added
+
+- Per-key `repeatCount` in `stats.json` — OS auto-repeat while a key is held (separate from physical `count`); shown in heatmap key tooltips
+
+### Changed
+
+- Collector emits NDJSON `rep` (`0` = first-down, `1` = auto-repeat); heatmaps, rankings, transitions, and session press totals still use physical first-downs only
 
 ## [2.1.0] - 2026-07-31
 

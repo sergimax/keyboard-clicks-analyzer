@@ -3,7 +3,10 @@
 export type KeyCount = {
   sc: number;
   ext: number;
+  /** Physical first-downs (one per press; excludes OS auto-repeat). */
   count: number;
+  /** OS auto-repeat while the key is held (not counted in `count` / totalPresses). */
+  repeatCount: number;
 };
 
 /** One completed collect start→stop interval. */

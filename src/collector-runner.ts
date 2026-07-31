@@ -4,6 +4,7 @@ import readline from "node:readline";
 import { openInBrowser, startLiveServer } from "./server/live-server.ts";
 import {
   bumpKey,
+  bumpKeyRepeat,
   bumpTransition,
   clearStatsInPlace,
   collectorBin,
@@ -19,6 +20,8 @@ type RawEvent = {
   sc: number;
   ext: number;
   t: number;
+  /** 1 = OS auto-repeat while held; 0 / omitted = physical first-down. */
+  rep: number;
 };
 
 function parseEvent(line: string): RawEvent | null {
@@ -33,7 +36,8 @@ function parseEvent(line: string): RawEvent | null {
     ) {
       return null;
     }
-    return { sc: obj.sc, ext: obj.ext, t: obj.t };
+    const rep = typeof obj.rep === "number" && obj.rep === 1 ? 1 : 0;
+    return { sc: obj.sc, ext: obj.ext, t: obj.t, rep };
   } catch {
     return null;
   }
@@ -99,6 +103,11 @@ export async function runCollectSession(options?: {
   rl.on("line", (line) => {
     const event = parseEvent(line);
     if (!event) return;
+    if (event.rep === 1) {
+      bumpKeyRepeat(stats, event.sc, event.ext, event.t);
+      dirty = true;
+      return;
+    }
     const keyId = bumpKey(stats, event.sc, event.ext, event.t);
     if (lastKeyId) {
       bumpTransition(stats, lastKeyId, event.sc, event.ext, event.t);

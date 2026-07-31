@@ -8,6 +8,8 @@ export type HeatKey = {
   col: number;
   span: number;
   count: number;
+  /** OS auto-repeat while held (not used for heat intensity). */
+  repeatCount: number;
   intensity: number;
 };
 
@@ -103,9 +105,15 @@ export function heatKeyStyle(intensity: number): HeatKeyStyle {
 
 export function buildHeatKeys(stats: StatsFile): HeatKey[] {
   const counts = new Map<string, number>();
+  const repeats = new Map<string, number>();
   for (const entry of Object.values(stats.keys ?? {})) {
     const { id } = canonicalKey(entry.sc, entry.ext);
     counts.set(id, (counts.get(id) ?? 0) + entry.count);
+    const repeatCount =
+      typeof entry.repeatCount === "number" && Number.isFinite(entry.repeatCount)
+        ? Math.max(0, entry.repeatCount)
+        : 0;
+    repeats.set(id, (repeats.get(id) ?? 0) + repeatCount);
   }
 
   const max = Math.max(0, ...counts.values(), 0);
@@ -120,6 +128,7 @@ export function buildHeatKeys(stats: StatsFile): HeatKey[] {
       col: meta.col,
       span: meta.span ?? 1,
       count,
+      repeatCount: repeats.get(id) ?? 0,
       intensity: intensityFor(count, max),
     };
   });
@@ -135,6 +144,7 @@ export function buildHeatKeys(stats: StatsFile): HeatKey[] {
       col: 0,
       span: 1,
       count,
+      repeatCount: repeats.get(id) ?? 0,
       intensity: intensityFor(count, max),
     });
   }
