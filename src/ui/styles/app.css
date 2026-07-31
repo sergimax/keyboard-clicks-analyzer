@@ -435,12 +435,32 @@ li {
   font-size: 0.85rem;
 }
 
-.view-controls {
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 28px;
+  margin: 0 0 18px;
+}
+
+.view-controls,
+.export-controls {
   display: flex;
   flex-wrap: wrap;
   gap: 12px 20px;
   align-items: center;
-  margin: 0 0 18px;
+}
+
+.export-controls {
+  margin-left: auto;
+}
+
+@media (max-width: 820px) {
+  .export-controls {
+    margin-left: 0;
+    width: 100%;
+  }
 }
 
 .toggle-numpad {

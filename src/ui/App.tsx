@@ -157,14 +157,18 @@ export function App() {
       <p className="sub">
         Local physical-key presses · no network · labels use US QWERTY positions
       </p>
-      <div className="view-controls">
-        <NumpadToggle showNumpad={showNumpad} onChange={setShowNumpad} />
-        <HeatScaleToggle mode={heatScale} onChange={setHeatScale} />
-        <DeviceMetaFields meta={deviceMeta} onChange={setDeviceMeta} />
-        <ExportJsonButton
-          disabled={stats.totalPresses === 0 && (stats.recordingMs ?? 0) === 0}
-          onExport={() => downloadExportJson(stats, live, deviceMeta)}
-        />
+      <div className="toolbar">
+        <div className="view-controls" aria-label="Display options">
+          <NumpadToggle showNumpad={showNumpad} onChange={setShowNumpad} />
+          <HeatScaleToggle mode={heatScale} onChange={setHeatScale} />
+        </div>
+        <div className="export-controls" aria-label="Export">
+          <DeviceMetaFields meta={deviceMeta} onChange={setDeviceMeta} />
+          <ExportJsonButton
+            disabled={stats.totalPresses === 0 && (stats.recordingMs ?? 0) === 0}
+            onExport={() => downloadExportJson(stats, live, deviceMeta)}
+          />
+        </div>
       </div>
       {error ? <p className="status-error">{error}</p> : null}
       <MetaBar
