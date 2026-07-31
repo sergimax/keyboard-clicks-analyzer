@@ -5,7 +5,9 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] — 2.2.0
+## [Unreleased]
+
+## [2.2.0] - 2026-07-31
 
 ### Added
 
@@ -16,12 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Modifier chords** (`stats.modifierPairs`) — true held-modifier + key combos via collector `mods` bitmask; UI/export separate from sequential bigrams
 - Rankings split transitions into **Top pairs** (A≠B), **Self-repeats** (A→A), and **Modifier chords** (top 30 each)
 - Export JSON metadata: `appVersion` (from package.json) and `schemaVersion` (export shape; currently `2`), alongside existing `exportedAt`
+- App version shown in the UI header (`vX.Y.Z`)
 
 ### Changed
 
 - Collector emits NDJSON `rep` (`0` = first-down, `1` = auto-repeat) and `mods` (held-modifier bitmask); heatmaps, rankings, transitions, and session press totals still use physical first-downs only
 - **Reset stats** opens an in-app confirm dialog (Cancel focused by default; Escape / backdrop dismiss) instead of a one-click/`window.confirm` path that was easy to miss
 - Export `rankings.*.transitions` is now `{ topPairs, selfRepeats, modifierPairs }` (full maps remain under `stats`)
+- MetaBar split into presses/hottest vs burst/recording stats; toolbar separates display options from export fields
+- Heatmap legend explains Absolute vs Relative with concrete anchors (e.g. hottest key label)
 
 ## [2.1.0] - 2026-07-31
 
