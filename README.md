@@ -59,6 +59,7 @@ npm run reset
 
 - `keys` — per physical key (`sc` + `ext`): `count` (first-downs) and `repeatCount` (OS auto-repeat while held)
 - `transitions` — consecutive first-down pairs (`from→to` aggregates; ignores auto-repeat)
+- `bursts` — press-run aggregates (`count`, `longest`); a new burst starts after >1s idle (physical presses only)
 - `daily` — per local calendar day key counts + transitions (for today / last 7 days; older days pruned)
 - `recordingMs` / `sessions` — completed recording intervals
 - `totalPresses`, `updatedAt` (`totalPresses` = sum of `count` only)
@@ -69,7 +70,8 @@ Built UI assets live in `dist/ui/` (gitignored; produced by `npm run build:ui`).
 
 - Physical keys via Windows low-level hook (`WH_KEYBOARD_LL`)
 - Aggregation key: scan code + extended flag (layout-independent: `Q` and `Й` are the same key)
-- Key-up is ignored; OS auto-repeat while holding increments `repeatCount` (not `count` / heatmap / transitions)
+- Key-up is ignored; OS auto-repeat while holding increments `repeatCount` (not `count` / heatmap / transitions / bursts)
+- Bursts group physical presses separated by >1s idle — UI/export show avg burst length and bursts/hour (activity chunking, not switch wear)
 - Right Shift / Win / Menu variants are normalized when Windows reports inconsistent codes
 
 ## Privacy

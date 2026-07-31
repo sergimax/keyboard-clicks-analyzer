@@ -9,6 +9,15 @@ export type KeyCount = {
   repeatCount: number;
 };
 
+/**
+ * Press-run aggregates (physical first-downs only).
+ * A new burst starts after >1s idle; avg length and bursts/hour are derived.
+ */
+export type BurstStats = {
+  count: number;
+  longest: number;
+};
+
 /** One completed collect start→stop interval. */
 export type RecordingSession = {
   startedAt: string;
@@ -43,6 +52,11 @@ export type StatsFile = {
   keys: Record<string, KeyCount>;
   /** All-time consecutive key-down transitions (`fromId>toId`). */
   transitions: Record<string, TransitionCount>;
+  /**
+   * Press-run aggregates (physical first-downs only; new burst after >1s idle).
+   * Derived: avgBurstLength = totalPresses / bursts.count; bursts/hour vs recordingMs.
+   */
+  bursts: BurstStats;
   /** Local-day buckets for day/week rankings. Older days may be pruned. */
   daily: Record<string, DailyBucket>;
 };
