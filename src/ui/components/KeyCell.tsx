@@ -1,20 +1,35 @@
-import type { HeatKey } from "@shared/heat";
-import { heatKeyStyle } from "@shared/heat";
+import {
+  formatSharePercent,
+  heatKeyStyle,
+  type HeatKey,
+  type HeatScaleMode,
+} from "@shared/heat";
 
 type KeyCellProps = {
   heatKey: HeatKey;
+  scaleMode: HeatScaleMode;
 };
 
-export function KeyCell({ heatKey }: KeyCellProps) {
+export function KeyCell({ heatKey, scaleMode }: KeyCellProps) {
   const style = heatKeyStyle(heatKey.intensity);
   const isNumpad = heatKey.col >= 21;
-  const count = heatKey.count > 0 ? String(heatKey.count) : "";
-  const title =
+  const caption =
+    heatKey.count <= 0
+      ? ""
+      : scaleMode === "relative"
+        ? formatSharePercent(heatKey.share)
+        : String(heatKey.count);
+  const shareText =
+    heatKey.count > 0 ? ` · ${formatSharePercent(heatKey.share)} of presses` : "";
+  const titleRepeats =
     heatKey.repeatCount > 0
-      ? `${heatKey.label} (${heatKey.id}): ${heatKey.count} physical presses` +
-        ` · ${heatKey.repeatCount} hold-repeats (OS auto-repeat while held;` +
+      ? ` · ${heatKey.repeatCount} hold-repeats (OS auto-repeat while held;` +
         ` not wear — useful for games/navigation hold patterns)`
-      : `${heatKey.label} (${heatKey.id}): ${heatKey.count}`;
+      : "";
+  const title =
+    `${heatKey.label} (${heatKey.id}): ${heatKey.count} physical presses` +
+    shareText +
+    titleRepeats;
 
   return (
     <div
@@ -31,7 +46,7 @@ export function KeyCell({ heatKey }: KeyCellProps) {
     >
       <span className="lbl">{heatKey.label}</span>
       <span className="cnt" style={{ color: style.countColor }}>
-        {count}
+        {caption}
       </span>
     </div>
   );

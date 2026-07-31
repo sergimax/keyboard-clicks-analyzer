@@ -48,6 +48,7 @@ npm run reset
   - **All time / Today / Last 7 days** — top-30 rankings with presses + recorded time; each has its own **Copy** button
   - **Reset stats** — clears key counts, day buckets, timers, and intervals (confirm dialog); requires collect still running
   - **Show numpad** — toggle numpad visibility (default Off; saved in the browser)
+  - **Heatmap Absolute / Relative (%)** — absolute uses sqrt scale vs hottest key; relative shows % captions and rank-based colors (Space won’t wash out mid keys; preference saved in the browser)
   - **Export JSON** — download summary + rankings + stats; includes `meta`, `timing`, `intensity`, top `share`, top-20 `transitions`
   - **Top transitions** — consecutive physical key pairs (e.g. LCtrl→C) per period
 
