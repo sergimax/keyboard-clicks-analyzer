@@ -13,11 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Bursts** — press runs separated by >1s idle (`stats.bursts.count` / `longest`); MetaBar + Export JSON show avg burst length and bursts/hour
 - Heatmap scale toggle **Absolute** / **Relative (%)** (`localStorage` `kca-heat-scale`): relative shows share captions and rank-based colors so dominant keys (e.g. Space) do not wash out the board
 - **Suspicious repeats** — sparse per-key counters for same-key gaps under 30ms / 50ms (`stats.suspiciousRepeats`); side panel list for bounce / double-register / dying switches (no full interval storage)
+- **Modifier chords** (`stats.modifierPairs`) — true held-modifier + key combos via collector `mods` bitmask; UI/export separate from sequential bigrams
+- Rankings split transitions into **Top pairs** (A≠B), **Self-repeats** (A→A), and **Modifier chords** (top 30 each)
 
 ### Changed
 
-- Collector emits NDJSON `rep` (`0` = first-down, `1` = auto-repeat); heatmaps, rankings, transitions, and session press totals still use physical first-downs only
+- Collector emits NDJSON `rep` (`0` = first-down, `1` = auto-repeat) and `mods` (held-modifier bitmask); heatmaps, rankings, transitions, and session press totals still use physical first-downs only
 - **Reset stats** opens an in-app confirm dialog (Cancel focused by default; Escape / backdrop dismiss) instead of a one-click/`window.confirm` path that was easy to miss
+- Export `rankings.*.transitions` is now `{ topPairs, selfRepeats, modifierPairs }` (full maps remain under `stats`)
 
 ## [2.1.0] - 2026-07-31
 

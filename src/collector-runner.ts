@@ -6,6 +6,7 @@ import {
   bumpBurst,
   bumpKey,
   bumpKeyRepeat,
+  bumpModifierPairs,
   bumpSuspiciousRepeat,
   bumpTransition,
   clearStatsInPlace,
@@ -26,6 +27,8 @@ type RawEvent = {
   t: number;
   /** 1 = OS auto-repeat while held; 0 / omitted = physical first-down. */
   rep: number;
+  /** Bitmask of other held modifiers at event time (0 if absent / old collector). */
+  mods: number;
 };
 
 function parseEvent(line: string): RawEvent | null {
@@ -41,7 +44,11 @@ function parseEvent(line: string): RawEvent | null {
       return null;
     }
     const rep = typeof obj.rep === "number" && obj.rep === 1 ? 1 : 0;
-    return { sc: obj.sc, ext: obj.ext, t: obj.t, rep };
+    const mods =
+      typeof obj.mods === "number" && Number.isFinite(obj.mods)
+        ? Math.max(0, Math.floor(obj.mods))
+        : 0;
+    return { sc: obj.sc, ext: obj.ext, t: obj.t, rep, mods };
   } catch {
     return null;
   }
@@ -120,6 +127,9 @@ export async function runCollectSession(options?: {
     const keyId = bumpKey(stats, event.sc, event.ext, event.t);
     bumpBurst(stats, burstTracker, event.t);
     bumpSuspiciousRepeat(stats, suspiciousTracker, event.sc, event.ext, event.t);
+    if (event.mods) {
+      bumpModifierPairs(stats, event.mods, event.sc, event.ext, event.t);
+    }
     if (lastKeyId) {
       bumpTransition(stats, lastKeyId, event.sc, event.ext, event.t);
     }

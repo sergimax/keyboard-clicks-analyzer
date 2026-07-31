@@ -1,12 +1,15 @@
 import type { RankItem } from "@shared/heat";
-import type { TransitionItem } from "@shared/transitions";
+import type { ModifierPairItem } from "@shared/modifiers";
+import type { SelfRepeatItem, TransitionItem } from "@shared/transitions";
 import { RankBlock } from "./RankBlock";
 
 export type RankPeriod = {
   title: string;
   periodLabel: string;
   top: RankItem[];
-  transitions: TransitionItem[];
+  topPairs: TransitionItem[];
+  selfRepeats: SelfRepeatItem[];
+  modifierPairs: ModifierPairItem[];
   totalPresses: number;
   totalRecordingMs: number;
   emptyMessage?: string;

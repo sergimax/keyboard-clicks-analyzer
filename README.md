@@ -49,8 +49,8 @@ npm run reset
   - **Reset stats** — clears key counts, day buckets, timers, and intervals (confirm dialog); requires collect still running
   - **Show numpad** — toggle numpad visibility (default Off; saved in the browser)
   - **Heatmap Absolute / Relative (%)** — absolute uses sqrt scale vs hottest key; relative shows % captions and rank-based colors (Space won’t wash out mid keys; preference saved in the browser)
-  - **Export JSON** — download summary + rankings + stats; includes `meta`, `timing`, `intensity`, top `share`, top-20 `transitions`
-  - **Top transitions** — consecutive physical key pairs (e.g. LCtrl→C) per period
+  - **Export JSON** — download summary + rankings + stats; includes `meta`, `timing`, `intensity`, top `share`, and `transitions.{topPairs,selfRepeats,modifierPairs}`
+  - **Top pairs / self-repeats / modifier chords** — bigrams (A≠B), same-key runs (A→A), and true held-modifier+key combos per period
 
 `npm run report` serves the same UI from disk stats (no Reset button). There is no standalone `data/heatmap.html` anymore — use the report viewer.
 
@@ -59,10 +59,11 @@ npm run reset
 `data/stats.json` (gitignored) stores:
 
 - `keys` — per physical key (`sc` + `ext`): `count` (first-downs) and `repeatCount` (OS auto-repeat while held)
-- `transitions` — consecutive first-down pairs (`from→to` aggregates; ignores auto-repeat)
+- `transitions` — full consecutive first-down pair map (`from→to`; ignores auto-repeat); UI/export derive topPairs (A≠B) and selfRepeats (A→A)
+- `modifierPairs` — held-modifier + key chords (`LCtrl+C` while Ctrl is down; not sequential LCtrl→C)
 - `bursts` — press-run aggregates (`count`, `longest`); a new burst starts after >1s idle (physical presses only)
 - `suspiciousRepeats` — sparse same-key double-taps under 30ms / 50ms (`under30ms`, `under50ms`; bounce / double register); full interval lists are not stored
-- `daily` — per local calendar day key counts + transitions (for today / last 7 days; older days pruned)
+- `daily` — per local calendar day key counts + transitions + modifierPairs (for today / last 7 days; older days pruned)
 - `recordingMs` / `sessions` — completed recording intervals
 - `totalPresses`, `updatedAt` (`totalPresses` = sum of `count` only)
 
@@ -75,6 +76,7 @@ Built UI assets live in `dist/ui/` (gitignored; produced by `npm run build:ui`).
 - Key-up is ignored; OS auto-repeat while holding increments `repeatCount` (not `count` / heatmap / transitions / bursts)
 - Bursts group physical presses separated by >1s idle — UI/export show avg burst length and bursts/hour (activity chunking, not switch wear)
 - Suspicious repeats: same physical key again within 30ms / 50ms (OS auto-repeat ignored); side panel lists keys that may bounce or double-register
+- Modifier chords use collector `mods` bitmask of other held modifiers at first-down (rebuild collector after pull)
 - Right Shift / Win / Menu variants are normalized when Windows reports inconsistent codes
 
 ## Privacy

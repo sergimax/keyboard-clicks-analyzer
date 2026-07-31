@@ -1,7 +1,13 @@
 import { canonicalKey, lookupKey } from "../keymap.ts";
 import type { StatsFile, TransitionCount } from "./types.ts";
 
-export const TRANSITION_TOP_LIMIT = 20;
+export const TRANSITION_TOP_LIMIT = 30;
+
+export type SelfRepeatItem = {
+  id: string;
+  label: string;
+  count: number;
+};
 
 export type TransitionItem = {
   fromId: string;
@@ -95,6 +101,19 @@ export function transitionsForDateKeys(
   return merged;
 }
 
+function toTransitionItem(entry: TransitionCount): TransitionItem {
+  const from = canonicalKey(entry.fromSc, entry.fromExt);
+  const to = canonicalKey(entry.toSc, entry.toExt);
+  return {
+    fromId: from.id,
+    toId: to.id,
+    from: lookupKey(from.sc, from.ext).label,
+    to: lookupKey(to.sc, to.ext).label,
+    count: entry.count,
+  };
+}
+
+/** Top A→B pairs including self-repeats (legacy helper). */
 export function topTransitions(
   map: Record<string, TransitionCount> | undefined,
   limit: number = TRANSITION_TOP_LIMIT,
@@ -104,14 +123,47 @@ export function topTransitions(
     .filter((entry) => entry.count > 0)
     .sort((a, b) => b.count - a.count)
     .slice(0, limit)
-    .map((entry) => {
+    .map(toTransitionItem);
+}
+
+/** Top bigrams with from ≠ to (navigation/hotkey/typing character). */
+export function topPairs(
+  map: Record<string, TransitionCount> | undefined,
+  limit: number = TRANSITION_TOP_LIMIT,
+): TransitionItem[] {
+  if (!map) return [];
+  return Object.values(map)
+    .filter((entry) => {
+      if (entry.count <= 0) return false;
       const from = canonicalKey(entry.fromSc, entry.fromExt);
       const to = canonicalKey(entry.toSc, entry.toExt);
+      return from.id !== to.id;
+    })
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit)
+    .map(toTransitionItem);
+}
+
+/** Same-key consecutive first-downs (Left→Left, Bksp→Bksp) — not chords. */
+export function selfRepeats(
+  map: Record<string, TransitionCount> | undefined,
+  limit: number = TRANSITION_TOP_LIMIT,
+): SelfRepeatItem[] {
+  if (!map) return [];
+  return Object.values(map)
+    .filter((entry) => {
+      if (entry.count <= 0) return false;
+      const from = canonicalKey(entry.fromSc, entry.fromExt);
+      const to = canonicalKey(entry.toSc, entry.toExt);
+      return from.id === to.id;
+    })
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit)
+    .map((entry) => {
+      const key = canonicalKey(entry.fromSc, entry.fromExt);
       return {
-        fromId: from.id,
-        toId: to.id,
-        from: lookupKey(from.sc, from.ext).label,
-        to: lookupKey(to.sc, to.ext).label,
+        id: key.id,
+        label: lookupKey(key.sc, key.ext).label,
         count: entry.count,
       };
     });
