@@ -5,6 +5,7 @@ import {
   topKeysFromMap,
   withPressShare,
 } from "@shared/heat";
+import { avgBurstLength, burstsPerHour } from "@shared/bursts";
 import { dayRangeMs, localDateKey, weekRangeMs } from "@shared/dates";
 import {
   keysForDateKeys,
@@ -76,6 +77,13 @@ export type ExportPayload = {
     intensity: ExportIntensity;
     hottestKeyCount: number;
     sessionCount: number;
+    /** Press runs (idle >1s); rates use activeRecordingMs. */
+    bursts: {
+      count: number;
+      longest: number;
+      avgLength: number | null;
+      perHour: number | null;
+    };
     updatedAt: string;
   };
   rankings: {
@@ -192,6 +200,12 @@ export function buildExportPayload(
       intensity: intensityFor(stats.totalPresses, activeAll),
       hottestKeyCount: hottestCount(stats),
       sessionCount: stats.sessions?.length ?? 0,
+      bursts: {
+        count: stats.bursts?.count ?? 0,
+        longest: stats.bursts?.longest ?? 0,
+        avgLength: avgBurstLength(stats.totalPresses, stats.bursts?.count ?? 0),
+        perHour: burstsPerHour(stats.bursts?.count ?? 0, activeAll),
+      },
       updatedAt: stats.updatedAt,
     },
     rankings: {

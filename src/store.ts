@@ -16,11 +16,19 @@ import {
   recordingMsInRange,
 } from "./shared/period.ts";
 import {
+  bumpBurst as bumpBurstInPlace,
+  emptyBursts,
+  emptyBurstTracker,
+  normalizeBursts,
+  type BurstTracker,
+} from "./shared/bursts.ts";
+import {
   bumpTransitionInMap,
   normalizeTransitionMap,
 } from "./shared/transitions.ts";
 import {
   DAILY_RETENTION_DAYS,
+  type BurstStats,
   type DailyBucket,
   type KeyCount,
   type RecordingSession,
@@ -28,8 +36,16 @@ import {
   type TransitionCount,
 } from "./shared/types.ts";
 
-export type { DailyBucket, KeyCount, RecordingSession, StatsFile, TransitionCount };
-export { DAILY_RETENTION_DAYS };
+export type {
+  BurstStats,
+  DailyBucket,
+  KeyCount,
+  RecordingSession,
+  StatsFile,
+  TransitionCount,
+};
+export type { BurstTracker };
+export { DAILY_RETENTION_DAYS, emptyBurstTracker };
 export {
   dayRangeMs,
   formatDuration,
@@ -66,8 +82,13 @@ export function emptyStats(): StatsFile {
     sessions: [],
     keys: {},
     transitions: {},
+    bursts: emptyBursts(),
     daily: {},
   };
+}
+
+export function ensureBurstsField(stats: StatsFile): void {
+  stats.bursts = normalizeBursts(stats.bursts);
 }
 
 export function ensureDataDir(): void {
@@ -135,6 +156,7 @@ export function normalizeStats(stats: StatsFile): StatsFile {
   ensureTimingFields(stats);
   ensureDailyField(stats);
   ensureTransitionsField(stats);
+  ensureBurstsField(stats);
   stats.keys = normalizeKeyMap(stats.keys);
   stats.totalPresses = Object.values(stats.keys).reduce((sum, k) => sum + k.count, 0);
   stats.transitions = normalizeTransitionMap(stats.transitions);
@@ -245,6 +267,16 @@ export function bumpKeyRepeat(
   stats.daily[dateKey] = bucket;
 }
 
+/** Record one physical first-down into all-time burst aggregates. */
+export function bumpBurst(
+  stats: StatsFile,
+  tracker: BurstTracker,
+  atMs: number = Date.now(),
+): void {
+  ensureBurstsField(stats);
+  bumpBurstInPlace(stats.bursts, tracker, atMs);
+}
+
 /** Record consecutive first-down pair previousKeyId → current (sc,ext). */
 export function bumpTransition(
   stats: StatsFile,
@@ -292,6 +324,7 @@ export function clearStatsInPlace(stats: StatsFile): void {
   stats.recordingMs = 0;
   stats.sessions = [];
   stats.transitions = {};
+  stats.bursts = emptyBursts();
   stats.daily = {};
   stats.updatedAt = new Date().toISOString();
   saveStats(stats);

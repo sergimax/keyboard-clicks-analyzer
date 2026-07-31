@@ -32,6 +32,7 @@ const emptyStats: StatsFile = {
   sessions: [],
   keys: {},
   transitions: {},
+  bursts: { count: 0, longest: 0 },
   daily: {},
 };
 
@@ -163,6 +164,7 @@ export function App() {
         maxCount={hottestCount(stats)}
         totalRecordingMs={stats.recordingMs ?? 0}
         sessionCount={stats.sessions?.length ?? 0}
+        bursts={stats.bursts ?? { count: 0, longest: 0 }}
         onReset={live ? () => void handleReset() : undefined}
         resetting={resetting}
       />

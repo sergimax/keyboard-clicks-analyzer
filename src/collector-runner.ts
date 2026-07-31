@@ -3,11 +3,13 @@ import { existsSync } from "node:fs";
 import readline from "node:readline";
 import { openInBrowser, startLiveServer } from "./server/live-server.ts";
 import {
+  bumpBurst,
   bumpKey,
   bumpKeyRepeat,
   bumpTransition,
   clearStatsInPlace,
   collectorBin,
+  emptyBurstTracker,
   finalizeRecordingSession,
   formatDuration,
   loadStats,
@@ -66,6 +68,7 @@ export async function runCollectSession(options?: {
   let finished = false;
   let sessionStartedAt = Date.now();
   let lastKeyId: string | null = null;
+  const burstTracker = emptyBurstTracker();
 
   const writeStatusLine = () => {
     const elapsed = formatDuration(Date.now() - sessionStartedAt);
@@ -80,6 +83,8 @@ export async function runCollectSession(options?: {
       clearStatsInPlace(stats);
       sessionPresses = 0;
       lastKeyId = null;
+      burstTracker.lastPressAt = 0;
+      burstTracker.currentLength = 0;
       dirty = false;
       sessionStartedAt = Date.now();
       process.stderr.write(`\n${ok("Stats and recording timers reset from live UI")}\n`);
@@ -109,6 +114,7 @@ export async function runCollectSession(options?: {
       return;
     }
     const keyId = bumpKey(stats, event.sc, event.ext, event.t);
+    bumpBurst(stats, burstTracker, event.t);
     if (lastKeyId) {
       bumpTransition(stats, lastKeyId, event.sc, event.ext, event.t);
     }

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Per-key `repeatCount` in `stats.json` — OS auto-repeat while a key is held (separate from physical `count`); shown in heatmap key tooltips
+- **Bursts** — press runs separated by >1s idle (`stats.bursts.count` / `longest`); MetaBar + Export JSON show avg burst length and bursts/hour
 
 ### Changed
 
