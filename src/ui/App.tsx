@@ -22,6 +22,7 @@ import { NumpadToggle, readShowNumpad, writeShowNumpad } from "./components/Nump
 import { ExportJsonButton } from "./components/ExportJsonButton";
 import { DeviceMetaFields } from "./components/DeviceMetaFields";
 import { RankRow } from "./components/RankRow";
+import { ResetConfirmDialog } from "./components/ResetConfirmDialog";
 import { SessionsList } from "./components/SessionsList";
 import { downloadExportJson } from "./export-json";
 import {
@@ -47,6 +48,7 @@ export function App() {
   const [stats, setStats] = useState<StatsFile>(emptyStats);
   const [error, setError] = useState<string | null>(null);
   const [resetting, setResetting] = useState(false);
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
   const [showNumpad, setShowNumpad] = useState(() => readShowNumpad());
   const [heatScale, setHeatScale] = useState<HeatScaleMode>(() => readHeatScaleMode());
   const [deviceMeta, setDeviceMeta] = useState<DeviceMeta>(() => readDeviceMeta());
@@ -88,20 +90,14 @@ export function App() {
     };
   }, []);
 
-  async function handleReset() {
-    if (
-      !window.confirm(
-        "Reset all accumulated key stats and recording timers? This cannot be undone.",
-      )
-    ) {
-      return;
-    }
+  async function handleConfirmReset() {
     setResetting(true);
     try {
       await resetStats();
       const data = await fetchStats();
       setLive(data.live);
       setStats(data.stats);
+      setResetConfirmOpen(false);
     } catch {
       window.alert("Could not reset stats. Is collect still running?");
     } finally {
@@ -177,8 +173,18 @@ export function App() {
         totalRecordingMs={stats.recordingMs ?? 0}
         sessionCount={stats.sessions?.length ?? 0}
         bursts={stats.bursts ?? { count: 0, longest: 0 }}
-        onReset={live ? () => void handleReset() : undefined}
+        onReset={live ? () => setResetConfirmOpen(true) : undefined}
         resetting={resetting}
+      />
+      <ResetConfirmDialog
+        open={resetConfirmOpen}
+        busy={resetting}
+        totalPresses={stats.totalPresses}
+        sessionCount={stats.sessions?.length ?? 0}
+        onCancel={() => {
+          if (!resetting) setResetConfirmOpen(false);
+        }}
+        onConfirm={() => void handleConfirmReset()}
       />
       <div className="layout">
         <div className="main-col">
