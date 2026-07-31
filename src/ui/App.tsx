@@ -18,6 +18,7 @@ import {
   readHeatScaleMode,
   writeHeatScaleMode,
 } from "./components/HeatScaleToggle";
+import { HeatLegend } from "./components/HeatLegend";
 import { NumpadToggle, readShowNumpad, writeShowNumpad } from "./components/NumpadToggle";
 import { ExportJsonButton } from "./components/ExportJsonButton";
 import { DeviceMetaFields } from "./components/DeviceMetaFields";
@@ -106,6 +107,7 @@ export function App() {
   }
 
   const heatKeys = buildHeatKeys(stats, heatScale);
+  const hottest = hottestKey(stats);
   const mapped = heatKeys.filter((key) => key.row > 0);
   const unmapped = heatKeys.filter((key) => key.row === 0 && key.count > 0);
   const todayKey = localDateKey();
@@ -169,7 +171,7 @@ export function App() {
         live={live}
         updatedAt={stats.updatedAt}
         totalPresses={stats.totalPresses}
-        hottest={hottestKey(stats)}
+        hottest={hottest}
         totalRecordingMs={stats.recordingMs ?? 0}
         sessionCount={stats.sessions?.length ?? 0}
         bursts={stats.bursts ?? { count: 0, longest: 0 }}
@@ -189,11 +191,7 @@ export function App() {
       <div className="layout">
         <div className="main-col">
           <KeyboardBoard keys={mapped} scaleMode={heatScale} />
-          <div className="legend">
-            <span>{heatScale === "relative" ? "low rank" : "cold"}</span>
-            <div className="swatch" />
-            <span>{heatScale === "relative" ? "high rank" : "hot"}</span>
-          </div>
+          <HeatLegend mode={heatScale} hottest={hottest} />
           <p className="note">{note}</p>
           <RankRow periods={periods} />
         </div>
