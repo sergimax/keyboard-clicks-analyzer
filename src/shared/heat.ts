@@ -1,6 +1,9 @@
 import { allMappedKeys, canonicalKey, lookupKey } from "../keymap.ts";
 import type { KeyCount, StatsFile } from "./types.ts";
 
+/** How heatmap intensity / key captions are scaled. */
+export type HeatScaleMode = "absolute" | "relative";
+
 export type HeatKey = {
   id: string;
   label: string;
@@ -10,6 +13,8 @@ export type HeatKey = {
   count: number;
   /** OS auto-repeat while held (not used for heat intensity). */
   repeatCount: number;
+  /** Fraction of total physical presses (0–1). */
+  share: number;
   intensity: number;
 };
 
@@ -23,6 +28,43 @@ export type RankItemWithShare = RankItem & {
 export function intensityFor(count: number, max: number): number {
   if (max <= 0 || count <= 0) return 0;
   return Math.sqrt(count / max);
+}
+
+/**
+ * Rank-based intensity among keys with count > 0 (ties share avg rank).
+ * Spreads heat across the board so a dominant key (e.g. Space) does not
+ * crush mid-tier keys the way absolute max-scaling does.
+ */
+export function percentileIntensities(
+  counts: Iterable<[string, number]>,
+): Map<string, number> {
+  const positive = [...counts].filter(([, count]) => count > 0);
+  const result = new Map<string, number>();
+  if (positive.length === 0) return result;
+  if (positive.length === 1) {
+    const only = positive[0];
+    if (only) result.set(only[0], 1);
+    return result;
+  }
+
+  positive.sort((left, right) => left[1]! - right[1]!);
+  let index = 0;
+  while (index < positive.length) {
+    let end = index + 1;
+    while (
+      end < positive.length &&
+      positive[end]![1] === positive[index]![1]
+    ) {
+      end += 1;
+    }
+    const avgRank = (index + end - 1) / 2;
+    const intensity = avgRank / (positive.length - 1);
+    for (let at = index; at < end; at += 1) {
+      result.set(positive[at]![0], intensity);
+    }
+    index = end;
+  }
+  return result;
 }
 
 function heatRgb(intensity: number): [number, number, number] {
@@ -103,7 +145,10 @@ export function heatKeyStyle(intensity: number): HeatKeyStyle {
   };
 }
 
-export function buildHeatKeys(stats: StatsFile): HeatKey[] {
+export function buildHeatKeys(
+  stats: StatsFile,
+  mode: HeatScaleMode = "absolute",
+): HeatKey[] {
   const counts = new Map<string, number>();
   const repeats = new Map<string, number>();
   for (const entry of Object.values(stats.keys ?? {})) {
@@ -117,36 +162,39 @@ export function buildHeatKeys(stats: StatsFile): HeatKey[] {
   }
 
   const max = Math.max(0, ...counts.values(), 0);
+  const totalPresses = [...counts.values()].reduce((sum, count) => sum + count, 0);
+  const relativeIntensity =
+    mode === "relative" ? percentileIntensities(counts) : null;
   const known = new Set(allMappedKeys().map((k) => k.id));
 
-  const keys: HeatKey[] = allMappedKeys().map(({ id, meta }) => {
-    const count = counts.get(id) ?? 0;
-    return {
-      id,
-      label: meta.label,
-      row: meta.row,
-      col: meta.col,
-      span: meta.span ?? 1,
-      count,
-      repeatCount: repeats.get(id) ?? 0,
-      intensity: intensityFor(count, max),
-    };
+  const toHeatKey = (
+    id: string,
+    meta: { label: string; row: number; col: number; span?: number },
+    count: number,
+  ): HeatKey => ({
+    id,
+    label: meta.label,
+    row: meta.row,
+    col: meta.col,
+    span: meta.span ?? 1,
+    count,
+    repeatCount: repeats.get(id) ?? 0,
+    share: pressShare(count, totalPresses),
+    intensity:
+      mode === "relative"
+        ? (relativeIntensity?.get(id) ?? 0)
+        : intensityFor(count, max),
   });
+
+  const keys: HeatKey[] = allMappedKeys().map(({ id, meta }) =>
+    toHeatKey(id, meta, counts.get(id) ?? 0),
+  );
 
   for (const [id, count] of counts) {
     if (known.has(id)) continue;
     const [sc, ext] = id.split(":").map(Number);
     const meta = lookupKey(sc!, ext!);
-    keys.push({
-      id,
-      label: meta.label,
-      row: 0,
-      col: 0,
-      span: 1,
-      count,
-      repeatCount: repeats.get(id) ?? 0,
-      intensity: intensityFor(count, max),
-    });
+    keys.push(toHeatKey(id, meta, count));
   }
 
   return keys;

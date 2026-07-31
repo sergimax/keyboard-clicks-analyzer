@@ -343,6 +343,52 @@ li {
   cursor: pointer;
 }
 
+.heat-scale {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  user-select: none;
+}
+
+.heat-scale-label {
+  flex-shrink: 0;
+}
+
+.heat-scale-options {
+  display: inline-flex;
+  border: 1px solid #3a4456;
+  background: #1a2030;
+  overflow: hidden;
+}
+
+.heat-scale-btn {
+  appearance: none;
+  margin: 0;
+  padding: 5px 10px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.heat-scale-btn + .heat-scale-btn {
+  border-left: 1px solid #3a4456;
+}
+
+.heat-scale-btn:hover {
+  color: #e8edf5;
+  background: #222a3a;
+}
+
+.heat-scale-btn.is-active {
+  color: #e8edf5;
+  background: #1f6f5b;
+}
+
 .numpad-toggle {
   appearance: none;
   display: inline-flex;

@@ -4,6 +4,7 @@ import {
   hottestCount,
   topKeys,
   topKeysFromMap,
+  type HeatScaleMode,
 } from "@shared/heat";
 import { dayRangeMs, localDateKey, weekRangeMs } from "@shared/dates";
 import { keysForDateKeys, pressesForDateKeys, recordingMsInRange } from "@shared/period";
@@ -12,6 +13,11 @@ import type { StatsFile } from "@shared/types";
 import { fetchStats, resetStats } from "./api";
 import { KeyboardBoard } from "./components/KeyboardBoard";
 import { MetaBar } from "./components/MetaBar";
+import {
+  HeatScaleToggle,
+  readHeatScaleMode,
+  writeHeatScaleMode,
+} from "./components/HeatScaleToggle";
 import { NumpadToggle, readShowNumpad, writeShowNumpad } from "./components/NumpadToggle";
 import { ExportJsonButton } from "./components/ExportJsonButton";
 import { DeviceMetaFields } from "./components/DeviceMetaFields";
@@ -42,12 +48,17 @@ export function App() {
   const [error, setError] = useState<string | null>(null);
   const [resetting, setResetting] = useState(false);
   const [showNumpad, setShowNumpad] = useState(() => readShowNumpad());
+  const [heatScale, setHeatScale] = useState<HeatScaleMode>(() => readHeatScaleMode());
   const [deviceMeta, setDeviceMeta] = useState<DeviceMeta>(() => readDeviceMeta());
 
   useEffect(() => {
     document.body.classList.toggle("hide-numpad", !showNumpad);
     writeShowNumpad(showNumpad);
   }, [showNumpad]);
+
+  useEffect(() => {
+    writeHeatScaleMode(heatScale);
+  }, [heatScale]);
 
   useEffect(() => {
     writeDeviceMeta(deviceMeta);
@@ -98,7 +109,7 @@ export function App() {
     }
   }
 
-  const heatKeys = buildHeatKeys(stats);
+  const heatKeys = buildHeatKeys(stats, heatScale);
   const mapped = heatKeys.filter((key) => key.row > 0);
   const unmapped = heatKeys.filter((key) => key.row === 0 && key.count > 0);
   const todayKey = localDateKey();
@@ -110,7 +121,7 @@ export function App() {
     : "No day buckets yet — restart collect to start tracking today/week.";
   const note = live
     ? "Live view updates about once per second from the local collector (127.0.0.1 only). Current session time is shown in the collect terminal. Day/week key counts update live; recorded time for periods uses completed intervals only."
-    : "Intensity uses a square-root scale so secondary keys remain readable. Heatmap and rankings count physical presses only (switch wear). Hold-repeats (OS auto-repeat while a key is held) are stored separately and shown in key tooltips — useful to spot games/navigation holds without inflating wear. Day/week rankings use local calendar days (week = last 7 days).";
+    : "Absolute heatmap: sqrt scale vs the hottest key (good for wear magnitude). Relative (%): captions show share of presses; colors use rank among pressed keys so Space does not wash out mid-tier keys. Rankings still use physical presses. Hold-repeats are in key tooltips. Day/week rankings use local calendar days (week = last 7 days).";
 
   const periods = [
     {
@@ -150,6 +161,7 @@ export function App() {
       </p>
       <div className="view-controls">
         <NumpadToggle showNumpad={showNumpad} onChange={setShowNumpad} />
+        <HeatScaleToggle mode={heatScale} onChange={setHeatScale} />
         <DeviceMetaFields meta={deviceMeta} onChange={setDeviceMeta} />
         <ExportJsonButton
           disabled={stats.totalPresses === 0 && (stats.recordingMs ?? 0) === 0}
@@ -170,11 +182,11 @@ export function App() {
       />
       <div className="layout">
         <div className="main-col">
-          <KeyboardBoard keys={mapped} />
+          <KeyboardBoard keys={mapped} scaleMode={heatScale} />
           <div className="legend">
-            <span>cold</span>
+            <span>{heatScale === "relative" ? "low rank" : "cold"}</span>
             <div className="swatch" />
-            <span>hot</span>
+            <span>{heatScale === "relative" ? "high rank" : "hot"}</span>
           </div>
           <p className="note">{note}</p>
           <RankRow periods={periods} />
