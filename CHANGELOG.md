@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Collector emits NDJSON `rep` (`0` = first-down, `1` = auto-repeat); heatmaps, rankings, transitions, and session press totals still use physical first-downs only
+- **Reset stats** opens an in-app confirm dialog (Cancel focused by default; Escape / backdrop dismiss) instead of a one-click/`window.confirm` path that was easy to miss
 
 ## [2.1.0] - 2026-07-31
 
