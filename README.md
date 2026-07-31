@@ -57,11 +57,11 @@ npm run reset
 
 `data/stats.json` (gitignored) stores:
 
-- `keys` — per physical key counts (`sc` + `ext`), all time
-- `transitions` — consecutive first-down pairs (`from→to` aggregates)
+- `keys` — per physical key (`sc` + `ext`): `count` (first-downs) and `repeatCount` (OS auto-repeat while held)
+- `transitions` — consecutive first-down pairs (`from→to` aggregates; ignores auto-repeat)
 - `daily` — per local calendar day key counts + transitions (for today / last 7 days; older days pruned)
 - `recordingMs` / `sessions` — completed recording intervals
-- `totalPresses`, `updatedAt`
+- `totalPresses`, `updatedAt` (`totalPresses` = sum of `count` only)
 
 Built UI assets live in `dist/ui/` (gitignored; produced by `npm run build:ui`).
 
@@ -69,7 +69,7 @@ Built UI assets live in `dist/ui/` (gitignored; produced by `npm run build:ui`).
 
 - Physical keys via Windows low-level hook (`WH_KEYBOARD_LL`)
 - Aggregation key: scan code + extended flag (layout-independent: `Q` and `Й` are the same key)
-- Key-up and OS auto-repeat while holding a key are ignored (one count per press)
+- Key-up is ignored; OS auto-repeat while holding increments `repeatCount` (not `count` / heatmap / transitions)
 - Right Shift / Win / Menu variants are normalized when Windows reports inconsistent codes
 
 ## Privacy

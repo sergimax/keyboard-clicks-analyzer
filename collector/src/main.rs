@@ -1,5 +1,6 @@
-//! Low-level keyboard hook: emits one NDJSON line per physical key-down.
-//! Fields: sc (scan code), ext (extended key), t (unix ms). No text/layout/window data.
+//! Low-level keyboard hook: emits NDJSON for key-down and OS auto-repeat.
+//! Fields: sc (scan code), ext (extended key), t (unix ms), rep (0=first down, 1=auto-repeat).
+//! No text/layout/window data.
 
 use std::collections::HashSet;
 use std::io::{self, Write};
@@ -69,16 +70,15 @@ unsafe extern "system" fn keyboard_proc(code: i32, wparam: WPARAM, lparam: LPARA
                     false
                 };
 
-                if first_down {
-                    let line = format!(
-                        "{{\"sc\":{},\"ext\":{},\"t\":{}}}\n",
-                        sc,
-                        if extended { 1 } else { 0 },
-                        unix_ms()
-                    );
-                    let _ = io::stdout().write_all(line.as_bytes());
-                    let _ = io::stdout().flush();
-                }
+                let line = format!(
+                    "{{\"sc\":{},\"ext\":{},\"t\":{},\"rep\":{}}}\n",
+                    sc,
+                    if extended { 1 } else { 0 },
+                    unix_ms(),
+                    if first_down { 0 } else { 1 }
+                );
+                let _ = io::stdout().write_all(line.as_bytes());
+                let _ = io::stdout().flush();
             }
         }
     }

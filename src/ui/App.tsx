@@ -109,7 +109,7 @@ export function App() {
     : "No day buckets yet — restart collect to start tracking today/week.";
   const note = live
     ? "Live view updates about once per second from the local collector (127.0.0.1 only). Current session time is shown in the collect terminal. Day/week key counts update live; recorded time for periods uses completed intervals only."
-    : "Intensity uses a square-root scale so secondary keys remain readable. Auto-repeat while holding a key is ignored (one count per press). Day/week rankings use local calendar days (week = last 7 days).";
+    : "Intensity uses a square-root scale so secondary keys remain readable. Heatmap and rankings use physical presses; OS auto-repeat while holding is tracked separately as repeatCount (see key tooltips). Day/week rankings use local calendar days (week = last 7 days).";
 
   const periods = [
     {

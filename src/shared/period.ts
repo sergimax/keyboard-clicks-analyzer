@@ -12,11 +12,21 @@ export function keysForDateKeys(
     if (!bucket) continue;
     for (const entry of Object.values(bucket.keys)) {
       const canon = canonicalKey(entry.sc, entry.ext);
+      const repeatCount =
+        typeof entry.repeatCount === "number" && Number.isFinite(entry.repeatCount)
+          ? Math.max(0, entry.repeatCount)
+          : 0;
       const prev = merged[canon.id];
       if (prev) {
         prev.count += entry.count;
+        prev.repeatCount += repeatCount;
       } else {
-        merged[canon.id] = { sc: canon.sc, ext: canon.ext, count: entry.count };
+        merged[canon.id] = {
+          sc: canon.sc,
+          ext: canon.ext,
+          count: entry.count,
+          repeatCount,
+        };
       }
     }
   }

@@ -89,8 +89,8 @@ Example: `feat(live-server): add reset stats endpoint`
 - **Console session timer** — terminal line `session mm:ss · presses N` for the current run only (not shown in the browser); resets with Reset stats
 - **`npm run report`** — serves React viewer from disk stats (no Reset); Ctrl+C to stop
 - **`npm run reset`** — deletes `data/stats.json`
-- **Key aggregation** — `canonicalKey` / aliases in `keymap.ts`; presses and consecutive transitions go into all-time + `daily` local-day buckets
-- **Ignore** key-up and OS auto-repeat (one count per physical press)
+- **Key aggregation** — `canonicalKey` / aliases in `keymap.ts`; presses (`count`), `repeatCount`, and consecutive transitions go into all-time + `daily` local-day buckets
+- **Ignore** key-up for counting; OS auto-repeat increments `repeatCount` (physical first-downs stay in `count` / heat / transitions)
 - **Heatmap labels** — US QWERTY **positions** for display; not the user’s active layout
 - Restart `collect` after pulling code / rebuilding UI so the live server serves the new `dist/ui`
 - **Show numpad** — preference in `localStorage` (`kca-show-numpad`)
@@ -105,7 +105,7 @@ Example: `feat(live-server): add reset stats endpoint`
 - **HTTP** — `server/http-app.ts` serves `dist/ui` + `/api/stats` + optional `/api/reset`; wrappers `live-server.ts` / `report-server.ts`
 - **React UI** — `ui/` Vite app (`App.tsx`, components, `styles/app.css`)
 - **CLI colors** — `style.ts` (respect `NO_COLOR` / TTY)
-- **Rust** — `collector/src/main.rs` emits NDJSON `{ sc, ext, t }` on first key-down only
+- **Rust** — `collector/src/main.rs` emits NDJSON `{ sc, ext, t, rep }` (`rep:0` first-down, `rep:1` auto-repeat)
 
 ## Project Structure
 

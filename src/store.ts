@@ -99,12 +99,22 @@ function normalizeKeyMap(raw: Record<string, KeyCount>): Record<string, KeyCount
   const keys: Record<string, KeyCount> = {};
   for (const entry of Object.values(raw)) {
     if (!entry || typeof entry.count !== "number") continue;
+    const repeatCount =
+      typeof entry.repeatCount === "number" && Number.isFinite(entry.repeatCount)
+        ? Math.max(0, entry.repeatCount)
+        : 0;
     const canon = canonicalKey(entry.sc, entry.ext);
     const existing = keys[canon.id];
     if (existing) {
       existing.count += entry.count;
+      existing.repeatCount += repeatCount;
     } else {
-      keys[canon.id] = { sc: canon.sc, ext: canon.ext, count: entry.count };
+      keys[canon.id] = {
+        sc: canon.sc,
+        ext: canon.ext,
+        count: entry.count,
+        repeatCount,
+      };
     }
   }
   return keys;
@@ -173,14 +183,24 @@ function bumpInKeyMap(
   map: Record<string, KeyCount>,
   sc: number,
   ext: number,
+  kind: "press" | "repeat",
 ): void {
   const canon = canonicalKey(sc, ext);
   const existing = map[canon.id];
   if (existing) {
-    existing.count += 1;
-  } else {
-    map[canon.id] = { sc: canon.sc, ext: canon.ext, count: 1 };
+    if (kind === "press") {
+      existing.count += 1;
+    } else {
+      existing.repeatCount = (existing.repeatCount ?? 0) + 1;
+    }
+    return;
   }
+  map[canon.id] = {
+    sc: canon.sc,
+    ext: canon.ext,
+    count: kind === "press" ? 1 : 0,
+    repeatCount: kind === "repeat" ? 1 : 0,
+  };
 }
 
 export function bumpKey(
@@ -191,7 +211,7 @@ export function bumpKey(
 ): string {
   ensureDailyField(stats);
   ensureTransitionsField(stats);
-  bumpInKeyMap(stats.keys, sc, ext);
+  bumpInKeyMap(stats.keys, sc, ext, "press");
   const dateKey = localDateKey(atMs);
   const bucket = stats.daily[dateKey] ?? {
     presses: 0,
@@ -199,10 +219,30 @@ export function bumpKey(
     transitions: {},
   };
   if (!bucket.transitions) bucket.transitions = {};
-  bumpInKeyMap(bucket.keys, sc, ext);
+  bumpInKeyMap(bucket.keys, sc, ext, "press");
   bucket.presses = Object.values(bucket.keys).reduce((sum, k) => sum + k.count, 0);
   stats.daily[dateKey] = bucket;
   return canonicalKey(sc, ext).id;
+}
+
+/** Increment OS auto-repeat for a held key (does not affect presses / transitions). */
+export function bumpKeyRepeat(
+  stats: StatsFile,
+  sc: number,
+  ext: number,
+  atMs: number = Date.now(),
+): void {
+  ensureDailyField(stats);
+  bumpInKeyMap(stats.keys, sc, ext, "repeat");
+  const dateKey = localDateKey(atMs);
+  const bucket = stats.daily[dateKey] ?? {
+    presses: 0,
+    keys: {},
+    transitions: {},
+  };
+  if (!bucket.transitions) bucket.transitions = {};
+  bumpInKeyMap(bucket.keys, sc, ext, "repeat");
+  stats.daily[dateKey] = bucket;
 }
 
 /** Record consecutive first-down pair previousKeyId → current (sc,ext). */
