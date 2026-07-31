@@ -91,6 +91,7 @@ Example: `feat(live-server): add reset stats endpoint`
 - **`npm run reset`** — deletes `data/stats.json`
 - **Key aggregation** — `canonicalKey` / aliases in `keymap.ts`; presses (`count`), `repeatCount`, and consecutive transitions go into all-time + `daily` local-day buckets
 - **Bursts** — physical first-downs grouped by >1s idle (`stats.bursts.count` / `longest`); avg length and bursts/hour are derived (not stored)
+- **Suspicious repeats** — sparse same-key gaps under 30ms / 50ms (`stats.suspiciousRepeats`); OS auto-repeat ignored; no full interval histograms
 - **Ignore** key-up for counting; OS auto-repeat increments `repeatCount` (physical first-downs stay in `count` / heat / transitions)
 - **Heatmap labels** — US QWERTY **positions** for display; not the user’s active layout
 - Restart `collect` after pulling code / rebuilding UI so the live server serves the new `dist/ui`

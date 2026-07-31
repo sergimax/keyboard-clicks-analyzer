@@ -18,6 +18,17 @@ export type BurstStats = {
   longest: number;
 };
 
+/**
+ * Same-key physical presses closer than bounce thresholds (not OS auto-repeat).
+ * Sparse: only keys with at least one hit. `under50ms` includes `under30ms` gaps.
+ */
+export type SuspiciousRepeatCount = {
+  sc: number;
+  ext: number;
+  under30ms: number;
+  under50ms: number;
+};
+
 /** One completed collect start→stop interval. */
 export type RecordingSession = {
   startedAt: string;
@@ -57,6 +68,11 @@ export type StatsFile = {
    * Derived: avgBurstLength = totalPresses / bursts.count; bursts/hour vs recordingMs.
    */
   bursts: BurstStats;
+  /**
+   * Sparse same-key double-taps under 30ms / 50ms (bounce, double register, dying switches).
+   * Full interval histograms are not stored.
+   */
+  suspiciousRepeats: Record<string, SuspiciousRepeatCount>;
   /** Local-day buckets for day/week rankings. Older days may be pruned. */
   daily: Record<string, DailyBucket>;
 };

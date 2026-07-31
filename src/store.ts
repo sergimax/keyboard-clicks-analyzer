@@ -23,6 +23,13 @@ import {
   type BurstTracker,
 } from "./shared/bursts.ts";
 import {
+  emptySuspiciousRepeats,
+  emptySuspiciousRepeatTracker,
+  normalizeSuspiciousRepeats,
+  noteSuspiciousRepeat,
+  type SuspiciousRepeatTracker,
+} from "./shared/suspicious-repeats.ts";
+import {
   bumpTransitionInMap,
   normalizeTransitionMap,
 } from "./shared/transitions.ts";
@@ -33,6 +40,7 @@ import {
   type KeyCount,
   type RecordingSession,
   type StatsFile,
+  type SuspiciousRepeatCount,
   type TransitionCount,
 } from "./shared/types.ts";
 
@@ -42,10 +50,15 @@ export type {
   KeyCount,
   RecordingSession,
   StatsFile,
+  SuspiciousRepeatCount,
   TransitionCount,
 };
-export type { BurstTracker };
-export { DAILY_RETENTION_DAYS, emptyBurstTracker };
+export type { BurstTracker, SuspiciousRepeatTracker };
+export {
+  DAILY_RETENTION_DAYS,
+  emptyBurstTracker,
+  emptySuspiciousRepeatTracker,
+};
 export {
   dayRangeMs,
   formatDuration,
@@ -83,12 +96,17 @@ export function emptyStats(): StatsFile {
     keys: {},
     transitions: {},
     bursts: emptyBursts(),
+    suspiciousRepeats: emptySuspiciousRepeats(),
     daily: {},
   };
 }
 
 export function ensureBurstsField(stats: StatsFile): void {
   stats.bursts = normalizeBursts(stats.bursts);
+}
+
+export function ensureSuspiciousRepeatsField(stats: StatsFile): void {
+  stats.suspiciousRepeats = normalizeSuspiciousRepeats(stats.suspiciousRepeats);
 }
 
 export function ensureDataDir(): void {
@@ -157,6 +175,7 @@ export function normalizeStats(stats: StatsFile): StatsFile {
   ensureDailyField(stats);
   ensureTransitionsField(stats);
   ensureBurstsField(stats);
+  ensureSuspiciousRepeatsField(stats);
   stats.keys = normalizeKeyMap(stats.keys);
   stats.totalPresses = Object.values(stats.keys).reduce((sum, k) => sum + k.count, 0);
   stats.transitions = normalizeTransitionMap(stats.transitions);
@@ -277,6 +296,18 @@ export function bumpBurst(
   bumpBurstInPlace(stats.bursts, tracker, atMs);
 }
 
+/** Record same-key physical press if the gap is under bounce thresholds. */
+export function bumpSuspiciousRepeat(
+  stats: StatsFile,
+  tracker: SuspiciousRepeatTracker,
+  sc: number,
+  ext: number,
+  atMs: number = Date.now(),
+): void {
+  ensureSuspiciousRepeatsField(stats);
+  noteSuspiciousRepeat(stats.suspiciousRepeats, tracker, sc, ext, atMs);
+}
+
 /** Record consecutive first-down pair previousKeyId → current (sc,ext). */
 export function bumpTransition(
   stats: StatsFile,
@@ -325,6 +356,7 @@ export function clearStatsInPlace(stats: StatsFile): void {
   stats.sessions = [];
   stats.transitions = {};
   stats.bursts = emptyBursts();
+  stats.suspiciousRepeats = emptySuspiciousRepeats();
   stats.daily = {};
   stats.updatedAt = new Date().toISOString();
   saveStats(stats);
