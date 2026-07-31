@@ -228,11 +228,30 @@ li {
 
 .legend {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
   margin: 18px 0 0;
   color: var(--muted);
   font-size: 0.85rem;
+}
+
+.legend-scale {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.legend-end {
+  color: #c5cedd;
+}
+
+.legend-hint {
+  margin: 0;
+  max-width: 72ch;
+  line-height: 1.4;
+  font-size: 0.8rem;
 }
 
 .swatch {
@@ -241,6 +260,7 @@ li {
   border-radius: 999px;
   background: linear-gradient(90deg, var(--cold), #d68440, var(--hot));
   border: 1px solid #2a3140;
+  flex-shrink: 0;
 }
 
 .note {
