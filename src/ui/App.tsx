@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   buildHeatKeys,
-  hottestCount,
+  hottestKey,
   topKeys,
   topKeysFromMap,
   type HeatScaleMode,
@@ -169,7 +169,7 @@ export function App() {
         live={live}
         updatedAt={stats.updatedAt}
         totalPresses={stats.totalPresses}
-        maxCount={hottestCount(stats)}
+        hottest={hottestKey(stats)}
         totalRecordingMs={stats.recordingMs ?? 0}
         sessionCount={stats.sessions?.length ?? 0}
         bursts={stats.bursts ?? { count: 0, longest: 0 }}

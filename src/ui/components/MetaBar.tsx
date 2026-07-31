@@ -3,13 +3,14 @@ import {
   burstsPerHour,
 } from "@shared/bursts";
 import { formatDuration } from "@shared/format";
+import type { RankItem } from "@shared/heat";
 import type { BurstStats } from "@shared/types";
 
 type MetaBarProps = {
   live: boolean;
   updatedAt: string;
   totalPresses: number;
-  maxCount: number;
+  hottest: RankItem | null;
   totalRecordingMs: number;
   sessionCount: number;
   bursts: BurstStats;
@@ -25,7 +26,7 @@ export function MetaBar({
   live,
   updatedAt,
   totalPresses,
-  maxCount,
+  hottest,
   totalRecordingMs,
   sessionCount,
   bursts,
@@ -36,6 +37,9 @@ export function MetaBar({
   const longest = bursts?.longest ?? 0;
   const avg = avgBurstLength(totalPresses, burstCount);
   const perHour = burstsPerHour(burstCount, totalRecordingMs);
+  const hottestLabel = hottest
+    ? `${hottest.label} — ${hottest.count}`
+    : "—";
 
   return (
     <div className="meta">
@@ -47,8 +51,8 @@ export function MetaBar({
         <span>
           Total presses: <strong>{totalPresses}</strong>
         </span>
-        <span>
-          Hottest key: <strong>{maxCount}</strong>
+        <span title={hottest ? `${hottest.label} (${hottest.id})` : undefined}>
+          Hottest key: <strong>{hottestLabel}</strong>
         </span>
         <span
           title="Press runs separated by >1s idle (physical presses only). Complements presses/min with how activity is chunked."
