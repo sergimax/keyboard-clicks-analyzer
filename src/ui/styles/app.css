@@ -42,19 +42,36 @@ h1 {
 .meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px 24px;
+  gap: 12px 24px;
   margin-bottom: 22px;
   color: var(--muted);
   font-size: 0.9rem;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
 }
 
-.meta-main {
+.meta-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.meta-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px 24px;
+  gap: 10px 22px;
   align-items: center;
+}
+
+.meta-row-primary {
+  font-size: 0.95rem;
+}
+
+.meta-row-stats {
+  font-size: 0.85rem;
+  opacity: 0.92;
 }
 
 .meta strong {

@@ -43,37 +43,42 @@ export function MetaBar({
 
   return (
     <div className="meta">
-      <div className="meta-main">
-        {live ? <span className="live-badge">LIVE</span> : null}
-        <span>
-          Updated: <strong>{updatedAt || "—"}</strong>
-        </span>
-        <span>
-          Total presses: <strong>{totalPresses}</strong>
-        </span>
-        <span title={hottest ? `${hottest.label} (${hottest.id})` : undefined}>
-          Hottest key: <strong>{hottestLabel}</strong>
-        </span>
-        <span
-          title="Press runs separated by >1s idle (physical presses only). Complements presses/min with how activity is chunked."
-        >
-          Bursts: <strong>{burstCount}</strong>
-        </span>
-        <span title="Mean physical presses per burst (totalPresses ÷ bursts).">
-          Avg burst: <strong>{formatOptional(avg)}</strong>
-        </span>
-        <span title="Longest unbroken press run (idle gaps ≤1s).">
-          Longest burst: <strong>{longest}</strong>
-        </span>
-        <span title="Bursts per hour of completed active recording (same time base as intensity).">
-          Bursts/hour: <strong>{formatOptional(perHour)}</strong>
-        </span>
-        <span>
-          Total active recording: <strong>{formatDuration(totalRecordingMs)}</strong>
-        </span>
-        <span>
-          Saved intervals: <strong>{sessionCount}</strong>
-        </span>
+      <div className="meta-rows">
+        <div className="meta-row meta-row-primary">
+          {live ? <span className="live-badge">LIVE</span> : null}
+          <span>
+            Total presses: <strong>{totalPresses}</strong>
+          </span>
+          <span title={hottest ? `${hottest.label} (${hottest.id})` : undefined}>
+            Hottest key: <strong>{hottestLabel}</strong>
+          </span>
+        </div>
+        <div className="meta-row meta-row-stats">
+          <span>
+            Updated: <strong>{updatedAt || "—"}</strong>
+          </span>
+          <span
+            title="Press runs separated by >1s idle (physical presses only). Complements presses/min with how activity is chunked."
+          >
+            Bursts: <strong>{burstCount}</strong>
+          </span>
+          <span title="Mean physical presses per burst (totalPresses ÷ bursts).">
+            Avg burst: <strong>{formatOptional(avg)}</strong>
+          </span>
+          <span title="Longest unbroken press run (idle gaps ≤1s).">
+            Longest burst: <strong>{longest}</strong>
+          </span>
+          <span title="Bursts per hour of completed active recording (same time base as intensity).">
+            Bursts/hour: <strong>{formatOptional(perHour)}</strong>
+          </span>
+          <span>
+            Total active recording:{" "}
+            <strong>{formatDuration(totalRecordingMs)}</strong>
+          </span>
+          <span>
+            Saved intervals: <strong>{sessionCount}</strong>
+          </span>
+        </div>
       </div>
       {live && onReset ? (
         <button
