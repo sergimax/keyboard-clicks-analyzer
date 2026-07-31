@@ -179,7 +179,12 @@ export function App() {
 
   return (
     <>
-      <h1>Keyboard Heatmap</h1>
+      <header className="app-header">
+        <h1>Keyboard Heatmap</h1>
+        <span className="app-version" title="App version">
+          v{__APP_VERSION__}
+        </span>
+      </header>
       <p className="sub">
         Local physical-key presses · no network · labels use US QWERTY positions
       </p>
