@@ -246,6 +246,12 @@ export function formatSharePercent(share: number): string {
   return `${(share * 100).toFixed(1)}%`;
 }
 
+/** Hottest physical key by press count (label for display). */
+export function hottestKey(stats: StatsFile): RankItem | null {
+  const top = topKeys(stats, 1)[0];
+  return top && top.count > 0 ? top : null;
+}
+
 export function hottestCount(stats: StatsFile): number {
-  return Math.max(0, ...Object.values(stats.keys ?? {}).map((k) => k.count), 0);
+  return hottestKey(stats)?.count ?? 0;
 }
