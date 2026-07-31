@@ -30,6 +30,10 @@ import {
   type SuspiciousRepeatTracker,
 } from "./shared/suspicious-repeats.ts";
 import {
+  bumpModifierPairsFromMask,
+  normalizeModifierPairMap,
+} from "./shared/modifiers.ts";
+import {
   bumpTransitionInMap,
   normalizeTransitionMap,
 } from "./shared/transitions.ts";
@@ -38,6 +42,7 @@ import {
   type BurstStats,
   type DailyBucket,
   type KeyCount,
+  type ModifierPairCount,
   type RecordingSession,
   type StatsFile,
   type SuspiciousRepeatCount,
@@ -48,6 +53,7 @@ export type {
   BurstStats,
   DailyBucket,
   KeyCount,
+  ModifierPairCount,
   RecordingSession,
   StatsFile,
   SuspiciousRepeatCount,
@@ -86,6 +92,15 @@ export function keyId(sc: number, ext: number): string {
   return canonicalKey(sc, ext).id;
 }
 
+function emptyDailyBucket(): DailyBucket {
+  return {
+    presses: 0,
+    keys: {},
+    transitions: {},
+    modifierPairs: {},
+  };
+}
+
 export function emptyStats(): StatsFile {
   return {
     version: 1,
@@ -95,6 +110,7 @@ export function emptyStats(): StatsFile {
     sessions: [],
     keys: {},
     transitions: {},
+    modifierPairs: {},
     bursts: emptyBursts(),
     suspiciousRepeats: emptySuspiciousRepeats(),
     daily: {},
@@ -131,6 +147,12 @@ export function ensureDailyField(stats: StatsFile): void {
 export function ensureTransitionsField(stats: StatsFile): void {
   if (!stats.transitions || typeof stats.transitions !== "object") {
     stats.transitions = {};
+  }
+}
+
+export function ensureModifierPairsField(stats: StatsFile): void {
+  if (!stats.modifierPairs || typeof stats.modifierPairs !== "object") {
+    stats.modifierPairs = {};
   }
 }
 
@@ -174,11 +196,13 @@ export function normalizeStats(stats: StatsFile): StatsFile {
   ensureTimingFields(stats);
   ensureDailyField(stats);
   ensureTransitionsField(stats);
+  ensureModifierPairsField(stats);
   ensureBurstsField(stats);
   ensureSuspiciousRepeatsField(stats);
   stats.keys = normalizeKeyMap(stats.keys);
   stats.totalPresses = Object.values(stats.keys).reduce((sum, k) => sum + k.count, 0);
   stats.transitions = normalizeTransitionMap(stats.transitions);
+  stats.modifierPairs = normalizeModifierPairMap(stats.modifierPairs);
 
   for (const [dateKey, bucket] of Object.entries(stats.daily)) {
     if (!bucket || typeof bucket !== "object") {
@@ -188,6 +212,7 @@ export function normalizeStats(stats: StatsFile): StatsFile {
     bucket.keys = normalizeKeyMap(bucket.keys ?? {});
     bucket.presses = Object.values(bucket.keys).reduce((sum, k) => sum + k.count, 0);
     bucket.transitions = normalizeTransitionMap(bucket.transitions);
+    bucket.modifierPairs = normalizeModifierPairMap(bucket.modifierPairs);
   }
   pruneDaily(stats);
   return stats;
@@ -254,12 +279,9 @@ export function bumpKey(
   ensureTransitionsField(stats);
   bumpInKeyMap(stats.keys, sc, ext, "press");
   const dateKey = localDateKey(atMs);
-  const bucket = stats.daily[dateKey] ?? {
-    presses: 0,
-    keys: {},
-    transitions: {},
-  };
+  const bucket = stats.daily[dateKey] ?? emptyDailyBucket();
   if (!bucket.transitions) bucket.transitions = {};
+  if (!bucket.modifierPairs) bucket.modifierPairs = {};
   bumpInKeyMap(bucket.keys, sc, ext, "press");
   bucket.presses = Object.values(bucket.keys).reduce((sum, k) => sum + k.count, 0);
   stats.daily[dateKey] = bucket;
@@ -276,12 +298,9 @@ export function bumpKeyRepeat(
   ensureDailyField(stats);
   bumpInKeyMap(stats.keys, sc, ext, "repeat");
   const dateKey = localDateKey(atMs);
-  const bucket = stats.daily[dateKey] ?? {
-    presses: 0,
-    keys: {},
-    transitions: {},
-  };
+  const bucket = stats.daily[dateKey] ?? emptyDailyBucket();
   if (!bucket.transitions) bucket.transitions = {};
+  if (!bucket.modifierPairs) bucket.modifierPairs = {};
   bumpInKeyMap(bucket.keys, sc, ext, "repeat");
   stats.daily[dateKey] = bucket;
 }
@@ -322,13 +341,33 @@ export function bumpTransition(
   if (!Number.isFinite(fromScRaw) || !Number.isFinite(fromExtRaw)) return;
   bumpTransitionInMap(stats.transitions, fromScRaw!, fromExtRaw!, sc, ext);
   const dateKey = localDateKey(atMs);
-  const bucket = stats.daily[dateKey] ?? {
-    presses: 0,
-    keys: {},
-    transitions: {},
-  };
+  const bucket = stats.daily[dateKey] ?? emptyDailyBucket();
   if (!bucket.transitions) bucket.transitions = {};
+  if (!bucket.modifierPairs) bucket.modifierPairs = {};
   bumpTransitionInMap(bucket.transitions, fromScRaw!, fromExtRaw!, sc, ext);
+  stats.daily[dateKey] = bucket;
+}
+
+/**
+ * Record held-modifier + key chords from collector `mods` bitmask.
+ * Only meaningful on physical first-downs (not OS auto-repeat).
+ */
+export function bumpModifierPairs(
+  stats: StatsFile,
+  modsMask: number,
+  sc: number,
+  ext: number,
+  atMs: number = Date.now(),
+): void {
+  if (!modsMask) return;
+  ensureDailyField(stats);
+  ensureModifierPairsField(stats);
+  bumpModifierPairsFromMask(stats.modifierPairs, modsMask, sc, ext);
+  const dateKey = localDateKey(atMs);
+  const bucket = stats.daily[dateKey] ?? emptyDailyBucket();
+  if (!bucket.transitions) bucket.transitions = {};
+  if (!bucket.modifierPairs) bucket.modifierPairs = {};
+  bumpModifierPairsFromMask(bucket.modifierPairs, modsMask, sc, ext);
   stats.daily[dateKey] = bucket;
 }
 
@@ -355,6 +394,7 @@ export function clearStatsInPlace(stats: StatsFile): void {
   stats.recordingMs = 0;
   stats.sessions = [];
   stats.transitions = {};
+  stats.modifierPairs = {};
   stats.bursts = emptyBursts();
   stats.suspiciousRepeats = emptySuspiciousRepeats();
   stats.daily = {};

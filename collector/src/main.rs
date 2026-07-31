@@ -1,5 +1,5 @@
 //! Low-level keyboard hook: emits NDJSON for key-down and OS auto-repeat.
-//! Fields: sc (scan code), ext (extended key), t (unix ms), rep (0=first down, 1=auto-repeat).
+//! Fields: sc, ext, t, rep (0=first down, 1=auto-repeat), mods (bitmask of other held modifiers).
 //! No text/layout/window data.
 
 use std::collections::HashSet;
@@ -23,6 +23,16 @@ const VK_RWIN: u32 = 0x5C;
 const VK_APPS: u32 = 0x5D; // Menu
 const VK_RSHIFT: u32 = 0xA1;
 
+// Modifier bit masks — keep in sync with src/shared/modifiers.ts
+const MOD_LCTRL: u8 = 1 << 0;
+const MOD_RCTRL: u8 = 1 << 1;
+const MOD_LSHIFT: u8 = 1 << 2;
+const MOD_RSHIFT: u8 = 1 << 3;
+const MOD_LALT: u8 = 1 << 4;
+const MOD_RALT: u8 = 1 << 5;
+const MOD_LWIN: u8 = 1 << 6;
+const MOD_RWIN: u8 = 1 << 7;
+
 fn key_id(sc: u32, extended: bool) -> u32 {
     sc | if extended { 0xE000 } else { 0 }
 }
@@ -45,6 +55,25 @@ fn physical_sc_ext(vk: u32, scan_code: u32, extended: bool) -> (u32, bool) {
     }
 }
 
+/// Bits for modifiers currently in `held` (excluding the key being pressed).
+fn modifier_mask(held: &HashSet<u32>, exclude: u32) -> u8 {
+    let mut mask = 0u8;
+    let check = |id: u32, bit: u8, m: &mut u8| {
+        if id != exclude && held.contains(&id) {
+            *m |= bit;
+        }
+    };
+    check(key_id(0x1D, false), MOD_LCTRL, &mut mask); // 29
+    check(key_id(0x1D, true), MOD_RCTRL, &mut mask);
+    check(key_id(0x2A, false), MOD_LSHIFT, &mut mask); // 42
+    check(key_id(0x36, true), MOD_RSHIFT, &mut mask); // 54
+    check(key_id(0x38, false), MOD_LALT, &mut mask); // 56
+    check(key_id(0x38, true), MOD_RALT, &mut mask);
+    check(key_id(0x5B, true), MOD_LWIN, &mut mask);
+    check(key_id(0x5C, true), MOD_RWIN, &mut mask);
+    mask
+}
+
 unsafe extern "system" fn keyboard_proc(code: i32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
     if code >= 0 {
         let info = &*(lparam.0 as *const KBDLLHOOKSTRUCT);
@@ -63,19 +92,22 @@ unsafe extern "system" fn keyboard_proc(code: i32, wparam: WPARAM, lparam: LPARA
         } else {
             let msg = wparam.0 as u32;
             if msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN {
-                let first_down = if let Ok(mut guard) = HELD.lock() {
+                let (first_down, mods) = if let Ok(mut guard) = HELD.lock() {
                     let held = guard.get_or_insert_with(HashSet::new);
-                    held.insert(id)
+                    let mods = modifier_mask(held, id);
+                    let first_down = held.insert(id);
+                    (first_down, mods)
                 } else {
-                    false
+                    (false, 0u8)
                 };
 
                 let line = format!(
-                    "{{\"sc\":{},\"ext\":{},\"t\":{},\"rep\":{}}}\n",
+                    "{{\"sc\":{},\"ext\":{},\"t\":{},\"rep\":{},\"mods\":{}}}\n",
                     sc,
                     if extended { 1 } else { 0 },
                     unix_ms(),
-                    if first_down { 0 } else { 1 }
+                    if first_down { 0 } else { 1 },
+                    mods
                 );
                 let _ = io::stdout().write_all(line.as_bytes());
                 let _ = io::stdout().flush();

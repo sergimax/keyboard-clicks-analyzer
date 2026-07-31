@@ -92,6 +92,8 @@ Example: `feat(live-server): add reset stats endpoint`
 - **Key aggregation** — `canonicalKey` / aliases in `keymap.ts`; presses (`count`), `repeatCount`, and consecutive transitions go into all-time + `daily` local-day buckets
 - **Bursts** — physical first-downs grouped by >1s idle (`stats.bursts.count` / `longest`); avg length and bursts/hour are derived (not stored)
 - **Suspicious repeats** — sparse same-key gaps under 30ms / 50ms (`stats.suspiciousRepeats`); OS auto-repeat ignored; no full interval histograms
+- **Transitions** — full `stats.transitions` map; UI derives topPairs (A≠B) + selfRepeats (A→A); do not persist only a top-N list
+- **Modifier pairs** — `stats.modifierPairs` from collector `mods` bitmask (held modifiers at first-down); distinct from sequential LCtrl→C bigrams
 - **Ignore** key-up for counting; OS auto-repeat increments `repeatCount` (physical first-downs stay in `count` / heat / transitions)
 - **Heatmap labels** — US QWERTY **positions** for display; not the user’s active layout
 - Restart `collect` after pulling code / rebuilding UI so the live server serves the new `dist/ui`
@@ -108,7 +110,7 @@ Example: `feat(live-server): add reset stats endpoint`
 - **HTTP** — `server/http-app.ts` serves `dist/ui` + `/api/stats` + optional `/api/reset`; wrappers `live-server.ts` / `report-server.ts`
 - **React UI** — `ui/` Vite app (`App.tsx`, components, `styles/app.css`)
 - **CLI colors** — `style.ts` (respect `NO_COLOR` / TTY)
-- **Rust** — `collector/src/main.rs` emits NDJSON `{ sc, ext, t, rep }` (`rep:0` first-down, `rep:1` auto-repeat)
+- **Rust** — `collector/src/main.rs` emits NDJSON `{ sc, ext, t, rep, mods }` (`rep:0` first-down, `rep:1` auto-repeat; `mods` = held-modifier bitmask)
 
 ## Project Structure
 

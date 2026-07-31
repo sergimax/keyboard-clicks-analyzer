@@ -13,11 +13,22 @@ import {
   recordingMsInRange,
 } from "@shared/period";
 import {
-  topTransitions,
+  modifierPairsForDateKeys,
+  topModifierPairs,
+  type ModifierPairItem,
+} from "@shared/modifiers";
+import {
+  selfRepeats,
+  topPairs,
   transitionsForDateKeys,
+  type SelfRepeatItem,
   type TransitionItem,
 } from "@shared/transitions";
-import type { StatsFile, TransitionCount } from "@shared/types";
+import type {
+  ModifierPairCount,
+  StatsFile,
+  TransitionCount,
+} from "@shared/types";
 import { toExportMeta, type DeviceMeta, type ExportMeta } from "./device-meta";
 
 /**
@@ -52,6 +63,24 @@ export type ExportTransition = {
   count: number;
 };
 
+export type ExportSelfRepeat = {
+  key: string;
+  count: number;
+};
+
+export type ExportModifierPair = {
+  modifier: string;
+  key: string;
+  count: number;
+};
+
+/** Derived transition views (full maps remain in `stats`). */
+export type ExportTransitions = {
+  topPairs: ExportTransition[];
+  selfRepeats: ExportSelfRepeat[];
+  modifierPairs: ExportModifierPair[];
+};
+
 export type ExportRanking = {
   label: string;
   dateKey?: string;
@@ -61,8 +90,7 @@ export type ExportRanking = {
   timing: ExportTiming;
   intensity: ExportIntensity;
   top: ExportTopItem[];
-  /** Top consecutive key-down pairs in this period. */
-  transitions: ExportTransition[];
+  transitions: ExportTransitions;
 };
 
 export type ExportPayload = {
@@ -132,6 +160,14 @@ function toExportTransitions(items: TransitionItem[]): ExportTransition[] {
   return items.map(({ from, to, count }) => ({ from, to, count }));
 }
 
+function toExportSelfRepeats(items: SelfRepeatItem[]): ExportSelfRepeat[] {
+  return items.map(({ label, count }) => ({ key: label, count }));
+}
+
+function toExportModifierPairs(items: ModifierPairItem[]): ExportModifierPair[] {
+  return items.map(({ modifier, key, count }) => ({ modifier, key, count }));
+}
+
 function rankingBlock(options: {
   label: string;
   dateKey?: string;
@@ -142,6 +178,7 @@ function rankingBlock(options: {
   periodMs: number;
   top: RankItem[];
   transitionMap: Record<string, TransitionCount> | undefined;
+  modifierPairMap: Record<string, ModifierPairCount> | undefined;
 }): ExportRanking {
   const timing = timingFor(options.activeRecordingMs, options.periodMs);
   return {
@@ -153,7 +190,13 @@ function rankingBlock(options: {
     timing,
     intensity: intensityFor(options.totalPresses, timing.activeRecordingMs),
     top: toExportTop(withPressShare(options.top, options.totalPresses)),
-    transitions: toExportTransitions(topTransitions(options.transitionMap)),
+    transitions: {
+      topPairs: toExportTransitions(topPairs(options.transitionMap)),
+      selfRepeats: toExportSelfRepeats(selfRepeats(options.transitionMap)),
+      modifierPairs: toExportModifierPairs(
+        topModifierPairs(options.modifierPairMap),
+      ),
+    },
   };
 }
 
@@ -216,6 +259,7 @@ export function buildExportPayload(
         periodMs: allTimePeriodMs(stats),
         top: topKeys(stats),
         transitionMap: stats.transitions,
+        modifierPairMap: stats.modifierPairs,
       }),
       today: rankingBlock({
         label: "Today",
@@ -225,6 +269,9 @@ export function buildExportPayload(
         periodMs: day.endMs - day.startMs,
         top: topKeysFromMap(keysForDateKeys(stats, [todayKey])),
         transitionMap: transitionsForDateKeys(stats, [todayKey]),
+        modifierPairMap: modifierPairsForDateKeys(stats.daily ?? {}, [
+          todayKey,
+        ]),
       }),
       last7Days: rankingBlock({
         label: "Last 7 days",
@@ -235,6 +282,10 @@ export function buildExportPayload(
         periodMs: week.endMs - week.startMs,
         top: topKeysFromMap(keysForDateKeys(stats, week.dateKeys)),
         transitionMap: transitionsForDateKeys(stats, week.dateKeys),
+        modifierPairMap: modifierPairsForDateKeys(
+          stats.daily ?? {},
+          week.dateKeys,
+        ),
       }),
     },
     stats,

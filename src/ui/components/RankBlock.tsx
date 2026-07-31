@@ -5,13 +5,16 @@ import {
   type RankItem,
 } from "@shared/heat";
 import { formatDuration } from "@shared/format";
-import type { TransitionItem } from "@shared/transitions";
+import type { ModifierPairItem } from "@shared/modifiers";
+import type { SelfRepeatItem, TransitionItem } from "@shared/transitions";
 
 type RankBlockProps = {
   title: string;
   periodLabel: string;
   top: RankItem[];
-  transitions: TransitionItem[];
+  topPairs: TransitionItem[];
+  selfRepeats: SelfRepeatItem[];
+  modifierPairs: ModifierPairItem[];
   totalPresses: number;
   totalRecordingMs: number;
   emptyMessage?: string;
@@ -22,15 +25,25 @@ function formatRankLine(item: RankItem, totalPresses: number): string {
   return `${item.label} — ${item.count} · ${formatSharePercent(share)}`;
 }
 
-function formatTransitionLine(item: TransitionItem): string {
+function formatPairLine(item: TransitionItem): string {
   return `${item.from} → ${item.to} — ${item.count}`;
+}
+
+function formatSelfLine(item: SelfRepeatItem): string {
+  return `${item.label} → ${item.label} — ${item.count}`;
+}
+
+function formatModifierLine(item: ModifierPairItem): string {
+  return `${item.modifier}+${item.key} — ${item.count}`;
 }
 
 export function RankBlock({
   title,
   periodLabel,
   top,
-  transitions,
+  topPairs,
+  selfRepeats,
+  modifierPairs,
   totalPresses,
   totalRecordingMs,
   emptyMessage = "No data yet.",
@@ -38,7 +51,9 @@ export function RankBlock({
   const recorded = formatDuration(totalRecordingMs);
   const empty =
     top.length === 0 &&
-    transitions.length === 0 &&
+    topPairs.length === 0 &&
+    selfRepeats.length === 0 &&
+    modifierPairs.length === 0 &&
     totalPresses === 0 &&
     totalRecordingMs === 0;
   const [copying, setCopying] = useState(false);
@@ -48,8 +63,14 @@ export function RankBlock({
     const keyLines = top.map(
       (item, index) => `${index + 1}. ${formatRankLine(item, totalPresses)}`,
     );
-    const transitionLines = transitions.map(
-      (item, index) => `${index + 1}. ${formatTransitionLine(item)}`,
+    const pairLines = topPairs.map(
+      (item, index) => `${index + 1}. ${formatPairLine(item)}`,
+    );
+    const selfLines = selfRepeats.map(
+      (item, index) => `${index + 1}. ${formatSelfLine(item)}`,
+    );
+    const modLines = modifierPairs.map(
+      (item, index) => `${index + 1}. ${formatModifierLine(item)}`,
     );
     const summary = [
       periodLabel,
@@ -60,12 +81,20 @@ export function RankBlock({
     if (keyLines.length) {
       parts.push("", "Top keys:", ...keyLines);
     }
-    if (transitionLines.length) {
-      parts.push("", "Top transitions:", ...transitionLines);
+    if (pairLines.length) {
+      parts.push("", "Top pairs:", ...pairLines);
+    }
+    if (selfLines.length) {
+      parts.push("", "Self-repeats:", ...selfLines);
+    }
+    if (modLines.length) {
+      parts.push("", "Modifier chords:", ...modLines);
     }
     if (
       !keyLines.length &&
-      !transitionLines.length &&
+      !pairLines.length &&
+      !selfLines.length &&
+      !modLines.length &&
       totalPresses === 0 &&
       (recorded === "00:00" || recorded === "0:00:00")
     ) {
@@ -116,14 +145,49 @@ export function RankBlock({
           ))
         )}
       </ol>
-      {transitions.length > 0 ? (
+      {topPairs.length > 0 ? (
         <>
-          <h3 className="rank-subheading">Top transitions</h3>
+          <h3
+            className="rank-subheading"
+            title="Consecutive different keys (bigrams). Excludes A→A self-repeats."
+          >
+            Top pairs
+          </h3>
           <ol className="transition-list">
-            {transitions.map((item) => (
+            {topPairs.map((item) => (
               <li key={`${item.fromId}>${item.toId}`}>
-                {formatTransitionLine(item)}
+                {formatPairLine(item)}
               </li>
+            ))}
+          </ol>
+        </>
+      ) : null}
+      {selfRepeats.length > 0 ? (
+        <>
+          <h3
+            className="rank-subheading"
+            title="Same key pressed again in a row (nav, backspace runs) — not a key-to-key transition."
+          >
+            Self-repeats
+          </h3>
+          <ol className="transition-list">
+            {selfRepeats.map((item) => (
+              <li key={item.id}>{formatSelfLine(item)}</li>
+            ))}
+          </ol>
+        </>
+      ) : null}
+      {modifierPairs.length > 0 ? (
+        <>
+          <h3
+            className="rank-subheading"
+            title="Key pressed while a modifier was held (true chord). Unlike LCtrl→C bigrams, this requires Ctrl still down."
+          >
+            Modifier chords
+          </h3>
+          <ol className="transition-list">
+            {modifierPairs.map((item) => (
+              <li key={item.id}>{formatModifierLine(item)}</li>
             ))}
           </ol>
         </>

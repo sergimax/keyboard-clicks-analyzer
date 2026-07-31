@@ -8,7 +8,15 @@ import {
 } from "@shared/heat";
 import { dayRangeMs, localDateKey, weekRangeMs } from "@shared/dates";
 import { keysForDateKeys, pressesForDateKeys, recordingMsInRange } from "@shared/period";
-import { topTransitions, transitionsForDateKeys } from "@shared/transitions";
+import {
+  modifierPairsForDateKeys,
+  topModifierPairs,
+} from "@shared/modifiers";
+import {
+  selfRepeats,
+  topPairs,
+  transitionsForDateKeys,
+} from "@shared/transitions";
 import type { StatsFile } from "@shared/types";
 import { fetchStats, resetStats } from "./api";
 import { KeyboardBoard } from "./components/KeyboardBoard";
@@ -40,6 +48,7 @@ const emptyStats: StatsFile = {
   sessions: [],
   keys: {},
   transitions: {},
+  modifierPairs: {},
   bursts: { count: 0, longest: 0 },
   suspiciousRepeats: {},
   daily: {},
@@ -122,12 +131,24 @@ export function App() {
     ? "Live view updates about once per second from the local collector (127.0.0.1 only). Current session time is shown in the collect terminal. Day/week key counts update live; recorded time for periods uses completed intervals only."
     : "Absolute heatmap: sqrt scale vs the hottest key (good for wear magnitude). Relative (%): captions show share of presses; colors use rank among pressed keys so Space does not wash out mid-tier keys. Rankings still use physical presses. Hold-repeats are in key tooltips. Day/week rankings use local calendar days (week = last 7 days).";
 
+  const transitionsToday = transitionsForDateKeys(stats, [todayKey]);
+  const transitionsWeek = transitionsForDateKeys(stats, week.dateKeys);
+  const modifiersToday = modifierPairsForDateKeys(stats.daily ?? {}, [
+    todayKey,
+  ]);
+  const modifiersWeek = modifierPairsForDateKeys(
+    stats.daily ?? {},
+    week.dateKeys,
+  );
+
   const periods = [
     {
       title: "All time",
       periodLabel: "All time",
       top: topKeys(stats),
-      transitions: topTransitions(stats.transitions),
+      topPairs: topPairs(stats.transitions),
+      selfRepeats: selfRepeats(stats.transitions),
+      modifierPairs: topModifierPairs(stats.modifierPairs),
       totalPresses: stats.totalPresses,
       totalRecordingMs: stats.recordingMs ?? 0,
       emptyMessage: "No data yet. Run npm run collect.",
@@ -136,7 +157,9 @@ export function App() {
       title: "Today",
       periodLabel: `Today (${todayKey})`,
       top: topKeysFromMap(keysForDateKeys(stats, [todayKey])),
-      transitions: topTransitions(transitionsForDateKeys(stats, [todayKey])),
+      topPairs: topPairs(transitionsToday),
+      selfRepeats: selfRepeats(transitionsToday),
+      modifierPairs: topModifierPairs(modifiersToday),
       totalPresses: pressesForDateKeys(stats, [todayKey]),
       totalRecordingMs: recordingMsInRange(stats, day.startMs, day.endMs),
       emptyMessage: periodEmptyHint,
@@ -145,7 +168,9 @@ export function App() {
       title: "Last 7 days",
       periodLabel: `Last 7 days (${week.dateKeys[0]} – ${todayKey})`,
       top: topKeysFromMap(keysForDateKeys(stats, week.dateKeys)),
-      transitions: topTransitions(transitionsForDateKeys(stats, week.dateKeys)),
+      topPairs: topPairs(transitionsWeek),
+      selfRepeats: selfRepeats(transitionsWeek),
+      modifierPairs: topModifierPairs(modifiersWeek),
       totalPresses: pressesForDateKeys(stats, week.dateKeys),
       totalRecordingMs: recordingMsInRange(stats, week.startMs, week.endMs),
       emptyMessage: periodEmptyHint,
