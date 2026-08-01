@@ -48,8 +48,8 @@ npm run reset
   - **All time / Today / Last 7 days** — top-30 rankings with presses + recorded time; each has its own **Copy** button
   - **Reset stats** — clears key counts, day buckets, timers, and intervals (confirm dialog); requires collect still running
   - **Show numpad** — above the heatmap (default Off; saved in the browser)
-  - **Details** — side panel + ranking/Copy blocks; toggles for side panel (default On) and optional Top pairs / Self-repeats / Modifier chords (default Off)
-  - **Heatmap Absolute / Relative (%)** — absolute uses sqrt scale vs hottest key; relative shows % captions and rank-based colors (Space won’t wash out mid keys; preference saved in the browser)
+  - **Details** — summary stats, optional diagnostics column (suspicious repeats / intervals / unmapped; default On), and ranking/Copy blocks; toggles for Top pairs / Self-repeats / Modifier chords (default Off)
+  - **Heatmap numbers Absolute / Relative (%)** — absolute uses sqrt scale vs hottest key; relative shows % captions and rank-based colors (Space won’t wash out mid keys; preference saved in the browser)
   - **Export** (header) — modal with optional layout/keyboard meta, then download JSON (`exportedAt` / `appVersion` / `schemaVersion`, rankings, full `stats`)
   - **Reset** (header, live collect only) — confirm modal before clearing stats
   - **Top pairs / self-repeats / modifier chords** — bigrams (A≠B), same-key runs (A→A), and true held-modifier+key combos per period
@@ -77,7 +77,7 @@ Built UI assets live in `dist/ui/` (gitignored; produced by `npm run build:ui`).
 - Aggregation key: scan code + extended flag (layout-independent: `Q` and `Й` are the same key)
 - Key-up is ignored; OS auto-repeat while holding increments `repeatCount` (not `count` / heatmap / transitions / bursts)
 - Bursts group physical presses separated by >1s idle — UI/export show avg burst length and bursts/hour (activity chunking, not switch wear)
-- Suspicious repeats: same physical key again within 30ms / 50ms (OS auto-repeat ignored); side panel lists keys that may bounce or double-register
+- Suspicious repeats: same physical key again within 30ms / 50ms (OS auto-repeat ignored); diagnostics lists keys that may bounce or double-register
 - Modifier chords use collector `mods` bitmask of other held modifiers at first-down (rebuild collector after pull)
 - Right Shift / Win / Menu variants are normalized when Windows reports inconsistent codes
 

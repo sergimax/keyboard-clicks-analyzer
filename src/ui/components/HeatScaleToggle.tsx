@@ -30,10 +30,10 @@ export function HeatScaleToggle({ mode, onChange }: HeatScaleToggleProps) {
     <div
       className="heat-scale"
       role="group"
-      aria-label="Heatmap scale"
+      aria-label="Heatmap numbers"
       title="Absolute: color vs hottest key (sqrt), show counts. Relative: color by rank among pressed keys, show % of total — mid-tier keys stay visible when Space dominates."
     >
-      <span className="heat-scale-label">Heatmap</span>
+      <span className="heat-scale-label">Heatmap numbers</span>
       <div className="heat-scale-options">
         <button
           type="button"
