@@ -28,6 +28,11 @@ import {
 } from "./components/HeatScaleToggle";
 import { HeatLegend } from "./components/HeatLegend";
 import { NumpadToggle, readShowNumpad, writeShowNumpad } from "./components/NumpadToggle";
+import {
+  SidePanelToggle,
+  readShowSidePanel,
+  writeShowSidePanel,
+} from "./components/SidePanelToggle";
 import { ExportJsonButton } from "./components/ExportJsonButton";
 import { DeviceMetaFields } from "./components/DeviceMetaFields";
 import { RankRow } from "./components/RankRow";
@@ -61,6 +66,7 @@ export function App() {
   const [resetting, setResetting] = useState(false);
   const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
   const [showNumpad, setShowNumpad] = useState(() => readShowNumpad());
+  const [showSide, setShowSide] = useState(() => readShowSidePanel());
   const [heatScale, setHeatScale] = useState<HeatScaleMode>(() => readHeatScaleMode());
   const [deviceMeta, setDeviceMeta] = useState<DeviceMeta>(() => readDeviceMeta());
 
@@ -68,6 +74,10 @@ export function App() {
     document.body.classList.toggle("hide-numpad", !showNumpad);
     writeShowNumpad(showNumpad);
   }, [showNumpad]);
+
+  useEffect(() => {
+    writeShowSidePanel(showSide);
+  }, [showSide]);
 
   useEffect(() => {
     writeHeatScaleMode(heatScale);
@@ -191,6 +201,7 @@ export function App() {
       <div className="toolbar">
         <div className="view-controls" aria-label="Display options">
           <NumpadToggle showNumpad={showNumpad} onChange={setShowNumpad} />
+          <SidePanelToggle showSide={showSide} onChange={setShowSide} />
           <HeatScaleToggle mode={heatScale} onChange={setHeatScale} />
         </div>
         <div className="export-controls" aria-label="Export">
@@ -223,14 +234,16 @@ export function App() {
         }}
         onConfirm={() => void handleConfirmReset()}
       />
-      <div className="layout">
+      <div className={`layout${showSide ? "" : " no-side"}`}>
         <div className="main-col">
           <KeyboardBoard keys={mapped} scaleMode={heatScale} />
           <HeatLegend mode={heatScale} hottest={hottest} />
           <p className="note">{note}</p>
+        </div>
+        {showSide ? <SessionsList stats={stats} unmapped={unmapped} /> : null}
+        <div className="rank-area">
           <RankRow periods={periods} />
         </div>
-        <SessionsList stats={stats} unmapped={unmapped} />
       </div>
     </>
   );
