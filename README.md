@@ -47,8 +47,8 @@ npm run reset
   - **Saved intervals** — count of completed intervals; list under **Recording intervals**
   - **All time / Today / Last 7 days** — top-30 rankings with presses + recorded time; each has its own **Copy** button
   - **Reset stats** — clears key counts, day buckets, timers, and intervals (confirm dialog); requires collect still running
-  - **Show numpad** — toggle numpad visibility (default Off; saved in the browser)
-  - **Side panel** — toggle suspicious repeats / recording intervals (default On; on narrow screens stacks under the heatmap, above rankings)
+  - **Show numpad** — above the heatmap (default Off; saved in the browser)
+  - **Details** — side panel + ranking/Copy blocks; toggles for side panel (default On) and optional Top pairs / Self-repeats / Modifier chords (default Off)
   - **Heatmap Absolute / Relative (%)** — absolute uses sqrt scale vs hottest key; relative shows % captions and rank-based colors (Space won’t wash out mid keys; preference saved in the browser)
   - **Export JSON** — download summary + rankings + stats; includes `exportedAt` / `appVersion` / `schemaVersion`, `meta`, `timing`, `intensity`, top `share`, and `transitions.{topPairs,selfRepeats,modifierPairs}`
   - **Top pairs / self-repeats / modifier chords** — bigrams (A≠B), same-key runs (A→A), and true held-modifier+key combos per period

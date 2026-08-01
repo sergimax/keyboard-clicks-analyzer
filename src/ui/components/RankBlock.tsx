@@ -7,6 +7,7 @@ import {
 import { formatDuration } from "@shared/format";
 import type { ModifierPairItem } from "@shared/modifiers";
 import type { SelfRepeatItem, TransitionItem } from "@shared/transitions";
+import type { RankVisibility } from "../rank-visibility";
 
 type RankBlockProps = {
   title: string;
@@ -15,6 +16,7 @@ type RankBlockProps = {
   topPairs: TransitionItem[];
   selfRepeats: SelfRepeatItem[];
   modifierPairs: ModifierPairItem[];
+  visibility: RankVisibility;
   totalPresses: number;
   totalRecordingMs: number;
   emptyMessage?: string;
@@ -44,16 +46,20 @@ export function RankBlock({
   topPairs,
   selfRepeats,
   modifierPairs,
+  visibility,
   totalPresses,
   totalRecordingMs,
   emptyMessage = "No data yet.",
 }: RankBlockProps) {
   const recorded = formatDuration(totalRecordingMs);
+  const showPairs = visibility.topPairs && topPairs.length > 0;
+  const showSelf = visibility.selfRepeats && selfRepeats.length > 0;
+  const showMods = visibility.modifierPairs && modifierPairs.length > 0;
   const empty =
     top.length === 0 &&
-    topPairs.length === 0 &&
-    selfRepeats.length === 0 &&
-    modifierPairs.length === 0 &&
+    !showPairs &&
+    !showSelf &&
+    !showMods &&
     totalPresses === 0 &&
     totalRecordingMs === 0;
   const [copying, setCopying] = useState(false);
@@ -63,15 +69,21 @@ export function RankBlock({
     const keyLines = top.map(
       (item, index) => `${index + 1}. ${formatRankLine(item, totalPresses)}`,
     );
-    const pairLines = topPairs.map(
-      (item, index) => `${index + 1}. ${formatPairLine(item)}`,
-    );
-    const selfLines = selfRepeats.map(
-      (item, index) => `${index + 1}. ${formatSelfLine(item)}`,
-    );
-    const modLines = modifierPairs.map(
-      (item, index) => `${index + 1}. ${formatModifierLine(item)}`,
-    );
+    const pairLines = visibility.topPairs
+      ? topPairs.map(
+          (item, index) => `${index + 1}. ${formatPairLine(item)}`,
+        )
+      : [];
+    const selfLines = visibility.selfRepeats
+      ? selfRepeats.map(
+          (item, index) => `${index + 1}. ${formatSelfLine(item)}`,
+        )
+      : [];
+    const modLines = visibility.modifierPairs
+      ? modifierPairs.map(
+          (item, index) => `${index + 1}. ${formatModifierLine(item)}`,
+        )
+      : [];
     const summary = [
       periodLabel,
       `Total presses: ${totalPresses}`,
@@ -136,6 +148,7 @@ export function RankBlock({
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
+      <h3 className="rank-subheading">Most popular</h3>
       <ol>
         {top.length === 0 ? (
           <li>{emptyMessage}</li>
@@ -145,7 +158,7 @@ export function RankBlock({
           ))
         )}
       </ol>
-      {topPairs.length > 0 ? (
+      {showPairs ? (
         <>
           <h3
             className="rank-subheading"
@@ -162,7 +175,7 @@ export function RankBlock({
           </ol>
         </>
       ) : null}
-      {selfRepeats.length > 0 ? (
+      {showSelf ? (
         <>
           <h3
             className="rank-subheading"
@@ -177,7 +190,7 @@ export function RankBlock({
           </ol>
         </>
       ) : null}
-      {modifierPairs.length > 0 ? (
+      {showMods ? (
         <>
           <h3
             className="rank-subheading"

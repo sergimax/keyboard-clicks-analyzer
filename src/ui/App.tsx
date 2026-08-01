@@ -33,6 +33,7 @@ import {
   readShowSidePanel,
   writeShowSidePanel,
 } from "./components/SidePanelToggle";
+import { PreferenceSwitch } from "./components/PreferenceSwitch";
 import { ExportJsonButton } from "./components/ExportJsonButton";
 import { DeviceMetaFields } from "./components/DeviceMetaFields";
 import { RankRow } from "./components/RankRow";
@@ -44,6 +45,11 @@ import {
   writeDeviceMeta,
   type DeviceMeta,
 } from "./device-meta";
+import {
+  readRankVisibility,
+  writeRankVisibility,
+  type RankVisibility,
+} from "./rank-visibility";
 
 const emptyStats: StatsFile = {
   version: 1,
@@ -68,6 +74,9 @@ export function App() {
   const [showNumpad, setShowNumpad] = useState(() => readShowNumpad());
   const [showSide, setShowSide] = useState(() => readShowSidePanel());
   const [heatScale, setHeatScale] = useState<HeatScaleMode>(() => readHeatScaleMode());
+  const [rankVisibility, setRankVisibility] = useState<RankVisibility>(() =>
+    readRankVisibility(),
+  );
   const [deviceMeta, setDeviceMeta] = useState<DeviceMeta>(() => readDeviceMeta());
 
   useEffect(() => {
@@ -82,6 +91,10 @@ export function App() {
   useEffect(() => {
     writeHeatScaleMode(heatScale);
   }, [heatScale]);
+
+  useEffect(() => {
+    writeRankVisibility(rankVisibility);
+  }, [rankVisibility]);
 
   useEffect(() => {
     writeDeviceMeta(deviceMeta);
@@ -124,6 +137,10 @@ export function App() {
     } finally {
       setResetting(false);
     }
+  }
+
+  function patchRankVisibility(patch: Partial<RankVisibility>) {
+    setRankVisibility((prev) => ({ ...prev, ...patch }));
   }
 
   const heatKeys = buildHeatKeys(stats, heatScale);
@@ -198,10 +215,9 @@ export function App() {
       <p className="sub">
         Local physical-key presses · no network · labels use US QWERTY positions
       </p>
+      <p className="note note-intro">{note}</p>
       <div className="toolbar">
         <div className="view-controls" aria-label="Display options">
-          <NumpadToggle showNumpad={showNumpad} onChange={setShowNumpad} />
-          <SidePanelToggle showSide={showSide} onChange={setShowSide} />
           <HeatScaleToggle mode={heatScale} onChange={setHeatScale} />
         </div>
         <div className="export-controls" aria-label="Export">
@@ -234,17 +250,53 @@ export function App() {
         }}
         onConfirm={() => void handleConfirmReset()}
       />
-      <div className={`layout${showSide ? "" : " no-side"}`}>
-        <div className="main-col">
-          <KeyboardBoard keys={mapped} scaleMode={heatScale} />
-          <HeatLegend mode={heatScale} hottest={hottest} />
-          <p className="note">{note}</p>
+
+      <section className="heatmap-section" aria-label="Heatmap">
+        <div className="heatmap-toolbar">
+          <NumpadToggle showNumpad={showNumpad} onChange={setShowNumpad} />
         </div>
-        {showSide ? <SessionsList stats={stats} unmapped={unmapped} /> : null}
-        <div className="rank-area">
-          <RankRow periods={periods} />
+        <KeyboardBoard keys={mapped} scaleMode={heatScale} />
+        <HeatLegend mode={heatScale} hottest={hottest} />
+      </section>
+
+      <section className="details-section" aria-label="Details">
+        <div className="details-header">
+          <h2 className="details-title">Details</h2>
+          <div className="details-toggles" aria-label="Details panels">
+            <SidePanelToggle showSide={showSide} onChange={setShowSide} />
+            <PreferenceSwitch
+              checked={rankVisibility.topPairs}
+              onChange={(checked) => patchRankVisibility({ topPairs: checked })}
+              label="Top pairs"
+              title="Show A→B bigrams in ranking / Copy blocks"
+            />
+            <PreferenceSwitch
+              checked={rankVisibility.selfRepeats}
+              onChange={(checked) =>
+                patchRankVisibility({ selfRepeats: checked })
+              }
+              label="Self-repeats"
+              title="Show same-key runs (A→A) in ranking / Copy blocks"
+            />
+            <PreferenceSwitch
+              checked={rankVisibility.modifierPairs}
+              onChange={(checked) =>
+                patchRankVisibility({ modifierPairs: checked })
+              }
+              label="Modifier chords"
+              title="Show held-modifier + key combos in ranking / Copy blocks"
+            />
+          </div>
         </div>
-      </div>
+        <div className={`details-layout${showSide ? "" : " no-side"}`}>
+          {showSide ? (
+            <SessionsList stats={stats} unmapped={unmapped} />
+          ) : null}
+          <div className="rank-area">
+            <RankRow periods={periods} visibility={rankVisibility} />
+          </div>
+        </div>
+      </section>
     </>
   );
 }
