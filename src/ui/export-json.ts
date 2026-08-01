@@ -313,7 +313,7 @@ export function downloadExportJson(
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = `keyboard-clicks-${stamp}.json`;
+  anchor.download = `keyboard-heatmap-${stamp}.json`;
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();
