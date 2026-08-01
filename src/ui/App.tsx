@@ -273,14 +273,6 @@ export function App() {
         </div>
         <KeyboardBoard keys={mapped} scaleMode={heatScale} />
         <HeatLegend mode={heatScale} hottest={hottest} />
-        <MetaBar
-          updatedAt={stats.updatedAt}
-          totalPresses={stats.totalPresses}
-          hottest={hottest}
-          totalRecordingMs={stats.recordingMs ?? 0}
-          sessionCount={stats.sessions?.length ?? 0}
-          bursts={stats.bursts ?? { count: 0, longest: 0 }}
-        />
       </section>
 
       <section className="details-section" aria-label="Details">
@@ -312,6 +304,14 @@ export function App() {
             />
           </div>
         </div>
+        <MetaBar
+          updatedAt={stats.updatedAt}
+          totalPresses={stats.totalPresses}
+          hottest={hottest}
+          totalRecordingMs={stats.recordingMs ?? 0}
+          sessionCount={stats.sessions?.length ?? 0}
+          bursts={stats.bursts ?? { count: 0, longest: 0 }}
+        />
         <div className={`details-layout${showSide ? "" : " no-side"}`}>
           {showSide ? (
             <SessionsList stats={stats} unmapped={unmapped} />

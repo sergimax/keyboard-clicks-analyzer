@@ -98,7 +98,7 @@ Example: `feat(live-server): add reset stats endpoint`
 - **Heatmap labels** — US QWERTY **positions** for display; not the user’s active layout
 - Restart `collect` after pulling code / rebuilding UI so the live server serves the new `dist/ui`
 - **Show numpad** — preference in `localStorage` (`kca-show-numpad`); control sits above the heatmap
-- **Details** — side panel (`kca-show-side`) + ranking toggles `kca-rank-pairs` / `kca-rank-self` / `kca-rank-mods` (default off; top keys always on)
+- **Details** — summary MetaBar + diagnostics column (`kca-show-side`) + ranking toggles `kca-rank-pairs` / `kca-rank-self` / `kca-rank-mods` (default off; top keys always on)
 - **Heatmap scale** — Absolute (sqrt vs max) / Relative (% captions + rank intensity); `localStorage` (`kca-heat-scale`)
 
 ## Component Structure

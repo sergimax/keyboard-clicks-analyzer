@@ -9,14 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Side panel** toggle (`localStorage` `kca-show-side`) to show/hide suspicious repeats, recording intervals, and unmapped codes
+- **Diagnostics** toggle (`localStorage` `kca-show-side`) to show/hide suspicious repeats, recording intervals, and unmapped codes
 - Ranking section toggles for **Top pairs** / **Self-repeats** / **Modifier chords** (default off; most-popular keys always shown)
 
 ### Changed
 
-- Layout: project note under the header; numpad toggle above the heatmap; **Details** section groups side panel + ranking/Copy blocks
-- On narrow layouts the side panel stacks above ranking/Copy blocks inside Details
+- Layout: project note under the header; numpad toggle above the heatmap; **Details** section groups summary stats, diagnostics, and ranking/Copy blocks
+- On narrow layouts diagnostics stack above ranking/Copy blocks inside Details
 - **Export** and **Reset** are header actions with modals (layouts/keyboard meta live in the Export dialog; Reset only while collect is live)
+- Details toggle label **Diagnostics** (was “Side panel”); heatmap control label **Heatmap numbers**; summary MetaBar sits under the Details header
 
 ## [2.2.0] - 2026-07-31
 

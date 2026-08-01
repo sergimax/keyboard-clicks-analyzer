@@ -31,8 +31,8 @@ export function SidePanelToggle({ showSide, onChange }: SidePanelToggleProps) {
     <PreferenceSwitch
       checked={showSide}
       onChange={onChange}
-      label="Side panel"
-      ariaLabel="Show side panel"
+      label="Diagnostics"
+      ariaLabel="Show diagnostics"
       title="Suspicious repeats, recording intervals, and unmapped codes"
     />
   );
