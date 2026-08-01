@@ -1,3 +1,5 @@
+import { PreferenceSwitch } from "./PreferenceSwitch";
+
 const NUMPAD_KEY = "kca-show-numpad";
 
 type NumpadToggleProps = {
@@ -24,18 +26,11 @@ export function writeShowNumpad(show: boolean): void {
 
 export function NumpadToggle({ showNumpad, onChange }: NumpadToggleProps) {
   return (
-    <button
-      type="button"
-      className={`numpad-toggle${showNumpad ? " is-on" : ""}`}
-      role="switch"
-      aria-checked={showNumpad}
-      aria-label="Show numpad"
-      onClick={() => onChange(!showNumpad)}
-    >
-      <span className="numpad-toggle-track" aria-hidden="true">
-        <span className="numpad-toggle-thumb" />
-      </span>
-      <span className="numpad-toggle-label">Show numpad</span>
-    </button>
+    <PreferenceSwitch
+      checked={showNumpad}
+      onChange={onChange}
+      label="Show numpad"
+      ariaLabel="Show numpad"
+    />
   );
 }

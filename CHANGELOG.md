@@ -10,10 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Side panel** toggle (`localStorage` `kca-show-side`) to show/hide suspicious repeats, recording intervals, and unmapped codes
+- Ranking section toggles for **Top pairs** / **Self-repeats** / **Modifier chords** (default off; most-popular keys always shown)
 
 ### Changed
 
-- On narrow layouts the side panel stacks under the heatmap (above ranking/Copy blocks) instead of below all rankings
+- Layout: project note under the header; numpad toggle above the heatmap; **Details** section groups side panel + ranking/Copy blocks
+- On narrow layouts the side panel stacks above ranking/Copy blocks inside Details
 
 ## [2.2.0] - 2026-07-31
 

@@ -1,3 +1,5 @@
+import { PreferenceSwitch } from "./PreferenceSwitch";
+
 const SIDE_PANEL_KEY = "kca-show-side";
 
 type SidePanelToggleProps = {
@@ -26,19 +28,12 @@ export function writeShowSidePanel(show: boolean): void {
 
 export function SidePanelToggle({ showSide, onChange }: SidePanelToggleProps) {
   return (
-    <button
-      type="button"
-      className={`numpad-toggle${showSide ? " is-on" : ""}`}
-      role="switch"
-      aria-checked={showSide}
-      aria-label="Show side panel"
+    <PreferenceSwitch
+      checked={showSide}
+      onChange={onChange}
+      label="Side panel"
+      ariaLabel="Show side panel"
       title="Suspicious repeats, recording intervals, and unmapped codes"
-      onClick={() => onChange(!showSide)}
-    >
-      <span className="numpad-toggle-track" aria-hidden="true">
-        <span className="numpad-toggle-thumb" />
-      </span>
-      <span className="numpad-toggle-label">Side panel</span>
-    </button>
+    />
   );
 }
