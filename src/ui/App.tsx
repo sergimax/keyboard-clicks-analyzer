@@ -34,6 +34,7 @@ import {
   writeShowSidePanel,
 } from "./components/SidePanelToggle";
 import { PreferenceSwitch } from "./components/PreferenceSwitch";
+import { AppHeader } from "./components/AppHeader";
 import { ExportDialog } from "./components/ExportDialog";
 import { RankRow } from "./components/RankRow";
 import { ResetConfirmDialog } from "./components/ResetConfirmDialog";
@@ -208,34 +209,14 @@ export function App() {
     stats.totalPresses === 0 && (stats.recordingMs ?? 0) === 0;
 
   return (
-    <>
-      <header className="app-header">
-        <div className="app-header-brand">
-          <h1>Keyboard Heatmap</h1>
-          <span className="app-version" title="App version">
-            v{__APP_VERSION__}
-          </span>
-        </div>
-        <div className="app-header-actions">
-          <button
-            type="button"
-            className="btn-header"
-            onClick={() => setExportOpen(true)}
-          >
-            Export
-          </button>
-          {live ? (
-            <button
-              type="button"
-              className="btn-header btn-header-danger"
-              disabled={resetting}
-              onClick={() => setResetConfirmOpen(true)}
-            >
-              Reset
-            </button>
-          ) : null}
-        </div>
-      </header>
+    <div className="app-shell">
+      <AppHeader
+        live={live}
+        resetting={resetting}
+        onExport={() => setExportOpen(true)}
+        onReset={() => setResetConfirmOpen(true)}
+      />
+      <main className="app-main">
       <p className="note note-intro">{note}</p>
       {error ? <p className="status-error">{error}</p> : null}
       <ExportDialog
@@ -322,6 +303,7 @@ export function App() {
           }
         />
       </section>
-    </>
+      </main>
+    </div>
   );
 }

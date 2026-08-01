@@ -15,7 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Layout: project note under the header; numpad toggle above the heatmap; **Details** section groups summary stats, panel toggles, and compact diagnostics + ranking cards
-- **Export** and **Reset** are header actions with modals (layouts/keyboard meta live in the Export dialog; Reset only while collect is live)
+- Sticky blurred app bar (brand + logo, centered Export/Reset with compact ☰ menu under 900px, GitHub / author / `v.X.Y.Z` chrome) aligned with other sergimax apps
+- **Export** and **Reset** open modals from the toolbar (layouts/keyboard meta in Export; Reset only while collect is live)
 - Details toggle label **Diagnostics** (was “Side panel”); heatmap control label **Heatmap numbers**; summary MetaBar sits under the Details header
 - Ranking blocks are compact (fit-content columns, denser lists, top 12 visible; Copy still exports full top 30)
 - Details panel toggles sit under the summary stats (near the blocks they control); diagnostics uses the same compact card style as ranking columns
