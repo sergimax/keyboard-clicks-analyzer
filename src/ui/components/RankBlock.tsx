@@ -9,6 +9,9 @@ import type { ModifierPairItem } from "@shared/modifiers";
 import type { SelfRepeatItem, TransitionItem } from "@shared/transitions";
 import type { RankVisibility } from "../rank-visibility";
 
+/** Visible rows in the UI; Copy still uses the full arrays. */
+const RANK_UI_LIMIT = 12;
+
 type RankBlockProps = {
   title: string;
   periodLabel: string;
@@ -55,6 +58,10 @@ export function RankBlock({
   const showPairs = visibility.topPairs && topPairs.length > 0;
   const showSelf = visibility.selfRepeats && selfRepeats.length > 0;
   const showMods = visibility.modifierPairs && modifierPairs.length > 0;
+  const visibleTop = top.slice(0, RANK_UI_LIMIT);
+  const visiblePairs = topPairs.slice(0, RANK_UI_LIMIT);
+  const visibleSelf = selfRepeats.slice(0, RANK_UI_LIMIT);
+  const visibleMods = modifierPairs.slice(0, RANK_UI_LIMIT);
   const empty =
     top.length === 0 &&
     !showPairs &&
@@ -150,10 +157,10 @@ export function RankBlock({
       </div>
       <h3 className="rank-subheading">Most popular</h3>
       <ol>
-        {top.length === 0 ? (
+        {visibleTop.length === 0 ? (
           <li>{emptyMessage}</li>
         ) : (
-          top.map((item) => (
+          visibleTop.map((item) => (
             <li key={item.id}>{formatRankLine(item, totalPresses)}</li>
           ))
         )}
@@ -166,8 +173,8 @@ export function RankBlock({
           >
             Top pairs
           </h3>
-          <ol className="transition-list">
-            {topPairs.map((item) => (
+          <ol>
+            {visiblePairs.map((item) => (
               <li key={`${item.fromId}>${item.toId}`}>
                 {formatPairLine(item)}
               </li>
@@ -183,8 +190,8 @@ export function RankBlock({
           >
             Self-repeats
           </h3>
-          <ol className="transition-list">
-            {selfRepeats.map((item) => (
+          <ol>
+            {visibleSelf.map((item) => (
               <li key={item.id}>{formatSelfLine(item)}</li>
             ))}
           </ol>
@@ -198,8 +205,8 @@ export function RankBlock({
           >
             Modifier chords
           </h3>
-          <ol className="transition-list">
-            {modifierPairs.map((item) => (
+          <ol>
+            {visibleMods.map((item) => (
               <li key={item.id}>{formatModifierLine(item)}</li>
             ))}
           </ol>
