@@ -7,19 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-08-01
+
 ### Added
 
 - **Diagnostics** toggle (`localStorage` `kca-show-side`) to show/hide suspicious repeats, recording intervals, and unmapped codes
 - Ranking section toggles for **Top pairs** / **Self-repeats** / **Modifier chords** (default off; most-popular keys always shown)
+- Sticky blurred app bar with logo, GitHub / author links, and `v.X.Y.Z` chrome (compact ☰ menu under 900px)
 
 ### Changed
 
-- Layout: project note under the header; numpad toggle above the heatmap; **Details** section groups summary stats, panel toggles, and compact diagnostics + ranking cards
-- Sticky blurred app bar (brand + logo, centered Export/Reset with compact ☰ menu under 900px, GitHub / author / `v.X.Y.Z` chrome) aligned with other sergimax apps
-- **Export** and **Reset** open modals from the toolbar (layouts/keyboard meta in Export; Reset only while collect is live)
-- Details toggle label **Diagnostics** (was “Side panel”); heatmap control label **Heatmap numbers**; summary MetaBar sits under the Details header
-- Ranking blocks are compact (fit-content columns, denser lists, top 12 visible; Copy still exports full top 30)
-- Details panel toggles sit under the summary stats (near the blocks they control); diagnostics uses the same compact card style as ranking columns
+- Layout: project note under the header; numpad toggle and heatmap-number scale above the board; **Details** groups summary stats, panel toggles, then compact diagnostics + ranking cards
+- **Export** and **Reset** are toolbar actions with modals (layout/keyboard meta in Export; Reset only while collect is live)
+- Ranking blocks are denser (fit-content columns, top 12 on screen; Copy still includes full top 30)
 
 ## [2.2.0] - 2026-07-31
 

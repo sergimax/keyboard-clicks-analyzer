@@ -1,5 +1,5 @@
 # Keyboard Clicks Analyzer
-![App version](https://img.shields.io/badge/App_version-2.2.0-purple)
+![App version](https://img.shields.io/badge/App_version-2.3.0-purple)
 
 Local, offline heatmap of **physical** keyboard key presses on Windows. Use it to decide which switches to replace first.
 
@@ -42,20 +42,14 @@ npm run reset
 
 - Terminal status line: `session mm:ss · presses N` (current run only; resets with **Reset stats**)
 - Browser: **http://127.0.0.1:17823/** (loopback only; usually opens automatically)
-  - **LIVE** badge, heatmap, rankings
-  - **Active recording** — sum of *completed* start→stop intervals (current session is not included until you stop)
-  - **Saved intervals** — count of completed intervals; list under **Recording intervals**
-  - **All time / Today / Last 7 days** — top-30 rankings with presses + recorded time; each has its own **Copy** button
-  - **Reset stats** — clears key counts, day buckets, timers, and intervals (confirm dialog); requires collect still running
-  - **Show numpad** — above the heatmap (default Off; saved in the browser)
-  - **Details** — summary stats, then panel toggles, then compact cards: optional diagnostics (suspicious repeats / intervals / unmapped; default On) plus ranking/Copy columns (top 12 on screen; Copy still includes full top 30); toggles for Top pairs / Self-repeats / Modifier chords (default Off)
-  - **Heatmap numbers Absolute / Relative (%)** — absolute uses sqrt scale vs hottest key; relative shows % captions and rank-based colors (Space won’t wash out mid keys; preference saved in the browser)
   - Sticky header — logo + title; **Export** / **Reset** (centered on desktop, ☰ menu on narrow); GitHub, author site, and `v.X.Y.Z`
+  - Heatmap with **Show numpad** and **Heatmap numbers** Absolute / Relative (%) above the board
+  - **Details** — summary stats (presses, hottest key, bursts, active recording, saved intervals), panel toggles, then compact cards for diagnostics + **All time / Today / Last 7 days** rankings (**Copy** still includes full top 30; screen shows top 12)
   - **Export** — modal with optional layout/keyboard meta, then download JSON (`exportedAt` / `appVersion` / `schemaVersion`, rankings, full `stats`)
-  - **Reset** (live collect only) — confirm modal before clearing stats
-  - **Top pairs / self-repeats / modifier chords** — bigrams (A≠B), same-key runs (A→A), and true held-modifier+key combos per period
+  - **Reset** (collect only) — confirm modal; clears key counts, day buckets, timers, and intervals
+  - Optional ranking lists: **Top pairs** / **Self-repeats** / **Modifier chords** (default Off)
 
-`npm run report` serves the same UI from disk stats (no Reset button). There is no standalone `data/heatmap.html` anymore — use the report viewer.
+`npm run report` serves the same UI from disk stats (no Reset). There is no standalone `data/heatmap.html` anymore — use the report viewer.
 
 ### Data file
 

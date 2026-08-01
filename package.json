@@ -1,6 +1,6 @@
 {
   "name": "keyboard-clicks-analyzer",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "private": true,
   "description": "Local physical-key press heatmap for Windows (offline)",
   "type": "module",
