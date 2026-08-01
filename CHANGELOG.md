@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Layout: project note under the header; numpad toggle above the heatmap; **Details** section groups side panel + ranking/Copy blocks
 - On narrow layouts the side panel stacks above ranking/Copy blocks inside Details
+- **Export** and **Reset** are header actions with modals (layouts/keyboard meta live in the Export dialog; Reset only while collect is live)
 
 ## [2.2.0] - 2026-07-31
 
