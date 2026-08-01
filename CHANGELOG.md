@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - On narrow layouts diagnostics stack above ranking/Copy blocks inside Details
 - **Export** and **Reset** are header actions with modals (layouts/keyboard meta live in the Export dialog; Reset only while collect is live)
 - Details toggle label **Diagnostics** (was “Side panel”); heatmap control label **Heatmap numbers**; summary MetaBar sits under the Details header
+- Ranking blocks are compact (fit-content columns, denser lists, top 12 visible; Copy still exports full top 30)
 
 ## [2.2.0] - 2026-07-31
 
