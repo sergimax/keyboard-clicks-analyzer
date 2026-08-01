@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 
 const GITHUB_REPO_URL =
-  "https://github.com/sergimax/keyboard-clicks-analyzer";
+  "https://github.com/sergimax/keyboard-heatmap";
 const AUTHOR_SITE_URL = "https://sergimax.ru";
 
 type AppHeaderProps = {
