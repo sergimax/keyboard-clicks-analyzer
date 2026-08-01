@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.1] - 2026-08-01
+
+### Changed
+
+- Project rename to **Keyboard Heatmap** (`keyboard-heatmap`): package name, GitHub repo link, Export JSON download filename, and README title
+
 ## [2.3.0] - 2026-08-01
 
 ### Added

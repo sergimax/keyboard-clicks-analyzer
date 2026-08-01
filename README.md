@@ -1,5 +1,5 @@
-# Keyboard Clicks Analyzer
-![App version](https://img.shields.io/badge/App_version-2.3.0-purple)
+# Keyboard Heatmap
+![App version](https://img.shields.io/badge/App_version-2.3.1-purple)
 
 Local, offline heatmap of **physical** keyboard key presses on Windows. Use it to decide which switches to replace first.
 
