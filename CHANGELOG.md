@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Side panel** toggle (`localStorage` `kca-show-side`) to show/hide suspicious repeats, recording intervals, and unmapped codes
+
+### Changed
+
+- On narrow layouts the side panel stacks under the heatmap (above ranking/Copy blocks) instead of below all rankings
+
 ## [2.2.0] - 2026-07-31
 
 ### Added
