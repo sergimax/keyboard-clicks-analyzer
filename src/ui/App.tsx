@@ -278,31 +278,6 @@ export function App() {
       <section className="details-section" aria-label="Details">
         <div className="details-header">
           <h2 className="details-title">Details</h2>
-          <div className="details-toggles" aria-label="Details panels">
-            <SidePanelToggle showSide={showSide} onChange={setShowSide} />
-            <PreferenceSwitch
-              checked={rankVisibility.topPairs}
-              onChange={(checked) => patchRankVisibility({ topPairs: checked })}
-              label="Top pairs"
-              title="Show A→B bigrams in ranking / Copy blocks"
-            />
-            <PreferenceSwitch
-              checked={rankVisibility.selfRepeats}
-              onChange={(checked) =>
-                patchRankVisibility({ selfRepeats: checked })
-              }
-              label="Self-repeats"
-              title="Show same-key runs (A→A) in ranking / Copy blocks"
-            />
-            <PreferenceSwitch
-              checked={rankVisibility.modifierPairs}
-              onChange={(checked) =>
-                patchRankVisibility({ modifierPairs: checked })
-              }
-              label="Modifier chords"
-              title="Show held-modifier + key combos in ranking / Copy blocks"
-            />
-          </div>
         </div>
         <MetaBar
           updatedAt={stats.updatedAt}
@@ -312,14 +287,40 @@ export function App() {
           sessionCount={stats.sessions?.length ?? 0}
           bursts={stats.bursts ?? { count: 0, longest: 0 }}
         />
-        <div className={`details-layout${showSide ? "" : " no-side"}`}>
-          {showSide ? (
-            <SessionsList stats={stats} unmapped={unmapped} />
-          ) : null}
-          <div className="rank-area">
-            <RankRow periods={periods} visibility={rankVisibility} />
-          </div>
+        <div className="details-toggles" aria-label="Details panels">
+          <SidePanelToggle showSide={showSide} onChange={setShowSide} />
+          <PreferenceSwitch
+            checked={rankVisibility.topPairs}
+            onChange={(checked) => patchRankVisibility({ topPairs: checked })}
+            label="Top pairs"
+            title="Show A→B bigrams in ranking / Copy blocks"
+          />
+          <PreferenceSwitch
+            checked={rankVisibility.selfRepeats}
+            onChange={(checked) =>
+              patchRankVisibility({ selfRepeats: checked })
+            }
+            label="Self-repeats"
+            title="Show same-key runs (A→A) in ranking / Copy blocks"
+          />
+          <PreferenceSwitch
+            checked={rankVisibility.modifierPairs}
+            onChange={(checked) =>
+              patchRankVisibility({ modifierPairs: checked })
+            }
+            label="Modifier chords"
+            title="Show held-modifier + key combos in ranking / Copy blocks"
+          />
         </div>
+        <RankRow
+          periods={periods}
+          visibility={rankVisibility}
+          leading={
+            showSide ? (
+              <SessionsList stats={stats} unmapped={unmapped} />
+            ) : null
+          }
+        />
       </section>
     </>
   );

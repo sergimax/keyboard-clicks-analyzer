@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { RankItem } from "@shared/heat";
 import type { ModifierPairItem } from "@shared/modifiers";
 import type { SelfRepeatItem, TransitionItem } from "@shared/transitions";
@@ -19,11 +20,13 @@ export type RankPeriod = {
 type RankRowProps = {
   periods: RankPeriod[];
   visibility: RankVisibility;
+  leading?: ReactNode;
 };
 
-export function RankRow({ periods, visibility }: RankRowProps) {
+export function RankRow({ periods, visibility, leading }: RankRowProps) {
   return (
     <div className="rank-row">
+      {leading}
       {periods.map((period) => (
         <RankBlock key={period.title} {...period} visibility={visibility} />
       ))}
