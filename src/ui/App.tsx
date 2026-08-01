@@ -34,8 +34,7 @@ import {
   writeShowSidePanel,
 } from "./components/SidePanelToggle";
 import { PreferenceSwitch } from "./components/PreferenceSwitch";
-import { ExportJsonButton } from "./components/ExportJsonButton";
-import { DeviceMetaFields } from "./components/DeviceMetaFields";
+import { ExportDialog } from "./components/ExportDialog";
 import { RankRow } from "./components/RankRow";
 import { ResetConfirmDialog } from "./components/ResetConfirmDialog";
 import { SessionsList } from "./components/SessionsList";
@@ -71,6 +70,7 @@ export function App() {
   const [error, setError] = useState<string | null>(null);
   const [resetting, setResetting] = useState(false);
   const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
   const [showNumpad, setShowNumpad] = useState(() => readShowNumpad());
   const [showSide, setShowSide] = useState(() => readShowSidePanel());
   const [heatScale, setHeatScale] = useState<HeatScaleMode>(() => readHeatScaleMode());
@@ -204,25 +204,51 @@ export function App() {
     },
   ];
 
+  const exportDisabled =
+    stats.totalPresses === 0 && (stats.recordingMs ?? 0) === 0;
+
   return (
     <>
       <header className="app-header">
-        <h1>Keyboard Heatmap</h1>
-        <span className="app-version" title="App version">
-          v{__APP_VERSION__}
-        </span>
+        <div className="app-header-brand">
+          <h1>Keyboard Heatmap</h1>
+          <span className="app-version" title="App version">
+            v{__APP_VERSION__}
+          </span>
+        </div>
+        <div className="app-header-actions">
+          <button
+            type="button"
+            className="btn-header"
+            onClick={() => setExportOpen(true)}
+          >
+            Export
+          </button>
+          {live ? (
+            <button
+              type="button"
+              className="btn-header btn-header-danger"
+              disabled={resetting}
+              onClick={() => setResetConfirmOpen(true)}
+            >
+              Reset
+            </button>
+          ) : null}
+        </div>
       </header>
       <p className="note note-intro">{note}</p>
-      <div className="toolbar">
-        <div className="export-controls" aria-label="Export">
-          <DeviceMetaFields meta={deviceMeta} onChange={setDeviceMeta} />
-          <ExportJsonButton
-            disabled={stats.totalPresses === 0 && (stats.recordingMs ?? 0) === 0}
-            onExport={() => downloadExportJson(stats, live, deviceMeta)}
-          />
-        </div>
-      </div>
       {error ? <p className="status-error">{error}</p> : null}
+      <ExportDialog
+        open={exportOpen}
+        disabled={exportDisabled}
+        meta={deviceMeta}
+        onMetaChange={setDeviceMeta}
+        onCancel={() => setExportOpen(false)}
+        onExport={() => {
+          downloadExportJson(stats, live, deviceMeta);
+          setExportOpen(false);
+        }}
+      />
       <ResetConfirmDialog
         open={resetConfirmOpen}
         busy={resetting}
@@ -254,8 +280,6 @@ export function App() {
           totalRecordingMs={stats.recordingMs ?? 0}
           sessionCount={stats.sessions?.length ?? 0}
           bursts={stats.bursts ?? { count: 0, longest: 0 }}
-          onReset={live ? () => setResetConfirmOpen(true) : undefined}
-          resetting={resetting}
         />
       </section>
 

@@ -13,8 +13,6 @@ type MetaBarProps = {
   totalRecordingMs: number;
   sessionCount: number;
   bursts: BurstStats;
-  onReset?: () => void;
-  resetting?: boolean;
 };
 
 function formatOptional(value: number | null): string {
@@ -28,8 +26,6 @@ export function MetaBar({
   totalRecordingMs,
   sessionCount,
   bursts,
-  onReset,
-  resetting = false,
 }: MetaBarProps) {
   const burstCount = bursts?.count ?? 0;
   const longest = bursts?.longest ?? 0;
@@ -77,16 +73,6 @@ export function MetaBar({
           </span>
         </div>
       </div>
-      {onReset ? (
-        <button
-          type="button"
-          className="btn-reset"
-          disabled={resetting}
-          onClick={onReset}
-        >
-          Reset stats
-        </button>
-      ) : null}
     </div>
   );
 }
