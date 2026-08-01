@@ -7,7 +7,6 @@ import type { RankItem } from "@shared/heat";
 import type { BurstStats } from "@shared/types";
 
 type MetaBarProps = {
-  live: boolean;
   updatedAt: string;
   totalPresses: number;
   hottest: RankItem | null;
@@ -23,7 +22,6 @@ function formatOptional(value: number | null): string {
 }
 
 export function MetaBar({
-  live,
   updatedAt,
   totalPresses,
   hottest,
@@ -45,7 +43,6 @@ export function MetaBar({
     <div className="meta">
       <div className="meta-rows">
         <div className="meta-row meta-row-primary">
-          {live ? <span className="live-badge">LIVE</span> : null}
           <span>
             Total presses: <strong>{totalPresses}</strong>
           </span>
@@ -80,7 +77,7 @@ export function MetaBar({
           </span>
         </div>
       </div>
-      {live && onReset ? (
+      {onReset ? (
         <button
           type="button"
           className="btn-reset"
