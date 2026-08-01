@@ -50,8 +50,9 @@ npm run reset
   - **Show numpad** — above the heatmap (default Off; saved in the browser)
   - **Details** — summary stats, then panel toggles, then compact cards: optional diagnostics (suspicious repeats / intervals / unmapped; default On) plus ranking/Copy columns (top 12 on screen; Copy still includes full top 30); toggles for Top pairs / Self-repeats / Modifier chords (default Off)
   - **Heatmap numbers Absolute / Relative (%)** — absolute uses sqrt scale vs hottest key; relative shows % captions and rank-based colors (Space won’t wash out mid keys; preference saved in the browser)
-  - **Export** (header) — modal with optional layout/keyboard meta, then download JSON (`exportedAt` / `appVersion` / `schemaVersion`, rankings, full `stats`)
-  - **Reset** (header, live collect only) — confirm modal before clearing stats
+  - Sticky header — logo + title; **Export** / **Reset** (centered on desktop, ☰ menu on narrow); GitHub, author site, and `v.X.Y.Z`
+  - **Export** — modal with optional layout/keyboard meta, then download JSON (`exportedAt` / `appVersion` / `schemaVersion`, rankings, full `stats`)
+  - **Reset** (live collect only) — confirm modal before clearing stats
   - **Top pairs / self-repeats / modifier chords** — bigrams (A≠B), same-key runs (A→A), and true held-modifier+key combos per period
 
 `npm run report` serves the same UI from disk stats (no Reset button). There is no standalone `data/heatmap.html` anymore — use the report viewer.

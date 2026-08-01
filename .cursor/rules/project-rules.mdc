@@ -12,6 +12,7 @@ alwaysApply: true
 - Use meaningful names; keep functions small and focused
 - Rust collector: keep the hook path minimal, no network, no text logging
 - React UI: function components; keep presentational pieces in `src/ui/components/`
+- App chrome: sticky blurred `AppHeader` (brand left, primary actions center, meta/links right) — same pattern as other sergimax apps; no MUI here
 
 ## Naming
 
