@@ -212,14 +212,8 @@ export function App() {
           v{__APP_VERSION__}
         </span>
       </header>
-      <p className="sub">
-        Local physical-key presses · no network · labels use US QWERTY positions
-      </p>
       <p className="note note-intro">{note}</p>
       <div className="toolbar">
-        <div className="view-controls" aria-label="Display options">
-          <HeatScaleToggle mode={heatScale} onChange={setHeatScale} />
-        </div>
         <div className="export-controls" aria-label="Export">
           <DeviceMetaFields meta={deviceMeta} onChange={setDeviceMeta} />
           <ExportJsonButton
@@ -229,17 +223,6 @@ export function App() {
         </div>
       </div>
       {error ? <p className="status-error">{error}</p> : null}
-      <MetaBar
-        live={live}
-        updatedAt={stats.updatedAt}
-        totalPresses={stats.totalPresses}
-        hottest={hottest}
-        totalRecordingMs={stats.recordingMs ?? 0}
-        sessionCount={stats.sessions?.length ?? 0}
-        bursts={stats.bursts ?? { count: 0, longest: 0 }}
-        onReset={live ? () => setResetConfirmOpen(true) : undefined}
-        resetting={resetting}
-      />
       <ResetConfirmDialog
         open={resetConfirmOpen}
         busy={resetting}
@@ -253,10 +236,27 @@ export function App() {
 
       <section className="heatmap-section" aria-label="Heatmap">
         <div className="heatmap-toolbar">
-          <NumpadToggle showNumpad={showNumpad} onChange={setShowNumpad} />
+          <p className="sub heatmap-sub">
+            Local physical-key presses · no network · labels use US QWERTY
+            positions
+          </p>
+          <div className="heatmap-controls" aria-label="Heatmap controls">
+            <NumpadToggle showNumpad={showNumpad} onChange={setShowNumpad} />
+            <HeatScaleToggle mode={heatScale} onChange={setHeatScale} />
+          </div>
         </div>
         <KeyboardBoard keys={mapped} scaleMode={heatScale} />
         <HeatLegend mode={heatScale} hottest={hottest} />
+        <MetaBar
+          updatedAt={stats.updatedAt}
+          totalPresses={stats.totalPresses}
+          hottest={hottest}
+          totalRecordingMs={stats.recordingMs ?? 0}
+          sessionCount={stats.sessions?.length ?? 0}
+          bursts={stats.bursts ?? { count: 0, longest: 0 }}
+          onReset={live ? () => setResetConfirmOpen(true) : undefined}
+          resetting={resetting}
+        />
       </section>
 
       <section className="details-section" aria-label="Details">
