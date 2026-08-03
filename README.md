@@ -1,5 +1,5 @@
 # Keyboard Heatmap
-![App version](https://img.shields.io/badge/App_version-2.3.1-purple)
+![App version](https://img.shields.io/badge/App_version-2.3.2-purple)
 
 Local, offline heatmap of **physical** keyboard key presses on Windows. Use it to decide which switches to replace first.
 
@@ -7,7 +7,7 @@ No outbound network calls. No character/text logging — only scan codes, counts
 
 UI is a **Vite + React** app served on `127.0.0.1` during `collect` / `report`.
 
-See [CHANGELOG.md](CHANGELOG.md) for history.
+See [CHANGELOG.md](CHANGELOG.md) for history. UI tokens and recipes: [docs/design-system.md](docs/design-system.md).
 
 ## Requirements
 
