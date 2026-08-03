@@ -1,271 +1,149 @@
 {
-  "$schemaComment": "Portable design tokens extracted from keyboard-heatmap. Core tokens are app-agnostic chrome; domain.heatmap is product-specific.",
+  "$schemaComment": "Keyboard Heatmap design tokens — Super ★ chrome + domain heatmap. See docs/theme-super.json for the portable Super contract.",
   "meta": {
     "name": "keyboard-heatmap",
-    "version": "1.0.0",
+    "version": "2.0.0",
+    "theme": "super",
     "sources": [
+      "docs/theme-super.json",
+      "src/ui/styles/tokens.css",
+      "src/ui/styles/links.css",
       "src/ui/styles/app.css",
       "src/shared/heat.ts",
-      "src/ui/components/AppHeader.tsx",
-      "src/ui/components/PreferenceSwitch.tsx"
+      "src/ui/color-mode.ts"
     ],
     "framework": "vite-react-css",
-    "colorModes": ["dark"]
+    "colorModes": ["light", "dark"],
+    "defaultColorMode": "light"
+  },
+  "semantics": {
+    "brandNotPrimary": true,
+    "primaryIsInverseInk": true,
+    "okIsGreen": true,
+    "dangerIsRed": true,
+    "brandDistinctFromDangerAndOk": true,
+    "interactiveBorder": "#8a8a8a",
+    "heatmapLegendFixed": ["#1c6052", "#d68440", "#b03a08"]
   },
   "typography": {
-    "fontFamily": "\"Segoe UI\", \"IBM Plex Sans\", system-ui, sans-serif",
-    "monoFamily": "\"Cascadia Mono\", \"Cascadia Code\", Consolas, \"SF Mono\", \"Segoe UI Mono\", ui-monospace, monospace",
-    "appTitle": {
-      "fontSize": "1.15rem",
-      "fontWeight": 650,
-      "letterSpacing": "0.02em"
+    "fontFamily": {
+      "body": "'Noto Sans', 'Segoe UI', system-ui, sans-serif",
+      "display": "'Onest', 'Noto Sans', 'Segoe UI', system-ui, sans-serif",
+      "mono": "'JetBrains Mono', 'IBM Plex Mono', Consolas, monospace"
     },
-    "sectionTitle": {
-      "fontSize": "1.15rem",
-      "fontWeight": 650,
-      "letterSpacing": "0.02em"
-    },
-    "button": {
-      "fontWeight": 600,
-      "textTransform": "none"
-    },
-    "keyLabel": {
-      "fontSize": "0.7rem",
-      "fontWeight": 700,
-      "letterSpacing": "0.01em"
-    },
-    "keyCount": {
-      "fontSize": "0.6rem",
-      "fontWeight": 650,
-      "fontVariantNumeric": "tabular-nums"
-    },
-    "rankItem": {
-      "fontSize": "0.78rem",
-      "lineHeight": 1.3,
-      "fontVariantNumeric": "tabular-nums"
-    },
-    "mutedBody": {
-      "fontSize": "0.9rem",
-      "colorToken": "textMuted"
-    }
+    "brandNameWeight": 700,
+    "proseLineHeight": 1.55,
+    "webfontCdn": false,
+    "note": "Offline app — no Google Fonts CDN; system fallbacks provide Cyrillic on Windows."
   },
   "shape": {
-    "controlBorderRadius": 8,
-    "menuItemBorderRadius": 6,
-    "panelBorderRadius": 10,
-    "boardBorderRadius": 14,
-    "dialogBorderRadius": 10,
-    "menuBorderRadius": 10,
-    "pillBorderRadius": 999,
-    "focusOutlineRadius": 4
+    "radius": "10px",
+    "controlRadius": "8px",
+    "gap": "0.55rem",
+    "pad": "0.65rem",
+    "boardGap": "6px",
+    "boardBorderRadius": 14
   },
-  "borders": {
-    "width": "1px",
-    "style": "solid",
-    "defaultColor": "#2a3140",
-    "controlColor": "#3a4456",
-    "controlHoverColor": "#5a6a82",
-    "accentColor": "#2f9e82",
-    "accentHoverColor": "#3db894",
-    "dangerColor": "#5a4030",
-    "dangerStrongColor": "#8a3a2a",
-    "dangerHoverColor": "#e85d04"
+  "colorMode": {
+    "htmlAttribute": "data-theme",
+    "storageKey": "kca-color-mode",
+    "themeColorMeta": {
+      "light": "#fcfbf9",
+      "dark": "#1a1a1a"
+    }
   },
-  "spacingRecipes": {
-    "toolbarGap": [12, 16],
-    "toolbarPadding": "10px 20px",
-    "mainPadding": "20px 20px 48px",
-    "panelPadding": "10px 12px",
-    "boardPadding": 14,
-    "boardGap": 6,
-    "controlsGap": [12, 20],
-    "rankRowGap": 12,
-    "modalPadding": "20px 22px",
-    "modalActionsGap": 10
+  "modes": {
+    "light": {
+      "bg": "#fcfbf9",
+      "surface": "#ffffff",
+      "chipBg": "#f3f2ef",
+      "headerBg": "rgba(252, 251, 249, 0.96)",
+      "border": "#8a8a8a",
+      "text": "#141414",
+      "textStrong": "#0a0a0a",
+      "textMuted": "#555555",
+      "brand": "#9a3412",
+      "brandSoft": "#fff7ed",
+      "brandBorder": "#c2410c",
+      "ok": "#166534",
+      "okBg": "#ecfdf5",
+      "okBorder": "#166534",
+      "danger": "#dc2626",
+      "dangerBg": "#fef2f2",
+      "dangerBorder": "#dc2626",
+      "link": "#2c5282",
+      "linkSpot": "#9a3412",
+      "primaryBg": "#0a0a0a",
+      "primaryBorder": "#0a0a0a",
+      "primaryFg": "#ffffff",
+      "shadow": "0 6px 18px rgba(0, 0, 0, 0.07)",
+      "keyBg": "#f3f2ef",
+      "keyBorder": "#8a8a8a",
+      "boardBg": "#f3f2ef"
+    },
+    "dark": {
+      "bg": "#1a1a1a",
+      "surface": "#242424",
+      "chipBg": "#1f1f1f",
+      "headerBg": "rgba(26, 26, 26, 0.96)",
+      "border": "#8a8a8a",
+      "text": "#f2f2f2",
+      "textStrong": "#fafafa",
+      "textMuted": "#a3a3a3",
+      "brand": "#fb923c",
+      "brandSoft": "#3d2818",
+      "brandBorder": "#fb923c",
+      "ok": "#86efac",
+      "okBg": "rgba(134, 239, 172, 0.12)",
+      "okBorder": "#86efac",
+      "danger": "#ff7b72",
+      "dangerBg": "rgba(255, 123, 114, 0.14)",
+      "dangerBorder": "#ff7b72",
+      "link": "#8ab4c8",
+      "linkSpot": "#fb923c",
+      "primaryBg": "#fafafa",
+      "primaryBorder": "#fafafa",
+      "primaryFg": "#111111",
+      "shadow": "0 8px 24px rgba(0, 0, 0, 0.4)",
+      "keyBg": "#1f1f1f",
+      "keyBorder": "#8a8a8a",
+      "boardBg": "#1f1f1f"
+    }
   },
-  "shadows": {
-    "menu": "0 10px 28px rgba(0, 0, 0, 0.35)",
-    "dialog": "0 16px 48px rgba(0, 0, 0, 0.45)",
-    "keyLabelOnDarkHeat": "0 0 2px rgba(0,0,0,0.85), 0 1px 1px rgba(0,0,0,0.7)"
+  "linkStyles": {
+    "quiet": {
+      "colorToken": "link",
+      "fontWeight": 500,
+      "textDecorationThickness": "1px",
+      "textUnderlineOffset": "3px"
+    },
+    "spot": {
+      "className": "link-spot",
+      "colorToken": "linkSpot",
+      "fontFamilyToken": "display",
+      "fontWeight": 700,
+      "fontStyle": "italic",
+      "textDecorationThickness": "2px"
+    }
   },
   "shell": {
     "contentMaxWidthPx": 1400,
     "toolbarMinHeightPx": 56,
-    "compactMenuBreakpointPx": 900,
-    "appBarZIndex": 200,
-    "menuZIndex": 220,
-    "modalZIndex": 1000,
-    "board": {
-      "columnsWithNumpad": 24,
-      "columnsWithoutNumpad": 19,
-      "colMinMaxPx": [36, 42],
-      "rowHeightPx": 44,
-      "rows": 6
-    }
-  },
-  "colorMode": {
-    "modes": ["dark"],
-    "note": "Single dark theme only; no data-color-mode toggle.",
-    "preferenceStoragePrefix": "kca-"
-  },
-  "cssVariables": {
-    "dark": {
-      "--bg": "#12151a",
-      "--panel": "#1a1f27",
-      "--text": "#e8edf5",
-      "--muted": "#8b95a8",
-      "--key-bg": "#252b36",
-      "--key-border": "#343c4a",
-      "--cold": "#1c6052",
-      "--hot": "#b03a08",
-      "--gap": "6px"
-    }
-  },
-  "palette": {
-    "dark": {
-      "text": { "primary": "#e8edf5", "muted": "#8b95a8", "soft": "#c5cddb", "legendEnd": "#c5cedd", "placeholder": "#5a6578" },
-      "background": {
-        "page": "#12151a",
-        "panel": "#1a1f27",
-        "board": "#141820",
-        "input": "#141820",
-        "segmented": "#1a2030",
-        "control": "#222a3a",
-        "controlHover": "#2a3348",
-        "appBar": "rgba(26, 31, 39, 0.72)",
-        "modal": "#1a1520",
-        "modalBackdrop": "rgba(8, 10, 14, 0.72)"
-      },
-      "divider": "#2a3140",
-      "controlBorder": "#3a4456",
-      "key": { "bg": "#252b36", "border": "#343c4a" },
-      "accent": {
-        "main": "#1f6f5b",
-        "border": "#2f9e82",
-        "borderHover": "#3db894",
-        "fill": "#1a2e28",
-        "fillHover": "#234038",
-        "fg": "#b8e0d4"
-      },
-      "danger": {
-        "border": "#5a4030",
-        "borderStrong": "#8a3a2a",
-        "borderHover": "#e85d04",
-        "fill": "#3a1c18",
-        "fillHover": "#4a2418",
-        "toolbarFillHover": "#3a2a20",
-        "fg": "#f4a261",
-        "fgSoft": "#ffb4a2",
-        "fgHot": "#ffd4a8"
-      },
-      "action": {
-        "hover": "rgba(232, 237, 245, 0.08)"
-      }
-    }
-  },
-  "atmosphere": {
-    "dark": "radial-gradient(1200px 600px at 10% -10%, #1e3a34 0%, transparent 55%), radial-gradient(900px 500px at 100% 0%, #3a2418 0%, transparent 50%), var(--bg)",
-    "note": "Fixed teal + warm radial washes on body over --bg"
-  },
-  "components": {
-    "appBar": {
-      "position": "sticky",
-      "backdropFilter": "saturate(1.2) blur(12px)",
-      "borderBottom": "1px solid #2a3140",
-      "layout": "brand-left | actions-center | meta-right",
-      "compactBreakpointPx": 900
-    },
-    "btnToolbar": {
-      "borderRadius": 8,
-      "padding": "6px 12px",
-      "fontSize": "0.85rem",
-      "border": "#3a4456",
-      "color": "#c5cddb",
-      "hoverAccent": true
-    },
-    "btnIcon": {
-      "sizePx": 36,
-      "borderRadius": 8,
-      "hoverBg": "rgba(232, 237, 245, 0.08)"
-    },
-    "btnCopy": {
-      "variant": "accent-outlined-fill",
-      "borderRadius": 8
-    },
-    "preferenceSwitch": {
-      "trackWidthPx": 36,
-      "trackHeightPx": 20,
-      "thumbSizePx": 14,
-      "offTrack": "#2a3140",
-      "onTrack": "#1f6f5b",
-      "onBorder": "#2f9e82",
-      "focusOutline": "2px solid #2f9e82"
-    },
-    "heatScaleSegmented": {
-      "border": "#3a4456",
-      "background": "#1a2030",
-      "activeBackground": "#1f6f5b",
-      "activeColor": "#e8edf5"
-    },
-    "rankBlock": {
-      "width": "15rem",
-      "padding": "10px 12px",
-      "background": "var(--panel)",
-      "border": "1px solid #2a3140",
-      "borderRadius": 10,
-      "screenListLimit": 12,
-      "copyLimit": 30
-    },
-    "modal": {
-      "maxWidthPx": 420,
-      "borderRadius": 10,
-      "border": "1px solid #5a4030",
-      "background": "#1a1520",
-      "titleDangerColor": "#ffd4a8",
-      "titleNeutralColor": "#e8edf5"
-    },
-    "input": {
-      "borderRadius": 8,
-      "border": "#3a4456",
-      "background": "#141820",
-      "focusBorder": "#2f9e82",
-      "placeholder": "#5a6578"
-    },
-    "keyCell": {
-      "borderRadius": 8,
-      "idleBackground": "var(--key-bg)",
-      "idleBorder": "var(--key-border)"
-    }
+    "compactMenuBreakpointPx": 900
   },
   "domain": {
-    "comment": "Heatmap spectrum + ink contrast; omit when seeding an unrelated UI.",
     "heatmap": {
       "stops": {
-        "idle": { "rgb": [37, 43, 54], "hex": "#252b36" },
-        "cold": { "rgb": [28, 96, 82], "hex": "#1c6052", "cssVar": "--cold" },
-        "mid": { "rgb": [214, 132, 64], "hex": "#d68440" },
-        "hot": { "rgb": [176, 58, 8], "hex": "#b03a08", "cssVar": "--hot" }
+        "cold": "#1c6052",
+        "mid": "#d68440",
+        "hot": "#b03a08"
       },
-      "legendGradient": "linear-gradient(90deg, var(--cold), #d68440, var(--hot))",
+      "legendGradient": "linear-gradient(90deg, var(--cold), var(--heat-mid), var(--hot))",
       "scaleModes": ["absolute", "relative"],
-      "absolute": "sqrt(count / max)",
-      "relative": "percentile / rank intensity among pressed keys",
-      "ink": {
-        "lightLabel": [248, 250, 252],
-        "darkLabel": [18, 14, 10],
-        "lightCount": [220, 226, 235],
-        "darkCount": [48, 36, 28],
-        "warmBorder": "#4a3424",
-        "coolBorder": "#2a4038",
-        "idleBorder": "#343c4a",
-        "rules": [
-          "Warm mid/hot fills (high R vs B) prefer dark ink",
-          "Contrast vs light/dark label picks readable ink",
-          "Light ink on dark heat gets soft black text-shadow"
-        ]
-      }
+      "idleKeysUseThemeTokens": true
     },
     "preferenceKeys": {
+      "colorMode": "kca-color-mode",
       "showNumpad": "kca-show-numpad",
       "showDiagnostics": "kca-show-side",
       "heatScale": "kca-heat-scale",

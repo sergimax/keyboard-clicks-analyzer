@@ -43,7 +43,7 @@ export function ResetConfirmDialog({
       }}
     >
       <div
-        className="modal"
+        className="modal modal-danger"
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="reset-dialog-title"

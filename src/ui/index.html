@@ -1,9 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#fcfbf9" />
     <title>Keyboard Heatmap (local)</title>
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("kca-color-mode");
+          var mode = stored === "dark" || stored === "light" ? stored : "light";
+          document.documentElement.dataset.theme = mode;
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) {
+            meta.setAttribute(
+              "content",
+              mode === "dark" ? "#1a1a1a" : "#fcfbf9",
+            );
+          }
+        } catch (error) {
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,0 +1,97 @@
+/**
+ * Super ★ theme tokens — light default, dark via html[data-theme="dark"].
+ * Source: docs/theme-super.json · docs/theme-super.md
+ * Domain heat stops stay fixed (never brand-tinted).
+ */
+
+:root,
+html[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #fcfbf9;
+  --surface: #ffffff;
+  --chip-bg: #f3f2ef;
+  --header-bg: rgba(252, 251, 249, 0.96);
+  --border: #8a8a8a;
+  --text: #141414;
+  --text-strong: #0a0a0a;
+  --text-muted: #555555;
+  --brand: #9a3412;
+  --brand-soft: #fff7ed;
+  --brand-border: #c2410c;
+  --ok: #166534;
+  --ok-bg: #ecfdf5;
+  --ok-border: #166534;
+  --danger: #dc2626;
+  --danger-bg: #fef2f2;
+  --danger-border: #dc2626;
+  --link: #2c5282;
+  --link-spot: #9a3412;
+  --primary-bg: #0a0a0a;
+  --primary-border: #0a0a0a;
+  --primary-fg: #ffffff;
+  --shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+  --action-hover: rgba(10, 10, 10, 0.04);
+  --modal-backdrop: rgba(20, 20, 20, 0.4);
+
+  /* Domain / board (theme-aware idle; heat gradient fixed) */
+  --key-bg: #f3f2ef;
+  --key-border: #8a8a8a;
+  --board-bg: #f3f2ef;
+  --cold: #1c6052;
+  --hot: #b03a08;
+  --heat-mid: #d68440;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #1a1a1a;
+  --surface: #242424;
+  --chip-bg: #1f1f1f;
+  --header-bg: rgba(26, 26, 26, 0.96);
+  --border: #8a8a8a;
+  --text: #f2f2f2;
+  --text-strong: #fafafa;
+  --text-muted: #a3a3a3;
+  --brand: #fb923c;
+  --brand-soft: #3d2818;
+  --brand-border: #fb923c;
+  --ok: #86efac;
+  --ok-bg: rgba(134, 239, 172, 0.12);
+  --ok-border: #86efac;
+  --danger: #ff7b72;
+  --danger-bg: rgba(255, 123, 114, 0.14);
+  --danger-border: #ff7b72;
+  --link: #8ab4c8;
+  --link-spot: #fb923c;
+  --primary-bg: #fafafa;
+  --primary-border: #fafafa;
+  --primary-fg: #111111;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --action-hover: rgba(250, 250, 250, 0.06);
+  --modal-backdrop: rgba(0, 0, 0, 0.6);
+
+  --key-bg: #1f1f1f;
+  --key-border: #8a8a8a;
+  --board-bg: #1f1f1f;
+  --cold: #1c6052;
+  --hot: #b03a08;
+  --heat-mid: #d68440;
+}
+
+:root {
+  --font-body: "Noto Sans", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Onest", "Noto Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", Consolas, monospace;
+
+  --radius: 10px;
+  --control-radius: 8px;
+  --gap: 0.55rem;
+  --pad: 0.65rem;
+  --board-gap: 6px;
+
+  /* Compat aliases used in a few components */
+  --panel: var(--surface);
+  --muted: var(--text-muted);
+}

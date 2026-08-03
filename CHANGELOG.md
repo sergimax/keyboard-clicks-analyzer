@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Super ★** theme port: light/dark (`kca-color-mode`, default light), inverse-ink primary CTAs, true red danger / green ok, brand orange for identity only
+- Theme toggle in the sticky header; `tokens.css` + `links.css` token layer
+
+### Changed
+
+- UI chrome uses MUJI neutrals and bilingual font stacks (Noto Sans / Onest / JetBrains Mono with system fallbacks; no font CDN)
+- Heatmap legend / heated-key spectrum unchanged; idle keys follow theme surface tokens
+- Design system docs aligned with Super (`docs/theme-super.md`)
+
 ## [2.3.2] - 2026-08-03
 
 ### Added

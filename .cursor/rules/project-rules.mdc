@@ -13,6 +13,7 @@ alwaysApply: true
 - Rust collector: keep the hook path minimal, no network, no text logging
 - React UI: function components; keep presentational pieces in `src/ui/components/`
 - App chrome: sticky blurred `AppHeader` (brand left, primary actions center, meta/links right) — same pattern as other sergimax apps; no MUI here
+- UI theme: **Super ★** (`docs/theme-super.md`) — light/dark via `html[data-theme]` + `kca-color-mode` (default light); tokens in `src/ui/styles/tokens.css`; brand ≠ primary CTA (inverse ink); ok green / danger red; heatmap legend gradient fixed
 
 ## Naming
 
@@ -101,6 +102,7 @@ Example: `feat(live-server): add reset stats endpoint`
 - **Show numpad** — preference in `localStorage` (`kca-show-numpad`); control sits above the heatmap
 - **Details** — summary MetaBar, panel toggles, then compact cards: diagnostics (`kca-show-side`) + ranking toggles `kca-rank-pairs` / `kca-rank-self` / `kca-rank-mods` (default off; top keys always on)
 - **Heatmap scale** — Absolute (sqrt vs max) / Relative (% captions + rank intensity); `localStorage` (`kca-heat-scale`)
+- **Color mode** — light/dark (`kca-color-mode`, default light); toggle in header
 
 ## Component Structure
 
@@ -110,7 +112,7 @@ Example: `feat(live-server): add reset stats endpoint`
 - **Shared (browser-safe)** — `shared/` types, dates, format, period, heat
 - **Key map** — `keymap.ts` (scan/ext → label + grid cell; aliases)
 - **HTTP** — `server/http-app.ts` serves `dist/ui` + `/api/stats` + optional `/api/reset`; wrappers `live-server.ts` / `report-server.ts`
-- **React UI** — `ui/` Vite app (`App.tsx`, components, `styles/app.css`)
+- **React UI** — `ui/` Vite app (`App.tsx`, components, `styles/tokens.css` + `links.css` + `app.css`, `color-mode.ts`)
 - **CLI colors** — `style.ts` (respect `NO_COLOR` / TTY)
 - **Rust** — `collector/src/main.rs` emits NDJSON `{ sc, ext, t, rep, mods }` (`rep:0` first-down, `rep:1` auto-repeat; `mods` = held-modifier bitmask)
 

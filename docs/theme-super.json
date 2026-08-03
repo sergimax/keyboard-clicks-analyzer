@@ -1,0 +1,134 @@
+{
+  "$schemaComment": "Super ★ unified theme — applied to live my site. Portable rules for RU+EN portfolio apps.",
+  "meta": {
+    "id": "super",
+    "label": "Super ★",
+    "round": 8,
+    "status": "applied",
+    "updatedAt": "2026-08-03",
+    "docs": [
+      "docs/theme-lab/theme-super.md",
+      "docs/theme-lab/theme-liked.md",
+      "docs/design-system.md"
+    ],
+    "live": [
+      "src/theme/tokens.css",
+      "src/theme/links.css",
+      "docs/design-tokens.json"
+    ],
+    "preview": "docs/theme-lab/theme-proposals.html",
+    "bilingualFonts": {
+      "rule": "RU+EN — Cyrillic + Latin required",
+      "body": "Noto Sans",
+      "display": "Onest",
+      "mono": ["JetBrains Mono", "IBM Plex Mono"],
+      "avoidLatinOnlyDisplay": ["Syne", "Space Grotesk"]
+    }
+  },
+  "semantics": {
+    "brandNotPrimary": true,
+    "primaryIsInverseInk": true,
+    "okIsGreen": true,
+    "dangerIsRed": true,
+    "brandDistinctFromDangerAndOk": true,
+    "interactiveBorder": "#8a8a8a",
+    "heatmapLegendFixed": ["#1c6052", "#d68440", "#b03a08"],
+    "links": {
+      "quiet": "informational — color ≠ body text",
+      "spot": "action in prose — brand + italic + bold + thick underline"
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "body": "'Noto Sans', system-ui, sans-serif",
+      "display": "'Onest', 'Noto Sans', system-ui, sans-serif",
+      "mono": "'JetBrains Mono', 'IBM Plex Mono', monospace"
+    },
+    "brandNameWeight": 700,
+    "proseLineHeight": 1.55
+  },
+  "shape": {
+    "radius": "10px",
+    "controlRadius": "8px",
+    "gap": "0.55rem",
+    "pad": "0.65rem",
+    "titleSize": "0.9rem"
+  },
+  "modes": {
+    "light": {
+      "bg": "#fcfbf9",
+      "surface": "#ffffff",
+      "chipBg": "#f3f2ef",
+      "headerBg": "rgba(252, 251, 249, 0.96)",
+      "border": "#8a8a8a",
+      "text": "#141414",
+      "textStrong": "#0a0a0a",
+      "textMuted": "#555555",
+      "brand": "#9a3412",
+      "brandSoft": "#fff7ed",
+      "brandBorder": "#c2410c",
+      "ok": "#166534",
+      "okBg": "#ecfdf5",
+      "okBorder": "#166534",
+      "danger": "#dc2626",
+      "dangerBg": "#fef2f2",
+      "dangerBorder": "#dc2626",
+      "link": "#2c5282",
+      "linkSpot": "#9a3412",
+      "primaryBg": "#0a0a0a",
+      "primaryBorder": "#0a0a0a",
+      "primaryFg": "#ffffff",
+      "shadow": "0 6px 18px rgba(0, 0, 0, 0.07)"
+    },
+    "dark": {
+      "bg": "#1a1a1a",
+      "surface": "#242424",
+      "chipBg": "#1f1f1f",
+      "headerBg": "rgba(26, 26, 26, 0.96)",
+      "border": "#8a8a8a",
+      "text": "#f2f2f2",
+      "textStrong": "#fafafa",
+      "textMuted": "#a3a3a3",
+      "brand": "#fb923c",
+      "brandSoft": "#3d2818",
+      "brandBorder": "#fb923c",
+      "ok": "#86efac",
+      "okBg": "rgba(134, 239, 172, 0.12)",
+      "okBorder": "#86efac",
+      "danger": "#ff7b72",
+      "dangerBg": "rgba(255, 123, 114, 0.14)",
+      "dangerBorder": "#ff7b72",
+      "link": "#8ab4c8",
+      "linkSpot": "#fb923c",
+      "primaryBg": "#fafafa",
+      "primaryBorder": "#fafafa",
+      "primaryFg": "#111111",
+      "shadow": "0 8px 24px rgba(0, 0, 0, 0.4)"
+    }
+  },
+  "linkStyles": {
+    "quiet": {
+      "colorToken": "link",
+      "fontWeight": 500,
+      "fontStyle": "normal",
+      "textDecoration": "underline",
+      "textDecorationThickness": "1px",
+      "textUnderlineOffset": "3px"
+    },
+    "spot": {
+      "className": "link-spot",
+      "colorToken": "linkSpot",
+      "fontFamilyToken": "display",
+      "fontWeight": 700,
+      "fontStyle": "italic",
+      "textDecoration": "underline",
+      "textDecorationThickness": "2px",
+      "textUnderlineOffset": "3px",
+      "letterSpacing": "0.01em"
+    }
+  },
+  "contrast": {
+    "textMin": 4.5,
+    "borderMin": 3
+  }
+}

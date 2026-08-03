@@ -1,4 +1,10 @@
 import { useEffect, useId, useRef, useState } from "react";
+import {
+  applyColorMode,
+  readColorMode,
+  writeColorMode,
+  type ColorMode,
+} from "../color-mode";
 
 const GITHUB_REPO_URL =
   "https://github.com/sergimax/keyboard-heatmap";
@@ -44,6 +50,101 @@ function MenuIcon() {
   );
 }
 
+function SunIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0-5h1v3h-2V2h1zm0 17h1v3h-2v-3h1zM3.5 11H6.5v2H3.5v-2zm14 0H20.5v2h-3v-2zM5.64 4.22l1.42-1.42 2.12 2.12-1.42 1.42-2.12-2.12zm11.18 11.18 1.42-1.42 2.12 2.12-1.42 1.42-2.12-2.12zM4.22 18.36l1.42 1.42 2.12-2.12-1.42-1.42-2.12 2.12zm11.18-11.18 1.42 1.42 2.12-2.12-1.42-1.42-2.12 2.12z"
+      />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M12.1 22a9.9 9.9 0 0 1-7.7-3.8A10 10 0 0 1 12.7 2a.75.75 0 0 1 .74 1A8.5 8.5 0 0 0 20 14.6a.75.75 0 0 1 .95.7A10 10 0 0 1 12.1 22z"
+      />
+    </svg>
+  );
+}
+
+function AppLogo() {
+  return (
+    <svg
+      className="app-logo"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 32 32"
+      width={28}
+      height={28}
+      fill="none"
+      aria-hidden="true"
+    >
+      <rect
+        x="2"
+        y="6"
+        width="28"
+        height="20"
+        rx="3.5"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      />
+      <rect x="5.5" y="10" width="4" height="3.25" rx="0.7" fill="currentColor" opacity="0.9" />
+      <rect x="11" y="10" width="4" height="3.25" rx="0.7" fill="currentColor" opacity="0.55" />
+      <rect x="16.5" y="10" width="4" height="3.25" rx="0.7" fill="currentColor" opacity="0.9" />
+      <rect x="22" y="10" width="4" height="3.25" rx="0.7" fill="currentColor" opacity="0.55" />
+      <rect
+        x="5.5"
+        y="15.25"
+        width="4"
+        height="3.25"
+        rx="0.7"
+        fill="currentColor"
+        opacity="0.55"
+      />
+      <rect
+        x="11"
+        y="15.25"
+        width="4"
+        height="3.25"
+        rx="0.7"
+        fill="currentColor"
+        opacity="0.9"
+      />
+      <rect
+        x="16.5"
+        y="15.25"
+        width="4"
+        height="3.25"
+        rx="0.7"
+        fill="currentColor"
+        opacity="0.55"
+      />
+      <rect
+        x="22"
+        y="15.25"
+        width="4"
+        height="3.25"
+        rx="0.7"
+        fill="currentColor"
+        opacity="0.9"
+      />
+      <rect
+        x="8.5"
+        y="20.5"
+        width="15"
+        height="3"
+        rx="0.7"
+        fill="currentColor"
+        opacity="0.75"
+      />
+    </svg>
+  );
+}
+
 export function AppHeader({
   live,
   resetting,
@@ -51,6 +152,7 @@ export function AppHeader({
   onReset,
 }: AppHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [colorMode, setColorMode] = useState<ColorMode>(() => readColorMode());
   const menuId = useId();
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -80,17 +182,18 @@ export function AppHeader({
     action();
   }
 
+  function toggleColorMode() {
+    const next: ColorMode = colorMode === "dark" ? "light" : "dark";
+    setColorMode(next);
+    writeColorMode(next);
+    applyColorMode(next);
+  }
+
   return (
     <header className="app-bar">
       <div className="app-toolbar">
         <div className="app-toolbar-brand">
-          <img
-            className="app-logo"
-            src={`${import.meta.env.BASE_URL}logo.svg`}
-            width={28}
-            height={28}
-            alt=""
-          />
+          <AppLogo />
           <h1 className="app-title">Keyboard Heatmap</h1>
         </div>
 
@@ -98,7 +201,7 @@ export function AppHeader({
           <div className="app-toolbar-actions app-toolbar-actions-desktop">
             <button
               type="button"
-              className="btn-toolbar"
+              className="btn-toolbar btn-toolbar-primary"
               onClick={onExport}
             >
               Export
@@ -137,7 +240,7 @@ export function AppHeader({
                 <button
                   type="button"
                   role="menuitem"
-                  className="app-menu-item"
+                  className="app-menu-item app-menu-item-primary"
                   onClick={() => runAction(onExport)}
                 >
                   Export
@@ -159,6 +262,19 @@ export function AppHeader({
         </div>
 
         <div className="app-toolbar-meta">
+          <button
+            type="button"
+            className="btn-icon"
+            onClick={toggleColorMode}
+            title={
+              colorMode === "dark" ? "Switch to light mode" : "Switch to dark mode"
+            }
+            aria-label={
+              colorMode === "dark" ? "Switch to light mode" : "Switch to dark mode"
+            }
+          >
+            {colorMode === "dark" ? <SunIcon /> : <MoonIcon />}
+          </button>
           <a
             className="btn-icon"
             href={GITHUB_REPO_URL}

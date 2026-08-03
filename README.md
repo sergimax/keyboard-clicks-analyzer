@@ -7,7 +7,7 @@ No outbound network calls. No character/text logging — only scan codes, counts
 
 UI is a **Vite + React** app served on `127.0.0.1` during `collect` / `report`.
 
-See [CHANGELOG.md](CHANGELOG.md) for history. UI tokens and recipes: [docs/design-system.md](docs/design-system.md).
+See [CHANGELOG.md](CHANGELOG.md) for history. UI tokens: [docs/design-system.md](docs/design-system.md) (Super ★: [docs/theme-super.md](docs/theme-super.md)).
 
 ## Requirements
 
@@ -42,7 +42,7 @@ npm run reset
 
 - Terminal status line: `session mm:ss · presses N` (current run only; resets with **Reset stats**)
 - Browser: **http://127.0.0.1:17823/** (loopback only; usually opens automatically)
-  - Sticky header — logo + title; **Export** / **Reset** (centered on desktop, ☰ menu on narrow); GitHub, author site, and `v.X.Y.Z`
+  - Sticky header — logo + title; **Export** / **Reset** (centered on desktop, ☰ menu on narrow); light/dark toggle, GitHub, author site, and `v.X.Y.Z`
   - Heatmap with **Show numpad** and **Heatmap numbers** Absolute / Relative (%) above the board
   - **Details** — summary stats (presses, hottest key, bursts, active recording, saved intervals), panel toggles, then compact cards for diagnostics + **All time / Today / Last 7 days** rankings (**Copy** still includes full top 30; screen shows top 12)
   - **Export** — modal with optional layout/keyboard meta, then download JSON (`exportedAt` / `appVersion` / `schemaVersion`, rankings, full `stats`)
