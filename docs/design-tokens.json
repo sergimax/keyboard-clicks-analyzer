@@ -2,7 +2,7 @@
   "$schemaComment": "Portable design tokens for keyboard-heatmap — chrome + domain heatmap.",
   "meta": {
     "name": "keyboard-heatmap",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "sources": [
       "src/ui/styles/tokens.css",
       "src/ui/styles/links.css",
@@ -287,7 +287,13 @@
       "background": "var(--header-bg)",
       "layout": "brand-left | actions-center | meta-right",
       "compactBreakpointPx": 900,
-      "metaIncludesThemeToggle": true
+      "metaIncludesThemeToggle": true,
+      "logo": {
+        "technique": "css-mask",
+        "maskUrl": "/logo.svg",
+        "colorToken": "brandBorder",
+        "note": "Brighter orange than title --brand (readable text ink)"
+      }
     },
     "btnToolbar": {
       "borderRadius": 8,

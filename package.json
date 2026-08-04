@@ -1,6 +1,6 @@
 {
   "name": "keyboard-heatmap",
-  "version": "2.3.2",
+  "version": "2.4.0",
   "private": true,
   "description": "Local physical-key press heatmap for Windows (offline)",
   "type": "module",
