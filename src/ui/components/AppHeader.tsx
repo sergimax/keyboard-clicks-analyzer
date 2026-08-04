@@ -1,4 +1,9 @@
 import { useEffect, useId, useRef, useState } from "react";
+import {
+  readColorMode,
+  toggleColorMode,
+  type ColorMode,
+} from "../color-mode";
 
 const GITHUB_REPO_URL =
   "https://github.com/sergimax/keyboard-heatmap";
@@ -44,6 +49,28 @@ function MenuIcon() {
   );
 }
 
+function SunIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0-5h1v3h-2V2h1zm0 17h1v3h-2v-3h1zM2 11h3v2H2v-2zm17 0h3v2h-3v-2zM4.22 4.22l1.42 1.42-1.42 1.41L2.8 5.64l1.42-1.42zm14.14 14.14 1.42 1.42-1.42 1.41-1.41-1.41 1.41-1.42zM4.22 19.78l1.42-1.42 1.41 1.42-1.41 1.41-1.42-1.41zm14.14-14.14 1.42-1.42 1.41 1.42-1.41 1.41-1.42-1.41z"
+      />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M12.7 2a9.2 9.2 0 0 0-1.1.07A8.5 8.5 0 1 0 20.93 13.4 9 9 0 0 1 12.7 2z"
+      />
+    </svg>
+  );
+}
+
 export function AppHeader({
   live,
   resetting,
@@ -51,6 +78,7 @@ export function AppHeader({
   onReset,
 }: AppHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [colorMode, setColorMode] = useState<ColorMode>(() => readColorMode());
   const menuId = useId();
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -80,6 +108,10 @@ export function AppHeader({
     action();
   }
 
+  function onToggleTheme() {
+    setColorMode(toggleColorMode());
+  }
+
   return (
     <header className="app-bar">
       <div className="app-toolbar">
@@ -98,7 +130,7 @@ export function AppHeader({
           <div className="app-toolbar-actions app-toolbar-actions-desktop">
             <button
               type="button"
-              className="btn-toolbar"
+              className="btn-toolbar btn-toolbar-primary"
               onClick={onExport}
             >
               Export
@@ -159,6 +191,17 @@ export function AppHeader({
         </div>
 
         <div className="app-toolbar-meta">
+          <button
+            type="button"
+            className="btn-icon"
+            onClick={onToggleTheme}
+            title={colorMode === "dark" ? "Switch to light" : "Switch to dark"}
+            aria-label={
+              colorMode === "dark" ? "Switch to light theme" : "Switch to dark theme"
+            }
+          >
+            {colorMode === "dark" ? <SunIcon /> : <MoonIcon />}
+          </button>
           <a
             className="btn-icon"
             href={GITHUB_REPO_URL}

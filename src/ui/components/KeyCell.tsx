@@ -11,7 +11,8 @@ type KeyCellProps = {
 };
 
 export function KeyCell({ heatKey, scaleMode }: KeyCellProps) {
-  const style = heatKeyStyle(heatKey.intensity);
+  const heated = heatKey.intensity > 0;
+  const style = heated ? heatKeyStyle(heatKey.intensity) : null;
   const isNumpad = heatKey.col >= 21;
   const caption =
     heatKey.count <= 0
@@ -38,14 +39,21 @@ export function KeyCell({ heatKey, scaleMode }: KeyCellProps) {
       style={{
         gridRow: heatKey.row,
         gridColumn: `${heatKey.col} / span ${heatKey.span}`,
-        background: style.background,
-        borderColor: style.borderColor,
-        color: style.labelColor,
-        textShadow: style.textShadow,
+        ...(style
+          ? {
+              background: style.background,
+              borderColor: style.borderColor,
+              color: style.labelColor,
+              textShadow: style.textShadow,
+            }
+          : null),
       }}
     >
       <span className="lbl">{heatKey.label}</span>
-      <span className="cnt" style={{ color: style.countColor }}>
+      <span
+        className="cnt"
+        style={style ? { color: style.countColor } : undefined}
+      >
         {caption}
       </span>
     </div>

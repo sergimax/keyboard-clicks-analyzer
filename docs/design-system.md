@@ -4,13 +4,16 @@ Portable visual tokens and UI recipes used by this app. Use as:
 
 1. **In-repo reference** when adding chrome, panels, controls, and heatmap surfaces
 2. **Import seed** for another project (`docs/design-tokens.json` + this file)
-3. **Cross-project alignment** with other sergimax apps (sticky blurred header, soft borders) — keep core chrome stable; extend the heatmap domain layer here only
+3. **Cross-project alignment** with other sergimax apps (sticky blurred header, shared chrome tokens) — keep core chrome stable; extend the heatmap domain layer here only
 
 **Source of truth (code):**
 
 | Layer | Path |
 | --- | --- |
-| CSS variables + layout | `src/ui/styles/app.css` |
+| Theme CSS variables | `src/ui/styles/tokens.css` |
+| Quiet / spot links | `src/ui/styles/links.css` |
+| Layout + component recipes | `src/ui/styles/app.css` |
+| Color mode | `src/ui/color-mode.ts` (`kca-color-mode`) |
 | Heat spectrum + key ink | `src/shared/heat.ts` |
 | Sticky app chrome | `src/ui/components/AppHeader.tsx` |
 | Preference switch | `src/ui/components/PreferenceSwitch.tsx` |
@@ -22,129 +25,142 @@ No MUI (or other component library) — plain React + CSS. When tokens change in
 
 ## Visual direction
 
-- **Base:** Cool slate / ink dark (`#12151a` page, `#1a1f27` panels) — not pure black
-- **Accent / primary:** Teal (`#1f6f5b` fill → `#2f9e82` border → `#3db894` hover)
-- **Danger / warm chrome:** Rust-orange (`#f4a261` text, `#5a4030` / `#e85d04` borders) — Reset, error, warm modal frame
-- **Domain heat:** Teal cold → amber mid → rust hot (`--cold` / `#d68440` / `--hot`)
-- **Surfaces:** Soft panels with `1px` divider borders and light elevation; no heavy multi-layer glow
-- **Radii:** Soft but not pill-heavy — controls `8px`, panels/menus `10px`, keyboard board `14px`; pills only for switches / legend swatch
-- **Type:** Segoe UI / IBM Plex Sans stack for chrome; monospace stack on keycaps
-- **Atmosphere:** Fixed teal + warm radial washes on `body` over `--bg`
+| Trait | Rule |
+| --- | --- |
+| Chrome | Quiet MUJI neutrals — warm paper (`#fcfbf9`), not slate-blue fog |
+| Brand | Burnt orange — identity only (title, spot links, focus accents) |
+| Primary CTA | Inverse ink (black on light / white on dark) — **never** brand fill |
+| Ok / Danger | Forest/mint green · true red — never reuse brand orange |
+| Domain heat | Fixed `#1c6052 → #d68440 → #b03a08` (never theme-branded) |
+| Type | Onest display · Noto Sans body · JetBrains Mono chips/meta (Cyrillic + Latin) |
+| Density | Stack gap `0.55rem`, panel pad `0.65rem`; board grid gap stays `6px` |
+| Radii | Controls `8px`, panels `10px`, board `14px`; pills for switches / legend |
 
-Avoid defaulting new work to purple-on-white gradients, cream/serif “AI landing” looks, or neon glow chrome. This product is intentionally **dark-only**.
+**Avoid:** teal-as-brand SaaS chrome; pink/magenta identity; brand≈danger or brand≈ok pairs; Latin-only display fonts (Syne, Space Grotesk).
 
 ---
 
 ## Color mode
 
-- **Dark only** — no `data-color-mode` toggle and no light palette
-- Preferences live in `localStorage` under the `kca-*` prefix (display toggles, export device meta) — not theme mode
+- Modes: `light` | `dark` via `html[data-theme]`
+- Default: **light**
+- Preference: `localStorage` `kca-color-mode`
+- FOUC guard: inline script in `src/ui/index.html` applies stored mode before paint
+- Header toggle (sun/moon) in `AppHeader` meta cluster
+
+Other prefs stay under the `kca-*` prefix (numpad, rankings, export meta) — separate from color mode.
 
 ---
 
-## Core palette (dark)
+## Core palette
+
+### Light
 
 | Role | Hex / value | CSS var |
 | --- | --- | --- |
-| Text | `#e8edf5` | `--text` |
-| Text muted | `#8b95a8` | `--muted` |
-| Text soft (toolbar btn) | `#c5cddb` | — |
-| Page background | `#12151a` | `--bg` |
-| Surface / panel | `#1a1f27` | `--panel` |
-| Board well | `#141820` | — |
-| Divider / chrome border | `#2a3140` | — |
-| Control border | `#3a4456` | — |
-| Idle key fill / border | `#252b36` / `#343c4a` | `--key-bg` / `--key-border` |
-| Accent fill | `#1f6f5b` | — |
-| Accent border | `#2f9e82` | — |
-| Accent soft fill | `#1a2e28` | — |
-| Accent foreground | `#b8e0d4` | — |
-| Danger text | `#f4a261` | — |
-| Danger border | `#5a4030` | — |
-| Danger hot border | `#e85d04` | — |
-| Hover wash | `rgba(232, 237, 245, 0.08)` | — |
+| Page background | `#fcfbf9` | `--bg` |
+| Surface / card | `#ffffff` | `--surface` (`--panel` alias) |
+| Chip / inset / board well | `#f3f2ef` | `--chip-bg` / `--board-bg` / `--key-bg` |
+| Sticky header | `rgba(252, 251, 249, 0.96)` | `--header-bg` |
+| Border | `#8a8a8a` | `--border` |
+| Text | `#141414` | `--text` |
+| Text strong | `#0a0a0a` | `--text-strong` |
+| Text muted | `#555555` | `--text-muted` (`--muted` alias) |
+| Brand | `#9a3412` | `--brand` |
+| Brand soft / border | `#fff7ed` / `#c2410c` | `--brand-soft` / `--brand-border` |
+| Ok | `#166534` | `--ok` (+ `--ok-bg` / `--ok-border`) |
+| Danger | `#dc2626` | `--danger` (+ `--danger-bg` / `--danger-border`) |
+| Link quiet / spot | `#2c5282` / `#9a3412` | `--link` / `--link-spot` |
+| Primary bg / fg | `#0a0a0a` / `#ffffff` | `--primary-bg` / `--primary-fg` |
+| Shadow | `0 6px 18px rgba(0, 0, 0, 0.07)` | `--shadow` |
 
-Declared on `:root` today: `--bg`, `--panel`, `--text`, `--muted`, `--key-bg`, `--key-border`, `--cold`, `--hot`, `--gap`. Many chrome colors are still hard-coded hex in `app.css` — prefer mapping new work to the table above (and promote to CSS vars when touching a cluster).
+### Dark
 
-### Page atmosphere (`body`)
+| Role | Hex / value | CSS var |
+| --- | --- | --- |
+| Page background | `#1a1a1a` | `--bg` |
+| Surface / card | `#242424` | `--surface` |
+| Chip / inset / board well | `#1f1f1f` | `--chip-bg` / `--board-bg` / `--key-bg` |
+| Sticky header | `rgba(26, 26, 26, 0.96)` | `--header-bg` |
+| Border | `#8a8a8a` | `--border` |
+| Text | `#f2f2f2` | `--text` |
+| Text strong | `#fafafa` | `--text-strong` |
+| Text muted | `#a3a3a3` | `--text-muted` |
+| Brand | `#fb923c` | `--brand` |
+| Brand soft / border | `#3d2818` / `#fb923c` | `--brand-soft` / `--brand-border` |
+| Ok | `#86efac` | `--ok` |
+| Danger | `#ff7b72` | `--danger` |
+| Link quiet / spot | `#8ab4c8` / `#fb923c` | `--link` / `--link-spot` |
+| Primary bg / fg | `#fafafa` / `#111111` | `--primary-bg` / `--primary-fg` |
+| Shadow | `0 8px 24px rgba(0, 0, 0, 0.4)` | `--shadow` |
 
-```text
-radial-gradient(1200px 600px at 10% -10%, #1e3a34 0%, transparent 55%),
-radial-gradient(900px 500px at 100% 0%, #3a2418 0%, transparent 50%),
-var(--bg)
-```
-
-Teal wash top-left + warm wash top-right — echoes the cold→hot heat story without competing with the board.
+**Contrast:** text / muted / brand / ok / danger / link / link-spot ≥ **4.5:1** on `--bg`. Borders ≥ ~**3:1**.
 
 ---
 
 ## Shape & radius
 
-| Token | Value (px) | Usage |
+| Token | Value | Usage |
 | --- | --- | --- |
-| Control | `8` | Toolbar buttons, icon buttons, keys, inputs, modal actions, Copy |
-| Menu item | `6` | Compact header menu rows |
-| Panel / menu / dialog | `10` | Rank cards, overflow menu, modals |
-| Board | `14` | Keyboard heatmap well |
+| `--control-radius` | `8px` | Buttons, keys, inputs |
+| Menu item | `6px` | Compact header menu rows |
+| `--radius` | `10px` | Rank cards, menus, dialogs |
+| Board | `14px` | Keyboard heatmap well |
 | Switch / legend swatch | `999` | Preference track, heat legend bar |
-| Focus ring clip | `4` | Preference switch `:focus-visible` |
+| Focus ring clip | `4px` | Preference switch `:focus-visible` |
+
+Spacing: `--gap` `0.55rem` (stacks), `--pad` `0.65rem`, `--board-gap` `6px` (keyboard grid only).
 
 ---
 
 ## Borders
 
-Default chrome:
-
 ```text
-border: 1px solid #2a3140
+border: 1px solid var(--border); /* #8a8a8a both modes */
 ```
 
-| Surface | Border | Notes |
-| --- | --- | --- |
-| App bar bottom | `#2a3140` | Over translucent blurred bar |
-| Rank / diagnostics cards | `#2a3140` on `--panel` | Dense fit-content columns |
-| Keyboard board | `#2a3140` on `#141820` | |
-| Toolbar / cancel / inputs | `#3a4456` | Hover often `#5a6a82` |
-| Accent actions (Copy, primary modal, switch on) | `#2f9e82` | Hover `#3db894` |
-| Danger / Reset / warm modal frame | `#5a4030` → `#e85d04` / `#8a3a2a` | Keep warm family together |
-
-Do **not** invent a second generic divider — reuse `#2a3140` / `#3a4456`.
+Interactive chrome uses the same `--border` (no separate soft divider family). Brand / danger / primary borders only on semantic controls.
 
 ---
 
 ## Elevation / shadows
 
-Keep shadows soft and dark (no colored glow).
-
-| Token | Value | Usage |
-| --- | --- | --- |
-| Menu | `0 10px 28px rgba(0, 0, 0, 0.35)` | Compact header ☰ menu |
-| Dialog | `0 16px 48px rgba(0, 0, 0, 0.45)` | Export / Reset modals |
-| App bar | backdrop blur only | `saturate(1.2) blur(12px)` + `rgba(26, 31, 39, 0.72)` fill |
-| Key label (light ink) | `0 0 2px rgba(0,0,0,0.85), 0 1px 1px rgba(0,0,0,0.7)` | From `heatKeyStyle` when ink is light |
+| Token | Usage |
+| --- | --- |
+| `--shadow` | Rank cards, menus, dialogs (cozy Soft-lift) |
+| App bar | backdrop blur + `--header-bg` |
+| Key label (light ink) | soft black text-shadow from `heatKeyStyle` |
 
 ---
 
 ## Typography
 
-```text
-"Segoe UI", "IBM Plex Sans", system-ui, sans-serif
-```
-
-Keycaps:
-
-```text
-"Cascadia Mono", "Cascadia Code", Consolas, "SF Mono", "Segoe UI Mono", ui-monospace, monospace
-```
+| Role | Stack |
+| --- | --- |
+| Body | `'Noto Sans', system-ui, sans-serif` → `--font-body` |
+| Display | `'Onest', 'Noto Sans', system-ui, sans-serif` → `--font-display` |
+| Mono | `'JetBrains Mono', 'IBM Plex Mono', monospace` → `--font-mono` |
 
 | Style | Rules |
 | --- | --- |
-| App / Details title | `1.15rem`, weight `650`, `letter-spacing: 0.02em` |
-| Buttons | weight `600`, no uppercase transform |
-| Meta / notes | muted `--muted`, ~`0.85`–`0.95rem` |
-| Rank list | `0.78rem`, tabular nums; screen shows top **12**, Copy still top **30** |
-| Rank subheads | uppercase, muted, `0.75rem` |
-| Version chip | `0.75rem`, muted, tabular nums |
+| Brand title | display, weight **700**, color `--brand` |
+| Section title | display, weight 700, `--text-strong` |
+| Buttons | weight 600, no uppercase |
+| Meta / chips / version | mono or muted body |
+| Rank list | `0.78rem`, tabular nums; screen top **12**, Copy top **30** |
+| Prose line-height | ~1.55 |
+
+Fonts loaded from Google Fonts in `src/ui/index.html` (Cyrillic + Latin).
+
+---
+
+## Links
+
+| Kind | When | Visual |
+| --- | --- | --- |
+| Quiet (`a`) | Docs / reference | `--link`, weight 500, 1px underline |
+| Spot (`a.link-spot`) | Primary in-copy actions | `--link-spot`, Onest, bold italic, 2px underline |
+| Icon (`a.btn-icon`) | Header meta | muted, no underline |
 
 ---
 
@@ -152,18 +168,14 @@ Keycaps:
 
 ### Sticky header (`AppHeader`)
 
-Same sergimax chrome pattern as sibling apps:
-
-1. **Brand left** — logo + `Keyboard Heatmap` title
-2. **Primary actions center** (desktop ≥900px) — Export / Reset
-3. **Meta right** — GitHub, author, `v.X.Y.Z`
+1. **Brand left** — logo + `Keyboard Heatmap` (brand color / display)
+2. **Primary actions center** (desktop ≥900px) — Export (primary ink) / Reset (danger)
+3. **Meta right** — theme toggle, GitHub, author, `v.X.Y.Z`
 4. **Compact under 900px** — ☰ menu for Export / Reset; meta icons stay visible
-
-Shell metrics:
 
 | Token | Value |
 | --- | --- |
-| Content max width | `1400px` (toolbar + main) |
+| Content max width | `1400px` |
 | Toolbar min height | `56px` |
 | Main padding | `20px 20px 48px` |
 | Compact breakpoint | `900px` |
@@ -172,7 +184,7 @@ Shell metrics:
 
 1. Intro note under header
 2. **Heatmap** — numpad + heat-scale controls above the board; legend under
-3. **Details** — MetaBar summary → panel toggles → compact diagnostics + ranking cards
+3. **Details** — MetaBar → panel toggles → diagnostics + ranking cards
 
 ---
 
@@ -180,25 +192,16 @@ Shell metrics:
 
 ### Recipes
 
-1. **Toolbar button** (`.btn-toolbar`) — transparent, `#3a4456` border, soft text; hover shifts to accent teal. Danger variant uses warm border/text (Reset).
-2. **Icon button** (`.btn-icon`) — 36×36, radius 8, muted → text + hover wash.
-3. **Preference switch** (`PreferenceSwitch` / `.numpad-toggle`) — pill track; off slate, on accent teal; shared by numpad, diagnostics, ranking toggles.
-4. **Segmented control** (`.heat-scale`) — Absolute / Relative; active segment accent fill `#1f6f5b`.
-5. **Rank / diagnostics card** (`.rank-block`) — `--panel` + divider border + radius 10; width ~`15rem`.
-6. **Modal** — warm-bordered paper `#1a1520` (danger title `#ffd4a8`, neutral title uses `--text`); Cancel / Primary (teal) / Danger actions; backdrop `rgba(8, 10, 14, 0.72)`.
-7. **Copy** (`.btn-copy`) — accent outlined fill; compact size inside rank headers.
-8. **Text fields** (`.device-meta-input`) — board-well fill, control border, accent focus ring via border color.
-
-### Buttons (summary)
-
-| Variant | Border | Fill | Text |
-| --- | --- | --- | --- |
-| Toolbar default | `#3a4456` | transparent → `#1a2e28` hover | `#c5cddb` |
-| Toolbar danger | `#5a4030` | → `#3a2a20` | `#f4a261` → `#ffd4a8` |
-| Modal cancel | `#3a4456` | `#222a3a` | `--text` |
-| Modal primary | `#2f9e82` | `#1a2e28` | `#b8e0d4` |
-| Modal danger | `#8a3a2a` | `#3a1c18` | `#ffb4a2` |
-| Copy | `#1f6f5b` | `#1a2e28` | `#b8e0d4` |
+1. **Toolbar primary** (`.btn-toolbar-primary`) — `--primary-bg` / `--primary-fg` (Export)
+2. **Toolbar danger** (`.btn-toolbar-danger`) — `--danger` on `--danger-bg` (Reset)
+3. **Outlined toolbar** (`.btn-toolbar`) — transparent + `--border` + `--text-strong`
+4. **Icon button** (`.btn-icon`) — 36×36, muted → strong + `--action-hover`
+5. **Preference switch** — off: chip + border; on: primary ink track
+6. **Segmented control** (`.heat-scale`) — chip well; active = primary ink
+7. **Rank / diagnostics card** — `--surface` + `--border` + `--radius` + `--shadow`
+8. **Modal** — surface paper, neutral or danger title; Cancel / Primary / Danger actions
+9. **Copy** — primary ink (compact in rank headers)
+10. **Text fields** — chip fill, `--border`, focus `--brand-border`
 
 `textTransform: none` everywhere; disabled ≈ `opacity: 0.55`.
 
@@ -206,25 +209,23 @@ Shell metrics:
 
 ## Domain: heatmap
 
-Port only when the target UI needs a physical-key heat board.
+Heat spectrum is product-specific — keep it separate from app chrome colors.
 
 ### Spectrum
 
-Implemented in `src/shared/heat.ts` (`heatRgb`) and mirrored in CSS (`--cold`, `--hot`, legend mid `#d68440`):
+Implemented in `src/shared/heat.ts` (`heatRgb`) and CSS (`--cold`, `--heat-mid`, `--hot`):
 
-| Stop | RGB | Hex |
+| Stop | Hex | Notes |
 | --- | --- | --- |
-| Idle / zero | `37, 43, 54` | `#252b36` (matches `--key-bg`) |
-| Cold | `28, 96, 82` | `#1c6052` (`--cold`) |
-| Mid | `214, 132, 64` | `#d68440` |
-| Hot | `176, 58, 8` | `#b03a08` (`--hot`) |
+| Idle | theme `--key-bg` | CSS only when intensity = 0 (not heat-branded) |
+| Cold | `#1c6052` | `--cold` |
+| Mid | `#d68440` | `--heat-mid` |
+| Hot | `#b03a08` | `--hot` |
 
-Interpolation: cold→mid for intensity `0…0.5`, mid→hot for `0.5…1`.
-
-Legend swatch:
+Legend:
 
 ```css
-linear-gradient(90deg, var(--cold), #d68440, var(--hot))
+linear-gradient(90deg, var(--cold), var(--heat-mid), var(--hot))
 ```
 
 ### Scale modes (`kca-heat-scale`)
@@ -232,17 +233,15 @@ linear-gradient(90deg, var(--cold), #d68440, var(--hot))
 | Mode | Intensity | Caption |
 | --- | --- | --- |
 | **Absolute** (default) | `sqrt(count / max)` | Press counts |
-| **Relative** | Rank / percentile among pressed keys | `%` share of total presses |
-
-Relative mode keeps mid-tier keys visible when Space (or another dominant key) would otherwise wash the board.
+| **Relative** | Rank / percentile among pressed keys | `%` share |
 
 ### Key ink (`heatKeyStyle`)
 
-- Prefer **dark ink** on warm mid/hot fills (high R vs B) and brighter backgrounds
-- Prefer **light ink** on deep teal / idle; add soft black text-shadow for contrast
-- Borders: warm `#4a3424`, cool heated `#2a4038`, idle `#343c4a`
+- Dark ink on warm mid/hot fills; light ink on deep teal
+- Borders: warm `#4a3424`, cool heated `#2a4038`
+- Idle keys: no inline heat style — theme `--key-bg` / `--key-border` / `--text`
 
-Board grid: 24 columns with numpad / 19 without; rows `44px`; gap `--gap` (`6px`); key radius `8px`.
+Board grid: 24 columns with numpad / 19 without; rows `44px`; gap `--board-gap` (`6px`); key radius `8px`.
 
 ---
 
@@ -250,6 +249,7 @@ Board grid: 24 columns with numpad / 19 without; rows `44px`; gap `--gap` (`6px`
 
 | Key | Purpose | Default |
 | --- | --- | --- |
+| `kca-color-mode` | `light` \| `dark` | `light` |
 | `kca-show-numpad` | Show numpad columns | off |
 | `kca-show-side` | Diagnostics card | on |
 | `kca-heat-scale` | `absolute` \| `relative` | `absolute` |
@@ -258,25 +258,21 @@ Board grid: 24 columns with numpad / 19 without; rows `44px`; gap `--gap` (`6px`
 | `kca-rank-mods` | Modifier chords ranking | off |
 | `kca-device-meta` | Export layout / keyboard strings | empty |
 
-Rename the prefix if seeding another app.
-
 ---
 
 ## Porting checklist
 
-**Core (reuse across sergimax dark tools)**
+**Core (reuse across sergimax apps)**
 
-1. Copy palette + CSS variables from `design-tokens.json` / this doc
-2. Sticky blurred app bar: brand | actions | meta; compact menu under ~900px
-3. Border recipe: `1px solid` divider / control / accent — radii 8 / 10 / 14
-4. Accent teal for primary actions; warm rust only for destructive / caution
-5. Body atmosphere: dual radial washes over page bg
+1. Copy palette + CSS variables from `design-tokens.json` / `tokens.css`
+2. Wire `data-theme` light/dark + FOUC script + optional toggle
+3. Quiet vs `.link-spot` link styles
+4. Brand ≠ primary CTA (ink primaries); ok green / danger red
+5. Cyrillic-capable fonts (Onest / Noto / JetBrains Mono)
 
-**Optional / domain**
+**Domain**
 
-- Heat spectrum + `heatKeyStyle` ink rules
-- Preference switch + segmented Absolute/Relative control
-- Rank card denseness (top 12 on screen / Copy 30)
+- Keep heat legend fixed; idle keys theme-aware via CSS
 
 **Do not port blindly**
 
@@ -288,9 +284,9 @@ Rename the prefix if seeding another app.
 
 ## Consistency rules for agents & humans
 
-1. New chrome surfaces → `--panel` or board well + `#2a3140` / `#3a4456` border + radius from the table — not ad-hoc hex families
-2. New semantic color → map to **accent teal**, **danger warm**, or **heat stops** first
-3. Keep the sticky header layout (brand / actions / meta); no MUI
-4. Prefer CSS variables for anything reused more than once; promote hard-coded repeats when you touch them
-5. Heat intensity and ink contrast stay in `src/shared/heat.ts` — don’t fork a second gradient in components
+1. New chrome → `--surface` + `--border` + radius from the table — not ad-hoc hex families
+2. Semantic color → **brand** (identity), **primary ink** (CTA), **ok**, **danger**, or **heat stops**
+3. Keep sticky header layout (brand / actions / meta); no MUI
+4. Prefer CSS variables; promote hard-coded repeats when touching a cluster
+5. Heat intensity and heated-key ink stay in `src/shared/heat.ts`
 6. When bumping tokens, update **code + this doc + `design-tokens.json`**
