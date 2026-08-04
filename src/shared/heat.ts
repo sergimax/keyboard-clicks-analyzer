@@ -68,8 +68,10 @@ export function percentileIntensities(
 }
 
 function heatRgb(intensity: number): [number, number, number] {
+  // Idle keys use theme CSS (--key-bg); this dark idle is only a fallback
+  // for colorFor(0) / callers that still request a zero-intensity fill.
   if (intensity <= 0) return [37, 43, 54];
-  // Deeper mid/hot so labels stay readable; cold stays teal.
+  // Fixed domain gradient: teal → amber → rust — never theme-branded.
   const cold = [28, 96, 82];
   const mid = [214, 132, 64];
   const hot = [176, 58, 8];
@@ -136,7 +138,7 @@ export function heatKeyStyle(intensity: number): HeatKeyStyle {
 
   return {
     background: rgbCss(rgb),
-    borderColor: useDarkInk ? "#4a3424" : intensity > 0 ? "#2a4038" : "#343c4a",
+    borderColor: useDarkInk ? "#4a3424" : intensity > 0 ? "#2a4038" : "#8a8a8a",
     labelColor: rgbCss(useDarkInk ? DARK_LABEL : LIGHT_LABEL),
     countColor: rgbCss(useDarkInk ? DARK_COUNT : LIGHT_COUNT),
     textShadow: useDarkInk

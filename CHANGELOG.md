@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- UI chrome: warm MUJI neutrals, burnt-orange brand (≠ primary CTA), true red danger / green ok, Onest + Noto Sans + JetBrains Mono (Cyrillic+Latin)
+- Light/dark color modes via `data-theme` (default light; `localStorage` `kca-color-mode`); header toggle
+- Primary actions use inverse ink; heatmap legend stays fixed `#1c6052 → #d68440 → #b03a08`
+
 ## [2.3.2] - 2026-08-03
 
 ### Added

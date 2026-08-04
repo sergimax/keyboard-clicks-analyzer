@@ -1,7 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
+import { applyColorMode, readColorMode } from "./color-mode";
 import "./styles/app.css";
+
+applyColorMode(readColorMode());
 
 const root = document.getElementById("root");
 if (!root) {
