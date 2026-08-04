@@ -52,7 +52,9 @@ body {
   flex-shrink: 0;
   width: 28px;
   height: 28px;
-  color: var(--brand);
+  background-color: var(--brand);
+  -webkit-mask: url("/logo.svg") center / contain no-repeat;
+  mask: url("/logo.svg") center / contain no-repeat;
 }
 
 .app-title {

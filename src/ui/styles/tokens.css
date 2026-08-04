@@ -1,8 +1,8 @@
 /**
- * Theme tokens — light default, dark via html[data-theme="dark"].
+ * Theme tokens — light / dark via html[data-theme].
+ * Color vars live only on [data-theme] so modes never fight via :root.
  */
 
-:root,
 html[data-theme="light"] {
   color-scheme: light;
 
