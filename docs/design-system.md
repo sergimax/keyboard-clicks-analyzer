@@ -168,7 +168,7 @@ Fonts loaded from Google Fonts in `src/ui/index.html` (Cyrillic + Latin).
 
 ### Sticky header (`AppHeader`)
 
-1. **Brand left** — logo + `Keyboard Heatmap` (brand color / display)
+1. **Brand left** — logo (CSS mask, `--brand-border` orange) + `Keyboard Heatmap` title (`--brand` / display)
 2. **Primary actions center** (desktop ≥900px) — Export (primary ink) / Reset (danger)
 3. **Meta right** — theme toggle, GitHub, author, `v.X.Y.Z`
 4. **Compact under 900px** — ☰ menu for Export / Reset; meta icons stay visible

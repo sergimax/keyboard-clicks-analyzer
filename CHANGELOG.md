@@ -7,11 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-08-04
+
+### Added
+
+- Light/dark color modes (`html[data-theme]`, default light; preference in `localStorage` `kca-color-mode`) with a header sun/moon toggle
+- Theme token layer: `src/ui/styles/tokens.css`, quiet/spot link styles in `links.css`
+
 ### Changed
 
-- UI chrome: warm MUJI neutrals, burnt-orange brand (≠ primary CTA), true red danger / green ok, Onest + Noto Sans + JetBrains Mono (Cyrillic+Latin)
-- Light/dark color modes via `data-theme` (default light; `localStorage` `kca-color-mode`); header toggle
-- Primary actions use inverse ink; heatmap legend stays fixed `#1c6052 → #d68440 → #b03a08`
+- UI chrome: warm MUJI neutrals, burnt-orange brand (identity only — primary CTAs use inverse ink), true red danger / green ok
+- Typography: Onest display, Noto Sans body, JetBrains Mono chips/meta (Cyrillic + Latin)
+- Design system docs (`docs/design-system.md`, `docs/design-tokens.json`) rewritten for dual color modes and the new chrome recipes
+- Heatmap legend stays fixed `#1c6052 → #d68440 → #b03a08`; idle keys follow theme surfaces
+
+### Fixed
+
+- App logo visibility in light mode (CSS mask painted with brighter `--brand-border` orange)
 
 ## [2.3.2] - 2026-08-03
 
