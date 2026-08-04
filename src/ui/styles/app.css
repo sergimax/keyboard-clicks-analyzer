@@ -52,7 +52,8 @@ body {
   flex-shrink: 0;
   width: 28px;
   height: 28px;
-  background-color: var(--brand);
+  /* Brighter orange than title ink (--brand is darkened for text contrast). */
+  background-color: var(--brand-border);
   -webkit-mask: url("/logo.svg") center / contain no-repeat;
   mask: url("/logo.svg") center / contain no-repeat;
 }
