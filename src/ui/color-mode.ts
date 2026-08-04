@@ -22,7 +22,7 @@ export function writeColorMode(mode: ColorMode): void {
 }
 
 export function applyColorMode(mode: ColorMode): void {
-  document.documentElement.dataset.theme = mode;
+  document.documentElement.setAttribute("data-theme", mode);
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) {
     meta.setAttribute(
@@ -32,8 +32,7 @@ export function applyColorMode(mode: ColorMode): void {
   }
 }
 
-export function toggleColorMode(): ColorMode {
-  const next: ColorMode = readColorMode() === "dark" ? "light" : "dark";
-  writeColorMode(next);
-  return next;
+/** Flip from the given mode (prefer UI state over re-reading storage). */
+export function nextColorMode(current: ColorMode): ColorMode {
+  return current === "dark" ? "light" : "dark";
 }

@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <rect x="2" y="6" width="28" height="20" rx="3.5" stroke="#e8edf5" stroke-width="1.75"/>
-  <rect x="5.5" y="10" width="4" height="3.25" rx="0.7" fill="#e8edf5" opacity="0.9"/>
-  <rect x="11" y="10" width="4" height="3.25" rx="0.7" fill="#e8edf5" opacity="0.55"/>
-  <rect x="16.5" y="10" width="4" height="3.25" rx="0.7" fill="#e8edf5" opacity="0.9"/>
-  <rect x="22" y="10" width="4" height="3.25" rx="0.7" fill="#e8edf5" opacity="0.55"/>
-  <rect x="5.5" y="15.25" width="4" height="3.25" rx="0.7" fill="#e8edf5" opacity="0.55"/>
-  <rect x="11" y="15.25" width="4" height="3.25" rx="0.7" fill="#e8edf5" opacity="0.9"/>
-  <rect x="16.5" y="15.25" width="4" height="3.25" rx="0.7" fill="#e8edf5" opacity="0.55"/>
-  <rect x="22" y="15.25" width="4" height="3.25" rx="0.7" fill="#e8edf5" opacity="0.9"/>
-  <rect x="8.5" y="20.5" width="15" height="3" rx="0.7" fill="#e8edf5" opacity="0.75"/>
+  <!-- Opaque black mark for CSS mask (painted with --brand in the UI). -->
+  <rect x="2" y="6" width="28" height="20" rx="3.5" stroke="#000" stroke-width="1.75"/>
+  <rect x="5.5" y="10" width="4" height="3.25" rx="0.7" fill="#000" opacity="0.9"/>
+  <rect x="11" y="10" width="4" height="3.25" rx="0.7" fill="#000" opacity="0.55"/>
+  <rect x="16.5" y="10" width="4" height="3.25" rx="0.7" fill="#000" opacity="0.9"/>
+  <rect x="22" y="10" width="4" height="3.25" rx="0.7" fill="#000" opacity="0.55"/>
+  <rect x="5.5" y="15.25" width="4" height="3.25" rx="0.7" fill="#000" opacity="0.55"/>
+  <rect x="11" y="15.25" width="4" height="3.25" rx="0.7" fill="#000" opacity="0.9"/>
+  <rect x="16.5" y="15.25" width="4" height="3.25" rx="0.7" fill="#000" opacity="0.55"/>
+  <rect x="22" y="15.25" width="4" height="3.25" rx="0.7" fill="#000" opacity="0.9"/>
+  <rect x="8.5" y="20.5" width="15" height="3" rx="0.7" fill="#000" opacity="0.75"/>
 </svg>

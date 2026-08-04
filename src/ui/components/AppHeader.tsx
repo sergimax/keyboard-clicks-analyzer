@@ -1,7 +1,8 @@
 import { useEffect, useId, useRef, useState } from "react";
 import {
+  nextColorMode,
   readColorMode,
-  toggleColorMode,
+  writeColorMode,
   type ColorMode,
 } from "../color-mode";
 
@@ -15,6 +16,28 @@ type AppHeaderProps = {
   onExport: () => void;
   onReset: () => void;
 };
+
+function SunIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm-1-5h2v3h-2V2zm0 17h2v3h-2v-3zM2 11h3v2H2v-2zm17 0h3v2h-3v-2zm-1.05-6.36 2.12-2.12 1.42 1.41-2.12 2.12-1.42-1.41zM4.93 17.66l2.12-2.12 1.42 1.41-2.12 2.12-1.42-1.41zM4.93 4.93l1.41-1.41 2.12 2.12-1.41 1.42L4.93 4.93zm9.9 9.9 1.41-1.41 2.12 2.12-1.41 1.41-2.12-2.12z"
+      />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M12.7 2a9.2 9.2 0 0 0-1.1.07A8.5 8.5 0 1 0 20.93 13.4 9 9 0 0 1 12.7 2z"
+      />
+    </svg>
+  );
+}
 
 function GitHubIcon() {
   return (
@@ -44,28 +67,6 @@ function MenuIcon() {
       <path
         fill="currentColor"
         d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"
-      />
-    </svg>
-  );
-}
-
-function SunIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-      <path
-        fill="currentColor"
-        d="M12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0-5h1v3h-2V2h1zm0 17h1v3h-2v-3h1zM2 11h3v2H2v-2zm17 0h3v2h-3v-2zM4.22 4.22l1.42 1.42-1.42 1.41L2.8 5.64l1.42-1.42zm14.14 14.14 1.42 1.42-1.42 1.41-1.41-1.41 1.41-1.42zM4.22 19.78l1.42-1.42 1.41 1.42-1.41 1.41-1.42-1.41zm14.14-14.14 1.42-1.42 1.41 1.42-1.41 1.41-1.42-1.41z"
-      />
-    </svg>
-  );
-}
-
-function MoonIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-      <path
-        fill="currentColor"
-        d="M12.7 2a9.2 9.2 0 0 0-1.1.07A8.5 8.5 0 1 0 20.93 13.4 9 9 0 0 1 12.7 2z"
       />
     </svg>
   );
@@ -109,20 +110,16 @@ export function AppHeader({
   }
 
   function onToggleTheme() {
-    setColorMode(toggleColorMode());
+    const next = nextColorMode(colorMode);
+    writeColorMode(next);
+    setColorMode(next);
   }
 
   return (
     <header className="app-bar">
       <div className="app-toolbar">
         <div className="app-toolbar-brand">
-          <img
-            className="app-logo"
-            src={`${import.meta.env.BASE_URL}logo.svg`}
-            width={28}
-            height={28}
-            alt=""
-          />
+          <span className="app-logo" aria-hidden="true" />
           <h1 className="app-title">Keyboard Heatmap</h1>
         </div>
 
